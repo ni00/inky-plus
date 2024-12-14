@@ -29,16 +29,20 @@ let hasFinishedLaunch = false;
 ipcMain.on('show-context-menu', (event) => {
     const template = [
         {
-            label: 'Cut',
+            label: i18n._('Cut'),
             role: 'cut' 
         },
         {
-            label: 'Copy',
+            label: i18n._('Copy'),
             role: 'copy' 
         },
         {
-            label: 'Paste',
+            label: i18n._('Paste'),
             role: 'paste' 
+        },
+        {
+            label: i18n._('Select All'),
+            role: 'selectall' 
         },
       { type: 'separator' },
     ]

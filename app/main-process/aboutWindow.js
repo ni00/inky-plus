@@ -8,7 +8,7 @@ const i18n = require('./i18n/i18n.js');
 
 const electronWindowOptions = {
     width: 340,
-    height: 270,
+    height: 300,
     resizable: false,
     show: false,
     autoHideMenuBar: true,
@@ -45,7 +45,8 @@ function AboutWindow(theme) {
         w.webContents.send("set-about-data", {
             "inkyVersion": electron.app.getVersion(),
             "inkVersion": inkVersion,
-            "inkjsVersion": inkjsPackage.version
+            "inkjsVersion": inkjsPackage.version,
+            "nikyVersion": "0.1.0"
         });
         w.webContents.send("change-theme", theme);
         w.setMenu(null);

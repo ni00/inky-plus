@@ -7,6 +7,7 @@ ipc.on("set-about-data", (event, data) => {
     $("#version-inky").text("Inky version: "+data.inkyVersion);
     $("#version-ink").text("ink version: "+data.inkVersion);
     $("#version-inkjs").text("inkjs version: "+data.inkjsVersion);
+    $("#version-niky").text("niky version: "+data.nikyVersion);
 });
 
 function updateTheme(event, newTheme) {
