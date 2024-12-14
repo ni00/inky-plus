@@ -1,5 +1,7 @@
 # Writing with ink
 
+（以下文本由 GPT 翻译，可能存在错误，请以官方文档为准，点此查看原文：[WritingWithInk.md](https://github.com/inkle/inky/blob/master/app/resources/Documentation/WritingWithInk.md)）
+
 <details>
   <summary>Table of Contents</summary>
 
@@ -41,82 +43,82 @@
    * [Part 6: International character support in identifiers](#part-6-international-character-support-in-identifiers)
 </details>
 
-## Introduction
+## Introduction 简介
 
-**ink** is a scripting language built around the idea of marking up pure-text with flow in order to produce interactive scripts.
+**ink** 是一种脚本语言，核心理念是通过在纯文本中标记流程，从而生成交互式脚本。
 
-At its most basic, it can be used to write a Choose Your Own-style story, or a branching dialogue tree. But its real strength is in writing dialogues with lots of options and lots of recombination of the flow.
+在最基础的层面上，它可用于创作类似“选择你自己的冒险”风格的故事，或构建分支式对话树。但 **ink** 真正的优势在于，它能轻松应对包含众多选项与丰富组合的对话场景。
 
-**ink** offers several features to enable non-technical writers to branch often, and play out the consequences of those branches, in both minor and major ways, without fuss.
+**ink** 提供了多种特性，帮助非技术背景的创作者轻松地为剧情频繁分支，并在细微或重大的层面上展现这些分支的后果，而无需繁琐的操作。
 
-The script aims to be clean and logically ordered, so branching dialogue can be tested "by eye". The flow is described in a declarative fashion where possible.
+这一脚本语言的设计目标是保持整洁与逻辑有序，以便通过直观地检视就能轻松测试分支对话。在可能的情况下，**ink** 会以声明式的方式来描述流程。
 
-It's also designed with redrafting in mind; so editing a flow should be fast.
+此外，**ink** 还在设计时充分考虑了重新起草（重写）的需求，使得修改流程变得快速而高效。
 
-# Part One: The Basics
+# Part One: The Basics 第一部分：基础知识
 
-## 1) Content
+## 1) Content 内容
 
-### The simplest ink script
+### The simplest ink script 最简单的 ink 脚本
 
-The most basic ink script is just text in a .ink file.
+最基本的 ink 脚本只是一个 `.ink` 文件中的文本内容：
 
 	Hello, world!
 
-On running, this will output the content, and then stop.
+运行后，它会输出这段文字，然后停止。
 
-Text on separate lines produces new paragraphs. The script:
+将文本写在单独的行中会产生新的段落。如下脚本所示：
 
 	Hello, world!
 	Hello?
 	Hello, are you there?
 
-produces output that looks the same.
+它的输出和上面相同，看起来也是三行文本，每行一个段落。
 
+### Comments 注释
 
-### Comments
+默认情况下，文件中所有文本都会出现在输出中，除非使用特定标记加以区分。
 
-By default, all text in your file will appear in the output content, unless specially marked up.
+最简单的标记是注释。**ink** 支持两种类型的注释。
 
-The simplest mark-up is a comment. **ink** supports two kinds of comment. There's the kind used for someone reading the code, which the compiler ignores:
+一种是给阅读代码的人看的，编译器会忽略它：
 
 	"What do you make of this?" she asked.
 
-	// Something unprintable...
+	// 这里是一些不用于输出的内容
 
 	"I couldn't possibly comment," I replied.
 
 	/*
-		... or an unlimited block of text
+		...或者是一个不限长度的注释块
 	*/
 
-and there's the kind used for reminding the author what they need to do, that the compiler prints out during compilation:
+另一种注释是给作者自己用的，用来提醒需要完成的工作。这种注释会在编译时打印出来：
 
+	TODO: 把这一部分完善！
 
-	TODO: Write this section properly!
+### Tags 标签
 
-### Tags
+游戏运行时，文本内容会原样呈现给玩家。但有时标记一行文本以携带额外信息会很有用，比如告诉游戏引擎如何处理这行内容。
 
-Text content from the game will appear 'as is' when the engine runs. However, it can sometimes be useful to mark up a line of content with extra information to tell the game what to do with that content.
-
-**ink** provides a simple system for tagging lines of content, with hashtags.
+**ink** 使用简单的“#”标记系统为文本行添加标签：
 
 	A line of normal game-text. # colour it blue
 
-These don't show up in the main text flow, but can be read off by the game and used as you see fit. See [Running Your Ink](RunningYourInk.md#marking-up-your-ink-content-with-tags) for more information.
+这些标签不会出现在主文本流中，但游戏可以在后台读取并根据需要使用。更多信息请参考 [运行你的 Ink](https://github.com/inkle/ink/blob/master/Documentation/RunningYourInk.md)。
 
 
-## 2) Choices
+## 2) Choices 选项
 
-Input is offered to the player via text choices. A text choice is indicated by an `*` character.
+玩家的输入通过文字选项（choices）来实现。文本选项使用 `*` 字符表示。
 
-If no other flow instructions are given, once made, the choice will flow into the next line of text.
+如果没有其他流程指令，当玩家选择一项选项后，叙事将继续向下执行下一行文本。
 
 	Hello world!
 	*	Hello back!
 		Nice to hear from you!
 
-This produces the following game:
+上述脚本的游戏表现为：
 
 	Hello world
 	1: Hello back!
@@ -125,17 +127,17 @@ This produces the following game:
 	Hello back!
 	Nice to hear from you.
 
-By default, the text of a choice appears again, in the output.
+默认情况下，玩家选择的选项文本会再次出现在最终输出中。
 
-### Suppressing choice text
+### Suppressing choice text 隐藏选项文本
 
-Some games separate the text of a choice from its outcome. In **ink**, if the choice text is given in square brackets, the text of the choice will not be printed into response.
+在某些游戏中，选项文本和其对应的后续输出需要分离。在 **ink** 中，如果将选项文本用方括号 `[]` 包裹起来，选项文本将不会在后续输出中重复出现。
 
 	Hello world!
 	*	[Hello back!]
 		Nice to hear from you!
 
-produces
+输出为：
 
 	Hello world
 	1: Hello back!
@@ -143,15 +145,15 @@ produces
 	> 1
 	Nice to hear from you.
 
-#### Advanced: mixing choice and output text
+#### Advanced: mixing choice and output text 高级技巧：混合选项与输出文本
 
-The square brackets in fact divide up the option content. What's before is printed in both choice and output; what's inside only in choice; and what's after, only in output. Effectively, they provide alternative ways for a line to end.
+事实上，方括号会将选项内容分割成多个部分。方括号前的内容会在选项和选择后输出中同时出现；方括号内的内容只会在选项中出现；方括号后的内容则只会在选择结果的输出中出现。这相当于为文本的结尾提供了多种输出路径。
 
 	Hello world!
 	*	Hello [back!] right back to you!
 		Nice to hear from you!
 
-produces:
+输出为：
 
 	Hello world
 	1: Hello back!
@@ -159,13 +161,13 @@ produces:
 	Hello right back to you!
 	Nice to hear from you.
 
-This is most useful when writing dialogue choices:
+此技巧在书写对话选项时尤其有用：
 
 	"What's that?" my master asked.
 	*	"I am somewhat tired[."]," I repeated.
 		"Really," he responded. "How deleterious."
 
-produces:
+输出为：
 
 	"What's that?" my master asked.
 	1. "I am somewhat tired."
@@ -173,9 +175,9 @@ produces:
 	"I am somewhat tired," I repeated.
 	"Really," he responded. "How deleterious."
 
-### Multiple Choices
+### Multiple Choices 多个选项
 
-To make choices really choices, we need to provide alternatives. We can do this simply by listing them:
+要体现真正的选择性，我们需要提供多个可选项。只需将多条选项依次列出即可：
 
 	"What's that?" my master asked.
 	*	"I am somewhat tired[."]," I repeated.
@@ -185,7 +187,7 @@ To make choices really choices, we need to provide alternatives. We can do this 
 	*  "I said, this journey is appalling[."] and I want no more of it."
 		"Ah," he replied, not unkindly. "I see you are feeling frustrated. Tomorrow, things will improve."
 
-This produces the following game:
+上述脚本的游戏表现为：
 
 	"What's that?" my master asked.
 
@@ -197,7 +199,7 @@ This produces the following game:
 	"I said, this journey is appalling and I want no more of it."
 	"Ah," he replied, not unkindly. "I see you are feeling frustrated. Tomorrow, things will improve."
 
-The above syntax is enough to write a single set of choices. In a real game, we'll want to move the flow from one point to another based on what the player chooses. To do that, we need to introduce a bit more structure.
+上面的语法足以创建单次的选择集合。在实际游戏中，我们往往希望根据玩家选择的不同，将故事流程导向不同的节点。这就需要更复杂的流程结构，我们将在后面进一步讨论。
 
 ## 3) Knots
 
