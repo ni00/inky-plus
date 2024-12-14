@@ -201,60 +201,58 @@
 
 上面的语法足以创建单次的选择集合。在实际游戏中，我们往往希望根据玩家选择的不同，将故事流程导向不同的节点。这就需要更复杂的流程结构，我们将在后面进一步讨论。
 
-## 3) Knots
+## 3) Knots 节点
 
-### Pieces of content are called knots
+### Pieces of content are called knots 内容单元称为节点
 
-To allow the game to branch we need to mark up sections of content with names (as an old-fashioned gamebook does with its 'Paragraph 18', and the like.)
+为了让游戏能够分支，我们需要给内容区块命名（类似于传统的游戏书有“第18段”这样的标记）。这些独立的内容区块称为 “节点（knots）”，它们是 **ink** 内容的基本结构单元。
 
-These sections are called "knots" and they're the fundamental structural unit of ink content.
+### Writing a knot 定义一个节点
 
-### Writing a knot
-
-The start of a knot is indicated by two or more equals signs, as follows.
+节点的开头以两个或更多个 `=` 号来表示，例如：
 
 	=== top_knot ===
 
-(The equals signs on the end are optional; and the name needs to be a single word with no spaces.)
+（行尾的 `===` 是可选的；节点名称必须是一个不含空格的单词。）
 
-The start of a knot is a header; the content that follows will be inside that knot.
+节点起始行是一个头部标记，紧随其后的内容都属于该节点。
 
 	=== back_in_london ===
 
 	We arrived into London at 9.45pm exactly.
 
-#### Advanced: a knottier "hello world"
+#### Advanced: a knottier "hello world" 进阶用法：一个稍显复杂的 hello world
 
-When you start an ink file, content outside of knots will be run automatically. But knots won't. So if you start using knots to hold your content, you'll need to tell the game where to go. We do this with a divert arrow `->`, which is covered properly in the next section.
+当你启动一个 ink 文件时，所有位于节点之外的内容会自动运行；但节点内的内容不会自动运行。因此，如果你开始使用节点来组织内容，你需要告诉游戏从哪个节点开始执行。我们通过使用转向箭头 `->` 来指定，这将在下一节详细介绍。
 
-The simplest knotty script is:
+最简单的使用节点的脚本是：
 
 	-> top_knot
 
 	=== top_knot ===
 	Hello world!
 
-However, **ink** doesn't like loose ends, and produces a warning on compilation and/or run-time when it thinks this has happened. The script above produces this on compilation:
+然而，**ink** 不喜欢流程无故中断。在编译和/或运行时，如果引擎判断流程无处可去，它会给出警告。上述脚本在编译时会产生如下警告：
 
 	WARNING: Apparent loose end exists where the flow runs out. Do you need a '-> END' statement, choice or divert? on line 3 of tests/test.ink
 
-and this on running:
+在运行时也会报错：
 
 	Runtime error in tests/test.ink line 3: ran out of content. Do you need a '-> DONE' or '-> END'?
 
-The following plays and compiles without error:
+以下版本的代码可以正常运行和编译无误：
 
 	=== top_knot ===
 	Hello world!
 	-> END
 
-`-> END` is a marker for both the writer and the compiler; it means "the story flow should now stop".
+`-> END` 对编写者和编译器而言都是一个明确的结束标记，表示“故事流程到此为止”。
 
-## 4) Diverts
+## 4) Diverts 跳转
 
-### Knots divert to knots
+### Knots divert to knots 节点间的跳转
 
-You can tell the story to move from one knot to another using `->`, a "divert arrow". Diverts happen immediately without any user input.
+你可以使用 `->`（称为“跳转箭头”）让故事从一个节点（knot）跳转到另一个节点。跳转是立刻发生的，不需要玩家输入。
 
 	=== back_in_london ===
 
@@ -264,9 +262,9 @@ You can tell the story to move from one knot to another using `->`, a "divert ar
 	=== hurry_home ===
 	We hurried home to Savile Row as fast as we could.
 
-#### Diverts are invisible
+#### Diverts are invisible 跳转是无形的
 
-Diverts are intended to be seamless and can even happen mid-sentence:
+跳转是无缝的，甚至可以在句子中间进行：
 
 	=== hurry_home ===
 	We hurried home to Savile Row -> as_fast_as_we_could
@@ -274,13 +272,13 @@ Diverts are intended to be seamless and can even happen mid-sentence:
 	=== as_fast_as_we_could ===
 	as fast as we could.
 
-produces the same line as above:
+上述脚本的输出与以下效果相同：
 
 	We hurried home to Savile Row as fast as we could.
 
-#### Glue
+#### Glue 粘合
 
-The default behaviour inserts line-breaks before every new line of content. In some cases, however, content must insist on not having a line-break, and it can do so using `<>`, or "glue".
+默认情况下，每当遇到新行内容，**ink** 会在输出中插入换行符。但在某些情况下，我们需要紧密衔接文本，而不希望换行。这时可以使用 `<>`（“粘合”符号）来实现。
 
 	=== hurry_home ===
 	We hurried home <>
@@ -293,18 +291,18 @@ The default behaviour inserts line-breaks before every new line of content. In s
 	=== as_fast_as_we_could ===
 	<> as fast as we could.
 
-also produces:
+该脚本的输出同样为：
 
 	We hurried home to Savile Row as fast as we could.
 
-You can't use too much glue: multiple glues next to each other have no additional effect. (And there's no way to "negate" a glue; once a line is sticky, it'll stick.)
+你不能过度使用“粘合”符号：多个连续的粘合符号不会产生额外效果。（也无法“抵消”粘合，一旦一行被“粘”上，就会一直粘合。）
 
 
-## 5) Branching The Flow
+## 5) Branching The Flow 分支流程
 
-### Basic branching
+### Basic branching 基本分支
 
-Combining knots, options and diverts gives us the basic structure of a choose-your-own game.
+将节点、选项和跳转（diverts）结合起来，可以实现最基本的多路径故事结构。
 
 	=== paragraph_1 ===
 	You stand by the wall of Analand, sword in hand.
@@ -317,9 +315,9 @@ Combining knots, options and diverts gives us the basic structure of a choose-yo
 
 	...
 
-### Branching and joining
+### Branching and joining 分支与合流
 
-Using diverts, the writer can branch the flow, and join it back up again, without showing the player that the flow has rejoined.
+通过使用跳转（diverts），作者可以让故事流程分支，然后在不让玩家察觉的情况下让分支重新汇合。这意味着多个不同的路径可以最终回到同一个叙事点上。
 
 	=== back_in_london ===
 
@@ -347,34 +345,33 @@ Using diverts, the writer can branch the flow, and join it back up again, withou
 	=== as_fast_as_we_could ===
 	<> as fast as we could.
 
+### The story flow 故事流程
 
-### The story flow
+节点与跳转的组合构建出了游戏的基础故事流程。这个流程是“平的”（flat），即没有调用栈（call stack），跳转后不会再“返回”原来的位置。
 
-Knots and diverts combine to create the basic story flow of the game. This flow is "flat" - there's no call-stack, and diverts aren't "returned" from.
+在大多数 **ink** 脚本中，故事从文件开头的内容开始，然后在各节点间“跳来跳去”，像一团意大利面一样盘绕，最后（希望）到达 `-> END` 告终。
 
-In most ink scripts, the story flow starts at the top, bounces around in a spaghetti-like mess, and eventually, hopefully, reaches a `-> END`.
+这种极为松散的结构让创作者可以随心所欲地写作，在必要时随意分支和合流，而无需过分担心整体结构的完备性。引入新的分支或变向并不需要任何模板化的步骤，也无需手动追踪状态。
 
-The very loose structure means writers can get on and write, branching and rejoining without worrying about the structure that they're creating as they go. There's no boiler-plate to creating new branches or diversions, and no need to track any state.
+#### Advanced: Loops 进阶用法：循环
 
-#### Advanced: Loops
+完全可以使用跳转来创建循环内容。**ink** 提供了多种特性来利用这一点，包括动态变化文本的方式，以及控制选项重复选择频率的方法。
 
-You absolutely can use diverts to create looped content, and **ink** has several features to exploit this, including ways to make the content vary itself, and ways to control how often options can be chosen.
+更多信息请参考有关动态文本变化以及[条件分支选项](#conditional-choices)的相关章节。
 
-See the sections on Varying Text and [Conditional Choices](#conditional-choices) for more information.
-
-Oh, and the following is legal and not a great idea:
+哦，顺带一提，下面这种写法虽然合法，但并不是个好主意：
 
 	=== round ===
 	and
 	-> round
 
-## 6) Includes and Stitches
+## 6) Includes and Stitches 包含与分段
 
-### Knots can be subdivided
+### Knots can be subdivided 节点可以进一步细分
 
-As stories get longer, they become more confusing to keep organised without some additional structure.
+随着故事规模增大，如果没有额外的结构支持，保持条理就会变得困难。
 
-Knots can include sub-sections called "stitches". These are marked using a single equals sign.
+节点（knots）内部可以进一步细分为子章节（stitches）。子章节以单个等号作为标记：
 
 	=== the_orient_express ===
 	= in_first_class
@@ -386,11 +383,11 @@ Knots can include sub-sections called "stitches". These are marked using a singl
 	= missed_the_train
 		...
 
-One could use a knot for a scene, for instance, and stitches for the events within the scene.
+例如，你可以将一个节点视为一个场景，而将其内部的子章节用来表示该场景中的不同事件。
 
-### Stitches have unique names
+### Stitches have unique names 子章节有独立的名字
 
-A stitch can be diverted to using its "address".
+你可以通过“地址”的方式跳转到子章节。地址的格式为：`节点名.子章节名`
 
 	*	[Travel in third class]
 		-> the_orient_express.in_third_class
@@ -398,23 +395,23 @@ A stitch can be diverted to using its "address".
 	*	[Travel in the guard's van]
 		-> the_orient_express.in_the_guards_van
 
-### The first stitch is the default
+### The first stitch is the default 第一个子章节是默认入口
 
-Diverting to a knot which contains stitches will divert to the first stitch in the knot. So:
+如果你跳转到一个含有多个子章节的节点（但未指定具体子章节），则会自动跳转到该节点内的第一个子章节。因此：
 
 	*	[Travel in first class]
 		"First class, Monsieur. Where else?"
 		-> the_orient_express
 
-is the same as:
+与下面的写法效果相同：
 
 	*	[Travel in first class]
 		"First class, Monsieur. Where else?"
 		-> the_orient_express.in_first_class
 
-(...unless we move the order of the stitches around inside the knot!)
+（除非你在节点内部改变子章节的顺序！）
 
-You can also include content at the top of a knot outside of any stitch. However, you need to remember to divert out of it - the engine *won't* automatically enter the first stitch once it's worked its way through the header content.
+你也可以在节点顶部（在所有子章节之前）添加内容。然而，需要记住的是，在这些内容结束后，故事并不会自动进入首个子章节，你必须手动跳转（divert）进入相应子章节。
 
 	=== the_orient_express ===
 
@@ -427,10 +424,9 @@ You can also include content at the top of a knot outside of any stitch. However
 	= in_second_class
 		...
 
+### Local diverts 本地跳转
 
-### Local diverts
-
-From inside a knot, you don't need to use the full address for a stitch.
+在同一个节点内，你不需要使用完整的地址来跳转到子章节：
 
 	-> the_orient_express
 
@@ -443,22 +439,21 @@ From inside a knot, you don't need to use the full address for a stitch.
 	= in_third_class
 		I put myself in third.
 
-This means stitches and knots can't share names, but several knots can contain the same stitch name. (So both the Orient Express and the SS Mongolia can have first class.)
+这意味着子章节名在同一节点内是唯一的，但不同节点之间可以使用相同的子章节名。（例如，the_orient_express 和 SS_Mongolia 都可以有一个 in_first_class 子章节。）
 
-The compiler will warn you if ambiguous names are used.
+如果存在名称冲突，编译器会发出警告。
 
-### Script files can be combined
+### Script files can be combined 脚本文件可以合并
 
-You can also split your content across multiple files, using an include statement.
+你还可以通过使用 `INCLUDE` 语句，将内容分散在多个文件中进行组织：
 
 	INCLUDE newspaper.ink
 	INCLUDE cities/vienna.ink
 	INCLUDE journeys/orient_express.ink
 
-Include statements should always go at the top of a file, and not inside knots.
+`INCLUDE` 语句应该始终放在文件顶部，而不应位于节点内部。
 
-There are no rules about what file a knot must be in to be diverted to. (In other words, separating files has no effect on the game's namespacing).
-
+文件分离不会对游戏内的名称空间产生影响，也就是说，你可以自由地在多个文件中创建节点和子章节，并在任意文件中对其进行跳转。
 
 ## 7) Varying Choices
 
