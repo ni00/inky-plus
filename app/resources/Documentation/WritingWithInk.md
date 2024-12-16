@@ -1225,183 +1225,176 @@ TODO: （需要向编译器传递 -c 参数）
 
 
 
-# Part 3: Variables and Logic
+# Part 3: Variables and Logic 第 3 部分：变量和逻辑
 
-So far we've made conditional text, and conditional choices, using tests based on what content the player has seen so far.
+到目前为止，我们已经使用基于玩家所见内容的测试创建了条件文本和条件选项。
 
-**ink** also supports variables, both temporary and global, storing numerical and content data, or even story flow commands. It is fully-featured in terms of logic, and contains a few additional structures to help keep the often complex logic of a branching story better organised.
+**ink** 同样支持变量，包括临时变量和全局变量，可用于存储数字、文本数据，甚至是故事流程命令。在逻辑功能上，**ink** 是完整的，并且包含了一些额外的结构，以帮助更好地组织分支故事中通常复杂的逻辑。
 
+## 1) Global Variables 全局变量
 
-## 1) Global Variables
+最强大、也可以说对故事最有用的一种变量，是用于存储游戏状态中某些独特属性的变量——例如主角口袋中的金钱数量，或者主角的心情状态。
 
-The most powerful kind of variable, and arguably the most useful for a story, is a variable to store some unique property about the state of the game - anything from the amount of money in the protagonist's pocket, to a value representing the protagonist's state of mind.
+这种变量被称为“全局变量”，因为它可以在故事中的任何地方访问、设置和读取。（传统编程通常会避免这种用法，因为它可能导致一个程序的某部分干扰另一个无关的部分。但故事是由因果关系驱动的：在拉斯维加斯发生的事情，很少会留在拉斯维加斯。）
 
-This kind of variable is called "global" because it can be accessed from anywhere in the story - both set, and read from. (Traditionally, programming tries to avoid this kind of thing, as it allows one part of a program to mess with another, unrelated part. But a story is a story, and stories are all about consequences: what happens in Vegas rarely stays there.)
+### Defining Global Variables 定义全局变量
 
-### Defining Global Variables
+全局变量可以通过 `VAR` 语句在任何地方定义。定义时需要为变量赋予一个初始值，以确定它的类型——整数、浮点数（小数）、内容，或故事地址。
 
-Global variables can be defined anywhere, via a `VAR` statement. They should be given an initial value, which defines what type of variable they are - integer, floating point (decimal), content, or a story address.
+    VAR knowledge_of_the_cure = false
+    VAR players_name = "Emilia"
+    VAR number_of_infected_people = 521
+    VAR current_epilogue = -> they_all_die_of_the_plague
 
-	VAR knowledge_of_the_cure = false
-	VAR players_name = "Emilia"
-	VAR number_of_infected_people = 521
-	VAR current_epilogue = -> they_all_die_of_the_plague
+### Using Global Variables 使用全局变量
 
-### Using Global Variables
+我们可以测试全局变量，以控制选项并提供条件文本，方式类似于之前所见的例子。
 
-We can test global variables to control options, and provide conditional text, in a similar way to what we have previously seen.
+    === the_train ===
+        火车晃动并发出咔哒声。{ mood > 0:然而，我感到心情还算不错，不太在意这些颠簸|这简直让我无法忍受}。
+        * { not knows_about_wager } “可是，先生，我们为什么要旅行？”[] 我问道。
+        * { knows_about_wager } 我思索着我们这场奇怪的冒险[]. 这会有可能吗？
 
-	=== the_train ===
-		The train jolted and rattled. { mood > 0:I was feeling positive enough, however, and did not mind the odd bump|It was more than I could bear}.
-		*	{ not knows_about_wager } 'But, Monsieur, why are we travelling?'[] I asked.
-		* 	{ knows_about_wager} I contemplated our strange adventure[]. Would it be possible?
+#### Advanced: storing diverts as variables 高级：将跳转存储为变量
 
-#### Advanced: storing diverts as variables
+“跳转”（divert）语句本身是一种值，可以被存储、修改并跳转到。
 
-A "divert" statement is actually a type of value in itself, and can be stored, altered, and diverted to.
+    VAR current_epilogue = -> everybody_dies
 
-	VAR 	current_epilogue = -> everybody_dies
-
-	=== continue_or_quit ===
-	Give up now, or keep trying to save your Kingdom?
-	*  [Keep trying!] 	-> more_hopeless_introspection
-	*  [Give up] 		-> current_epilogue
-
-
-#### Advanced: Global variables are externally visible
-
-Global variables can be accessed, and altered, from the runtime as well from the story, so provide a good way to communicate between the wider game and the story.
-
-The **ink** layer is often be a good place to store gameplay-variables; there's no save/load issues to consider, and the story itself can react to the current values.
+    === continue_or_quit ===
+    现在放弃，还是继续努力拯救你的王国？
+    * [继续努力！] -> more_hopeless_introspection
+    * [放弃] -> current_epilogue
 
 
+#### Advanced: Global variables are externally visible 高级：全局变量是外部可见的
 
-### Printing variables
+全局变量不仅可以在故事中访问和修改，也可以从运行时中访问和修改，因此它们是连接游戏主程序和故事的良好桥梁。
 
-The value of a variable can be printed as content using an inline syntax similar to sequences, and conditional text:
-
-	VAR friendly_name_of_player = "Jackie"
-	VAR age = 23
-
-	My name is Jean Passepartout, but my friend's call me {friendly_name_of_player}. I'm {age} years old.
-
-This can be useful in debugging. For more complex printing based on logic and variables, see the section on functions.
-
-### Evaluating strings
-
-It might be noticed that above we refered to variables as being able to contain "content", rather than "strings". That was deliberate, because a string defined in ink can contain ink - although it will always evaluate to a string. (Yikes!)
-
-	VAR a_colour = ""
-
-	~ a_colour = "{~red|blue|green|yellow}"
-
-	{a_colour}
-
-... produces one of red, blue, green or yellow.
-
-Note that once a piece of content like this is evaluated, its value is "sticky". (The quantum state collapses.) So the following:
-
-	The goon hits you, and sparks fly before you eyes, {a_colour} and {a_colour}.
-
-... won't produce a very interesting effect. (If you really want this to work, use a text function to print the colour!)
-
-This is also why
-
-	VAR a_colour = "{~red|blue|green|yellow}"
-
-is explicitly disallowed; it would be evaluated on the construction of the story, which probably isn't what you want.
+**ink** 层通常是存储游戏变量的好地方；不需要考虑保存/加载的问题，同时故事本身可以对当前值做出反应。
 
 
-## 2) Logic
+### Printing variables 打印变量
 
-Obviously, our global variables are not intended to be constants, so we need a syntax for altering them.
+变量的值可以通过类似于序列和条件文本的内联语法打印为内容：
 
-Since by default, any text in an **ink** script is printed out directly to the screen, we use a markup symbol to indicate that a line of content is intended meant to be doing some numerical work, we use the `~` mark.
+    VAR friendly_name_of_player = "Jackie"
+    VAR age = 23
 
-The following statements all assign values to variables:
+    我的名字是让·帕斯帕图（Jean Passepartout），但我的朋友都叫我 {friendly_name_of_player}。我今年 {age} 岁。
 
+这在调试时非常有用。有关基于逻辑和变量的更复杂打印，请参阅函数部分。
+
+### Evaluating strings 评估字符串
+
+你可能注意到，上文提到变量可以包含“内容”，而不是“字符串”。这是有意为之，因为在 **ink** 中定义的字符串可以包含 ink 代码——尽管最终它们始终会被评估为字符串。（令人惊叹！）
+
+    VAR a_colour = ""
+
+    ~ a_colour = "{~red|blue|green|yellow}"
+
+    {a_colour}
+
+... 将生成 red、blue、green 或 yellow 之一。
+
+注意，一旦像这样的内容被评估，其值是“粘性的”。（即量子状态已坍缩。）例如：
+
+    暴徒打了你一拳，火花在你眼前飞舞，{a_colour} 和 {a_colour}。
+
+... 不会产生特别有趣的效果。（如果你真的希望这有效，使用一个文本函数来打印颜色！）
+
+这也是为什么：
+
+    VAR a_colour = "{~red|blue|green|yellow}"
+
+是明确禁止的；它会在故事构建时被评估，而这可能不是你想要的结果。
+
+
+## 2) Logic 逻辑
+
+显然，全局变量并不是用来作为常量的，因此我们需要一种语法来修改它们。
+
+由于默认情况下，**ink** 脚本中的任何文本都会直接打印到屏幕上，我们需要一个标记符号来表示某行内容是用于执行数值操作的。我们使用 `~` 标记来实现这一点。
+
+以下语句都会为变量赋值：
 
 	=== set_some_variables ===
 		~ knows_about_wager = true
 		~ x = (x * x) - (y * y) + c
 		~ y = 2 * x * y
 
-and the following will test conditions:
+以下内容会测试条件：
 
 	{ x == 1.2 }
 	{ x / 2 > 4 }
 	{ y - 1 <= x * x }
 
-### Mathematics
+### Mathematics 数学运算
 
-**ink** supports the four basic mathematical operations (`+`, `-`, `*` and `/`), as well as `%` (or `mod`), which returns the remainder after integer division. There's also POW for to-the-power-of:
+**ink** 支持四种基本的数学运算符（`+`、`-`、`*` 和 `/`），以及 `%`（或 `mod`），它返回整数除法后的余数。此外，还有 `POW` 函数用于计算幂：
 
-	{POW(3, 2)} is 9.
-	{POW(16, 0.5)} is 4.
+    {POW(3, 2)} 是 9。
+    {POW(16, 0.5)} 是 4。
 
-
-If more complex operations are required, one can write functions (using recursion if necessary), or call out to external, game-code functions (for anything more advanced).
+如果需要更复杂的运算，可以编写函数（必要时使用递归），或者调用外部游戏代码函数（用于更高级的运算）。
 
 
 #### RANDOM(min, max)
 
-Ink can generate random integers if required using the RANDOM function. RANDOM is authored to be like a dice (yes, pendants, we said *a dice*), so the min and max values are both inclusive.
+如果需要，**ink** 可以使用 `RANDOM` 函数生成随机整数。`RANDOM` 的设计类似于掷骰子（是的，我们说的是 *一个骰子*），因此最小值和最大值都包含在结果范围内。
 
-	~ temp dice_roll = RANDOM(1, 6)
+    ~ temp dice_roll = RANDOM(1, 6)
+    ~ temp lazy_grading_for_test_paper = RANDOM(30, 75)
+    ~ temp number_of_heads_the_serpent_has = RANDOM(3, 8)
 
-	~ temp lazy_grading_for_test_paper = RANDOM(30, 75)
+随机数生成器可以通过种子进行初始化以便测试，详见上文的“游戏查询和函数”部分。
 
-	~ temp number_of_heads_the_serpent_has = RANDOM(3, 8)
+#### Advanced: numerical types are implicit 高级：数值类型是隐式的
 
-The random number generator can be seeded for testing purposes, see the section of Game Queries and Functions section above.
+操作的结果——尤其是除法——的类型基于输入类型。整数除法返回整数结果，而浮点数除法返回浮点数结果。
 
-#### Advanced: numerical types are implicit
+    ~ x = 2 / 3
+    ~ y = 7 / 3
+    ~ z = 1.2 / 0.5
 
-Results of operations - in particular, for division - are typed based on the type of the input. So integer division returns integer, but floating point division returns floating point results.
-
-	~ x = 2 / 3
-	~ y = 7 / 3
-	~ z = 1.2 / 0.5
-
-assigns `x` to be 0, `y` to be 2 and `z` to be 2.4.
+其中，`x` 为 0，`y` 为 2，`z` 为 2.4。
 
 #### Advanced: INT(), FLOOR() and FLOAT()
 
-In cases where you don't want implicit types, or you want to round off a variable, you can cast it directly.
+如果你不想使用隐式类型，或者想将变量舍入，可以直接对其进行类型转换。
 
-	{INT(3.2)} is 3.
-	{FLOOR(4.8)} is 4.
-	{INT(-4.8)} is -4.
-	{FLOOR(-4.8)} is -5.
+    {INT(3.2)} 是 3。
+    {FLOOR(4.8)} 是 4。
+    {INT(-4.8)} 是 -4。
+    {FLOOR(-4.8)} 是 -5。
 
-	{FLOAT(4)} is, um, still 4.
+    {FLOAT(4)} 仍然是 4。
 
+### String queries 字符串查询
 
+对于一个文本引擎来说，**ink** 对字符串处理的支持出奇地有限：假设任何你需要的字符串转换都会由游戏代码（或外部函数）处理。但我们支持三种基本查询——等于、不等于和子字符串（我们称之为 `?`，原因将在后续章节中解释）。
 
-### String queries
+以下表达式都会返回 true：
 
-Oddly for a text-engine, **ink** doesn't have much in the way of string-handling: it's assumed that any string conversion you need to do will be handled by the game code (and perhaps by external functions.) But we support three basic queries - equality, inequality, and substring (which we call ? for reasons that will become clear in a later chapter).
-
-The following all return true:
 
 	{ "Yes, please." == "Yes, please." }
 	{ "No, thank you." != "Yes, please." }
 	{ "Yes, please" ? "ease" }
 
 
-## 3) Conditional blocks (if/else)
+## 3) Conditional blocks (if/else) 条件块
 
-We've seen conditionals used to control options and story content; **ink** also provides an equivalent of the normal if/else-if/else structure.
+我们已经见过条件被用来控制选项和故事内容；**ink** 还提供了一个等价于普通 if/else-if/else 结构的功能。
 
-### A simple 'if'
+### A simple 'if' 简单的 'if'
 
-The if syntax takes its cue from the other conditionals used so far, with the `{`...`}` syntax indicating that something is being tested.
+if 语法基于之前的条件格式，使用 `{`...`}` 语法来指示某些内容正在被测试。
 
 	{ x > 0:
 		~ y = x - 1
 	}
 
-Else conditions can be provided:
+可以提供 else 条件：
 
 	{ x > 0:
 		~ y = x - 1
@@ -1409,9 +1402,9 @@ Else conditions can be provided:
 		~ y = x + 1
 	}
 
-### Extended if/else if/else blocks
+### Extended if/else if/else blocks 扩展的 if/else-if/else 块
 
-The above syntax is actually a specific case of a more general structure, something like a "switch" statement of another language:
+上述语法实际上是更通用结构的一种特例，类似于其他语言中的 "switch" 语句：
 
 	{
 		- x > 0:
@@ -1420,7 +1413,7 @@ The above syntax is actually a specific case of a more general structure, someth
 			~ y = x + 1
 	}
 
-And using this form we can include 'else-if' conditions:
+通过这种形式，我们可以添加 "else-if" 条件：
 
 	{
 		- x == 0:
@@ -1431,11 +1424,11 @@ And using this form we can include 'else-if' conditions:
 			~ y = x + 1
 	}
 
-(Note, as with everything else, the white-space is purely for readability and has no syntactic meaning.)
+（注意，与其他部分一样，空格仅用于提高可读性，对语法没有意义。）
 
 ### Switch blocks
 
-And there's also an actual switch statement:
+**ink** 还提供了真正的 switch 语句：
 
 	{ x:
 	- 0: 	zero
@@ -1444,9 +1437,9 @@ And there's also an actual switch statement:
 	- else: lots
 	}
 
-#### Example: context-relevant content
+#### Example: context-relevant content 示例：上下文相关的内容
 
-Note these tests don't have to be variable-based and can use read-counts, just as other conditionals can, and the following construction is quite frequent, as a way of saying "do some content which is relevant to the current game state":
+需要注意的是，这些条件不必基于变量，也可以使用读取计数，与其他条件类似。以下结构很常见，用于根据当前游戏状态生成相关内容：
 
 	=== dream ===
 		{
@@ -1463,87 +1456,84 @@ Note these tests don't have to be variable-based and can use read-counts, just a
 				-> dream_about_marmalade
 		}
 
-The syntax has the advantage of being easy to extend, and prioritise.
+这种语法的优势在于易于扩展和优先级控制。
 
+### Conditional blocks are not limited to logic 条件块不仅限于逻辑
 
+条件块不仅可以用于逻辑控制，还可以用于控制故事内容：
 
-### Conditional blocks are not limited to logic
+    我盯着福格先生。
+    { know_about_wager:
+        <> “但你肯定不是认真的吧？”我质问道。
+    - else:
+        <> “但总得有个原因吧，”我说道。
+    }
+    他没有回应，只是专注地看着报纸，仿佛昆虫学家在研究他最新的标本。
 
-Conditional blocks can be used to control story content as well as logic:
+你甚至可以在条件块中加入选项：
 
-	I stared at Monsieur Fogg.
-	{ know_about_wager:
-		<> "But surely you are not serious?" I demanded.
-	- else:
-		<> "But there must be a reason for this trip," I observed.
-	}
-	He said nothing in reply, merely considering his newspaper with as much thoroughness as entomologist considering his latest pinned addition.
+    { door_open:
+        * 我大步走出车厢[]，仿佛听到我的主人小声嘟囔了一句。 -> go_outside
+    - else:
+        * 我请求允许离开[]，福格先生看起来有些吃惊。 -> open_door
+        * 我站起身去开门[]，福格先生对此小小的反叛毫不在意。 -> open_door
+    }
 
-You can even put options inside conditional blocks:
+但请注意，上述例子中缺少编织语法和嵌套并非偶然：为了避免混淆嵌套类型，你不能在条件块中包含聚合点。
 
-	{ door_open:
-		* 	I strode out of the compartment[] and I fancied I heard my master quietly tutting to himself. 			-> go_outside
-	- else:
-		*	I asked permission to leave[] and Monsieur Fogg looked surprised. 	-> open_door
-		* 	I stood and went to open the door[]. Monsieur Fogg seemed untroubled by this small rebellion. -> open_door
-	}
+### Multiline blocks 多行块
 
-...but note that the lack of weave-syntax and nesting in the above example isn't accidental: to avoid confusing the various kinds of nesting at work, you aren't allowed to include gather points inside conditional blocks.
+还有另一类多行块，基于之前的替代系统扩展。以下示例都是有效的，并且效果如预期：
 
-### Multiline blocks
+    // 顺序：依次显示替代内容，最后停留在最后一项
+    { stopping:
+        - 我走进赌场。
+        - 我又走进赌场。
+        - 我再次走进赌场。
+    }
 
-There's one other class of multiline block, which expands on the alternatives system from above. The following are all valid and do what you might expect:
+    // 随机：随机显示一项内容
+    在桌上，我抽了一张牌。<>
+    { shuffle:
+        - 红心 A。
+        - 黑桃 K。
+        - 方块 2。
+          “这次你输了！”荷官笑着说。
+    }
 
- 	// Sequence: go through the alternatives, and stick on last
-	{ stopping:
-		-	I entered the casino.
-		-  I entered the casino again.
-		-  Once more, I went inside.
-	}
+    // 循环：依次显示每一项，然后循环
+    { cycle:
+        - 我屏住了呼吸。
+        - 我不耐烦地等待。
+        - 我停下脚步。
+    }
 
-	// Shuffle: show one at random
-	At the table, I drew a card. <>
-	{ shuffle:
-		- 	Ace of Hearts.
-		- 	King of Spades.
-		- 	2 of Diamonds.
-			'You lose this time!' crowed the croupier.
-	}
+    // 一次性：依次显示每一项，直到所有内容都被展示完
+    { once:
+        - 我的运气会好吗？
+        - 我能赢这一局吗？
+    }
 
-	// Cycle: show each in turn, and then cycle
-	{ cycle:
-		- I held my breath.
-		- I waited impatiently.
-		- I paused.
-	}
+#### Advanced: modified shuffles 高级：修改的随机显示
 
-	// Once: show each, once, in turn, until all have been shown
-	{ once:
-		- Would my luck hold?
-		- Could I win the hand?
-	}
+上面的随机块实际上是一个“随机循环”，会打乱内容顺序，依次播放，然后重新打乱再播放。
 
-#### Advanced: modified shuffles
+还有两种其他版本的随机显示：
 
-The shuffle block above is really a "shuffled cycle"; in that it'll shuffle the content, play through it, then reshuffle and go again.
+`shuffle once` 会打乱内容顺序，播放一次后停止。
 
-There are two other versions of shuffle:
+    { shuffle once:
+    - 太阳很热。
+    - 这是一个炎热的日子。
+    }
 
-`shuffle once` which will shuffle the content, play through it, and then do nothing.
+`shuffle stopping` 会打乱内容（除了最后一项），播放后停留在最后一项。
 
-	{ shuffle once:
-	-	The sun was hot.
-	- 	It was a hot day.
-	}
-
-`shuffle stopping` will shuffle all the content (except the last entry), and once its been played, it'll stick on the last entry.
-
-	{ shuffle stopping:
-	- 	A silver BMW roars past.
-	-	A bright yellow Mustang takes the turn.
-	- 	There are like, cars, here.
-	}
-
+    { shuffle stopping:
+    - 一辆银色宝马呼啸而过。
+    - 一辆明黄色野马漂移转弯。
+    - 这里似乎有很多车。
+    }
 
 ## 4) Temporary Variables
 
