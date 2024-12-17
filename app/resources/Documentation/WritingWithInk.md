@@ -1535,11 +1535,11 @@ if 语法基于之前的条件格式，使用 `{`...`}` 语法来指示某些内
     - 这里似乎有很多车。
     }
 
-## 4) Temporary Variables
+## 4) Temporary Variables 临时变量
 
-### Temporary variables are for scratch calculations
+### Temporary variables are for scratch calculations 临时变量用于快速计算
 
-Sometimes, a global variable is unwieldy. **ink** provides temporary variables for quick calculations of things.
+有时，全局变量显得不太方便。**ink** 提供了临时变量来进行快速的计算。
 
 	=== near_north_pole ===
 		~ temp number_of_warm_things = 0
@@ -1553,35 +1553,37 @@ Sometimes, a global variable is unwieldy. **ink** provides temporary variables f
 			~ number_of_warm_things++
 		}
 		{ number_of_warm_things > 2:
-			Despite the snow, I felt incorrigibly snug.
+			尽管下着雪，我还是感到异常温暖。
 		- else:
-			That night I was colder than I have ever been.
+			那晚我比任何时候都要冷。
 		}
 
-The value in a temporary variable is thrown away after the story leaves the stitch in which it was defined.
+临时变量的值在故事离开定义该变量的节（stitch）后会被丢弃。
 
-### Knots and stitches can take parameters
+### Knots and stitches can take parameters 节点和节可以接受参数
 
-A particularly useful form of temporary variable is a parameter. Any knot or stitch can be given a value as a parameter.
-
-	*	[Accuse Hasting]
-			-> accuse("Hastings")
-	*	[Accuse Mrs Black]
-			-> accuse("Claudia")
-	*	[Accuse myself]
-			-> accuse("myself")
-
-	=== accuse(who) ===
-		"I accuse {who}!" Poirot declared.
-		"Really?" Japp replied. "{who == "myself":You did it?|{who}?}"
-		"And why not?" Poirot shot back.
+一个特别有用的临时变量形式是参数。任何节点（knot）或节（stitch）都可以接受一个作为参数的值。
 
 
-... and you'll need to use parameters if you want to pass a temporary value from one stitch to another!
+    * [指控哈斯廷]
+        -> accuse("Hastings")
+    * [指控黑夫人]
+        -> accuse("Claudia")
+    * [指控我自己]
+        -> accuse("myself")
 
-#### Example: a recursive knot definition
+    === accuse(who) ===
+        "我指控 {who}!" 波洛宣布。
+        "真的吗?" 贾普回应道。"{who == "myself":你干的?|{who}?}"
+        "那为什么不呢?" 波洛反问道。
 
-Temporary variables are safe to use in recursion (unlike globals), so the following will work.
+
+
+... 如果你希望将临时值从一个节传递到另一个节时，必须使用参数！
+
+#### Example: a recursive knot definition 示例：递归节点定义
+
+临时变量在递归中是安全使用的（与全局变量不同），因此以下代码可以正常工作。
 
 	-> add_one_to_one_hundred(0, 1)
 
@@ -1594,62 +1596,60 @@ Temporary variables are safe to use in recursion (unlike globals), so the follow
 		}
 
 	=== finished(total) ===
-		"The result is {total}!" you announce.
-		Gauss stares at you in horror.
+       "结果是 {total}!" 你宣布道。
+        高斯惊恐地盯着你。
 		-> END
 
 
-(In fact, this kind of definition is useful enough that **ink** provides a special kind of knot, called, imaginatively enough, a `function`, which comes with certain restrictions and can return a value. See the section below.)
+（事实上，这种定义非常有用，以至于 **ink** 提供了一种特殊的节点，叫做 `function`，它有某些限制并且可以返回一个值。请参阅下面的部分。）
 
 
-#### Advanced: sending divert targets as parameters
+#### Advanced: sending divert targets as parameters 高级：将跳转目标作为参数传递
 
-Knot/stitch addresses are a type of value, indicated by a `->` character, and can be stored and passed around. The following is therefore legal, and often useful:
+节点/节地址本身也是一种值，由 `->` 符号表示，因此可以存储并传递。以下是合法的，并且经常有用的：
 
-	=== sleeping_in_hut ===
-		You lie down and close your eyes.
-		-> generic_sleep (-> waking_in_the_hut)
+    === sleeping_in_hut ===
+        你躺下并闭上了眼睛。
+        -> generic_sleep (-> waking_in_the_hut)
 
-	===	 generic_sleep (-> waking)
-		You sleep perchance to dream etc. etc.
-		-> waking
+    === generic_sleep (-> waking)
+        你沉沉睡去，梦中或许能见到些许神奇。
+        -> waking
 
-	=== waking_in_the_hut
-		You get back to your feet, ready to continue your journey.
+    === waking_in_the_hut
+        你重新站起身来，准备继续旅程。
 
-...but note the `->` in the `generic_sleep` definition: that's the one case in **ink** where a parameter needs to be typed: because it's too easy to otherwise accidentally do the following:
+... 但请注意 `->` 在 `generic_sleep` 定义中的使用：这是 **ink** 中唯一一个需要指定类型的参数，因为如果不加以注意，很容易写成以下内容：
 
-	=== sleeping_in_hut ===
-		You lie down and close your eyes.
-		-> generic_sleep (waking_in_the_hut)
+    === sleeping_in_hut ===
+        你躺下并闭上了眼睛。
+        -> generic_sleep (waking_in_the_hut)
 
-... which sends the read count of `waking_in_the_hut` into the sleeping knot, and then attempts to divert to it.
-
-
+... 这样会把 `waking_in_the_hut` 的读取计数传递给 `sleeping` 节点，并尝试跳转到它。
 
 
 
-## 5) Functions
+## 5) Functions 函数
 
-The use of parameters on knots means they are almost functions in the usual sense, but they lack one key concept - that of the call stack, and the use of return values.
+节点的参数使它们几乎可以看作是函数，但缺少一个关键概念——调用栈和返回值的使用。
 
-**ink** includes functions: they are knots, with the following limitations and features:
+**ink** 提供了函数功能：函数是节点，但具有以下限制和特性：
 
-A function:
-- cannot contain stitches
-- cannot use diverts or offer choices
-- can call other functions
-- can include printed content
-- can return a value of any type
-- can recurse safely
+一个函数：
+- 不能包含节（stitches）  
+- 不能使用跳转（diverts）或提供选项  
+- 可以调用其他函数  
+- 可以包含打印的内容  
+- 可以返回任何类型的值  
+- 可以安全地递归  
 
-(Some of these may seem quite limiting, but for more story-oriented call-stack-style features, see the section on [Tunnels](#1-tunnels).)
+（这些限制看起来可能有点苛刻，但对于更面向故事的调用栈功能，请参阅 [隧道](#1-tunnels) 部分。）
 
-Return values are provided via the `~ return` statement.
+返回值通过 `~ return` 语句提供。
 
-### Defining and calling functions
+### Defining and calling functions 定义和调用函数
 
-To define a function, simply declare a knot to be one:
+要定义一个函数，只需声明一个节点为函数：
 
 	=== function say_yes_to_everything ===
 		~ return true
@@ -1657,20 +1657,20 @@ To define a function, simply declare a knot to be one:
 	=== function lerp(a, b, k) ===
 		~ return ((b - a) * k) + a
 
-Functions are called by name, and with brackets, even if they have no parameters:
+调用函数时，使用名称和括号，即使它没有参数：
 
 	~ x = lerp(2, 8, 0.3)
 
-	*	{say_yes_to_everything()} 'Yes.'
+	*	{say_yes_to_everything()} '是的。'
 
-As in any other language, a function, once done, returns the flow to wherever it was called from - and despite not being allowed to divert the flow, functions can still call other functions.
+与其他语言一样，函数完成后会将流程返回到调用它的位置。尽管函数不能跳转流程，但它们仍然可以调用其他函数。
 
 	=== function say_no_to_nothing ===
 		~ return say_yes_to_everything()
 
-### Functions don't have to return anything
+### Functions don't have to return anything 函数不必返回值
 
-A function does not need to have a return value, and can simply do something that is worth packaging up:
+函数不需要返回值，它可以简单地执行某个操作，便于打包复用：
 
 	=== function harm(x) ===
 		{ stamina < x:
@@ -1679,35 +1679,35 @@ A function does not need to have a return value, and can simply do something tha
 			~ stamina = stamina - x
 		}
 
-...though remember a function cannot divert, so while the above prevents a negative Stamina value, it won't kill a player who hits zero.
+... 但请记住，函数不能跳转，因此尽管上述代码防止了耐力值为负数，它不会在玩家耐力值为零时导致死亡。
 
-### Functions can be called inline
+### Functions can be called inline 函数可以内联调用
 
-Functions can be called on `~` content lines, but can also be called during a piece of content. In this context, the return value, if there is one, is printed (as well as anything else the function wants to print.) If there is no return value, nothing is printed.
+函数可以在 `~` 内容行上调用，也可以在内容中调用。在这种情况下，如果函数有返回值，则会打印出来（以及函数想打印的任何其他内容）。如果没有返回值，则不会打印任何内容。
 
-Content is, by default, 'glued in', so the following:
+默认情况下，内容是“粘连”在一起的，因此以下示例：
 
-	Monsieur Fogg was looking {describe_health(health)}.
+    福格先生看起来 {describe_health(health)}。
 
-	=== function describe_health(x) ===
-	{
-	- x == 100:
-		~ return "spritely"
-	- x > 75:
-		~ return "chipper"
-	- x > 45:
-		~ return "somewhat flagging"
-	- else:
-		~ return "despondent"
-	}
+    === function describe_health(x) ===
+    {
+    - x == 100:
+        ~ return "精神抖擞"
+    - x > 75:
+        ~ return "神采奕奕"
+    - x > 45:
+        ~ return "有些疲惫"
+    - else:
+        ~ return "无精打采"
+    }
 
-produces:
+将生成：
 
-	Monsieur Fogg was looking despondent.
+    福格先生看起来无精打采。
 
-#### Examples
+#### Examples 示例
 
-For instance, you might include:
+例如，你可以包含以下函数：
 
 	=== function max(a,b) ===
 		{ a < b:
@@ -1717,142 +1717,139 @@ For instance, you might include:
 		}
 
 	=== function exp(x, e) ===
-		// returns x to the power e where e is an integer
+		// 返回 x 的 e 次幂，其中 e 为整数
 		{ e <= 0:
 			~ return 1
 		- else:
 			~ return x * exp(x, e - 1)
 		}
 
-Then:
+然后：
 
-	The maximum of 2^5 and 3^3 is {max(exp(2,5), exp(3,3))}.
+    2^5 和 3^3 中的最大值是 {max(exp(2,5), exp(3,3))}。
 
-produces:
+生成：
 
-	The maximum of 2^5 and 3^3 is 32.
+    2^5 和 3^3 中的最大值是 32。
 
 
-#### Example: turning numbers into words
+#### Example: turning numbers into words 将数字转换为单词
 
 The following example is long, but appears in pretty much every inkle game to date. (Recall that a hyphenated line inside multiline curly braces indicates either "a condition to test" or, if the curly brace began with a variable, "a value to compare against".)
 
-    === function print_num(x) ===
+   === function print_num(x) ===
     {
         - x >= 1000:
-            {print_num(x / 1000)} thousand { x mod 1000 > 0:{print_num(x mod 1000)}}
+            {print_num(x / 1000)} 千 { x mod 1000 > 0:{print_num(x mod 1000)}}
         - x >= 100:
-            {print_num(x / 100)} hundred { x mod 100 > 0:and {print_num(x mod 100)}}
+            {print_num(x / 100)} 百 { x mod 100 > 0:和 {print_num(x mod 100)}}
         - x == 0:
-            zero
+            零
         - else:
             { x >= 20:
                 { x / 10:
-                    - 2: twenty
-                    - 3: thirty
-                    - 4: forty
-                    - 5: fifty
-                    - 6: sixty
-                    - 7: seventy
-                    - 8: eighty
-                    - 9: ninety
+                    - 2: 二十
+                    - 3: 三十
+                    - 4: 四十
+                    - 5: 五十
+                    - 6: 六十
+                    - 7: 七十
+                    - 8: 八十
+                    - 9: 九十
                 }
                 { x mod 10 > 0:<>-<>}
             }
             { x < 10 || x > 20:
                 { x mod 10:
-                    - 1: one
-                    - 2: two
-                    - 3: three
-                    - 4: four
-                    - 5: five
-                    - 6: six
-                    - 7: seven
-                    - 8: eight
-                    - 9: nine
+                    - 1: 一
+                    - 2: 二
+                    - 3: 三
+                    - 4: 四
+                    - 5: 五
+                    - 6: 六
+                    - 7: 七
+                    - 8: 八
+                    - 9: 九
                 }
             - else:
                 { x:
-                    - 10: ten
-                    - 11: eleven
-                    - 12: twelve
-                    - 13: thirteen
-                    - 14: fourteen
-                    - 15: fifteen
-                    - 16: sixteen
-                    - 17: seventeen
-                    - 18: eighteen
-                    - 19: nineteen
+                    - 10: 十
+                    - 11: 十一
+                    - 12: 十二
+                    - 13: 十三
+                    - 14: 十四
+                    - 15: 十五
+                    - 16: 十六
+                    - 17: 十七
+                    - 18: 十八
+                    - 19: 十九
                 }
             }
     }
 
-which enables us to write things like:
+这样我们可以写出：
 
-	~ price = 15
+    ~ price = 15
 
-	I pulled out {print_num(price)} coins from my pocket and slowly counted them.
-	"Oh, never mind," the trader replied. "I'll take half." And she took {print_num(price / 2)}, and pushed the rest back over to me.
+    我从口袋里掏出了 {print_num(price)} 枚硬币，慢慢数了起来。
+    “算了，”商人说道，“我收一半。”她拿走了 {print_num(price / 2)} 枚，把剩下的推回给我。
 
 
+### Parameters can be passed by reference 参数可以通过引用传递
 
-### Parameters can be passed by reference
+函数的参数也可以通过“引用”传递，这意味着函数可以直接修改被传递的变量，而不是创建一个具有该值的临时变量。
 
-Function parameters can also be passed 'by reference', meaning that the function can actually alter the the variable being passed in, instead of creating a temporary variable with that value.
-
-For instance, most **inkle** stories include the following:
+例如，大多数 **inkle** 故事中会包含以下内容：
 
 	=== function alter(ref x, k) ===
 		~ x = x + k
 
-Lines such as:
+以下行：
 
 	~ gold = gold + 7
 	~ health = health - 4
 
-then become:
+就可以简化为：
 
 	~ alter(gold, 7)
 	~ alter(health, -4)
 
-which are slightly easier to read, and (more usefully) can be done inline for maximum compactness.
+这样更易于阅读，且可以内联调用，实现更紧凑的代码：
 
-	*	I ate a biscuit[] and felt refreshed. {alter(health, 2)}
-	* 	I gave a biscuit to Monsieur Fogg[] and he wolfed it down most undecorously. {alter(foggs_health, 1)}
-	-	<> Then we continued on our way.
+    * 我吃了一个饼干[]，感觉精神了些。{alter(health, 2)}
+    * 我把一个饼干递给福格先生[]，他狼吞虎咽地吃了下去。{alter(foggs_health, 1)}
+    - <> 然后我们继续上路。
 
-Wrapping up simple operations in function can also provide a simple place to put debugging information, if required.
-
-
+将简单操作封装到函数中，还可以在需要时为调试信息提供一个简单的位置。
 
 
-##  6) Constants
+##  6) Constants 常量
 
 
-### Global Constants
+### Global Constants 全局常量
 
-Interactive stories often rely on state machines, tracking what stage some higher level process has reached. There are lots of ways to do this, but the most conveninent is to use constants.
+互动故事通常依赖状态机来跟踪某个更高层次过程的进度。实现这一点有很多方式，但最方便的方式是使用常量。
 
-Sometimes, it's convenient to define constants to be strings, so you can print them out, for gameplay or debugging purposes.
+有时，定义常量为字符串是很方便的，这样你就可以将它们打印出来，用于游戏玩法或调试目的。
 
-	CONST HASTINGS = "Hastings"
-	CONST POIROT = "Poirot"
-	CONST JAPP = "Japp"
+    CONST HASTINGS = "哈斯廷斯"
+    CONST POIROT = "波洛"
+    CONST JAPP = "贾普"
 
-	VAR current_chief_suspect = HASTINGS
+    VAR current_chief_suspect = HASTINGS
 
-	=== review_evidence ===
-		{ found_japps_bloodied_glove:
-			~ current_chief_suspect = POIROT
-		}
-		Current Suspect: {current_chief_suspect}
+    === review_evidence ===
+        { found_japps_bloodied_glove:
+            ~ current_chief_suspect = POIROT
+        }
+        当前嫌疑人: {current_chief_suspect}
 
-Sometimes giving them values is useful:
+有时，给常量赋值也很有用：
 
 	CONST PI = 3.14
 	CONST VALUE_OF_TEN_POUND_NOTE = 10
 
-And sometimes the numbers are useful in other ways:
+有时这些数字在其他地方也会很有用：
 
 	CONST LOBBY = 1
 	CONST STAIRCASE = 2
@@ -1865,22 +1862,21 @@ And sometimes the numbers are useful in other ways:
 
 	=== report_progress ===
 	{  secret_agent_location == suitcase_location:
-		The secret agent grabs the suitcase!
+		秘密特工抓住了手提箱！
 		~ suitcase_location = HELD_BY_AGENT
 
 	-  secret_agent_location < suitcase_location:
-		The secret agent moves forward.
+		秘密特工向前移动。
 		~ secret_agent_location++
 	}
 
-Constants are simply a way to allow you to give story states easy-to-understand names.
+常量仅仅是为了让你为故事状态赋予易于理解的名称。
 
-## 7) Advanced: Game-side logic
+## 7) Advanced: Game-side logic 高级：游戏端逻辑
 
-There are two core ways to provide game hooks in the **ink** engine. External function declarations in ink allow you to directly call C# functions in the game, and variable observers are callbacks that are fired in the game when ink variables are modified. Both of these are described in [Running your ink](RunningYourInk.md).
+在 **ink** 引擎中，有两种核心方式来提供游戏钩子。外部函数声明允许你直接调用游戏中的 C# 函数，而变量观察者是在游戏中修改 **ink** 变量时触发的回调。两者的详细描述可以参考 [运行你的 ink](RunningYourInk.md)。
 
 # Part 4: Advanced Flow Control
-
 
 ## 1) Tunnels
 
