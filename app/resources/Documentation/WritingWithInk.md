@@ -1876,22 +1876,22 @@ The following example is long, but appears in pretty much every inkle game to da
 
 在 **ink** 引擎中，有两种核心方式来提供游戏钩子。外部函数声明允许你直接调用游戏中的 C# 函数，而变量观察者是在游戏中修改 **ink** 变量时触发的回调。两者的详细描述可以参考 [运行你的 ink](RunningYourInk.md)。
 
-# Part 4: Advanced Flow Control
+# Part 4: Advanced Flow Control 高级流程控制
 
-## 1) Tunnels
+## 1) Tunnels 隧道
 
-The default structure for **ink** stories is a "flat" tree of choices, branching and joining back together, perhaps looping, but with the story always being "at a certain place".
+**ink** 故事的默认结构是一个“平坦”的选择树，分支并重新合并，可能会有循环，但故事始终“处于某个位置”。
 
-But this flat structure makes certain things difficult: for example, imagine a game in which the following interaction can happen:
+然而，这种平坦的结构使得某些操作变得困难。例如，设想一个游戏，其中以下交互可以发生：
 
-	=== crossing_the_date_line ===
-	*	"Monsieur!"[] I declared with sudden horror. "I have just realised. We have crossed the international date line!"
-	-	Monsieur Fogg barely lifted an eyebrow. "I have adjusted for it."
-	*	I mopped the sweat from my brow[]. A relief!
-	* 	I nodded, becalmed[]. Of course he had!
-	*  I cursed, under my breath[]. Once again, I had been belittled!
+    === crossing_the_date_line ===
+    * "蒙索尔!"[] 我突然惊恐地宣告。"我刚意识到，我们已经跨越了国际日期变更线！"
+    - 蒙索尔·福格几乎没有抬起眉毛。"我已经调整好了。"
+    * 我擦了擦额头上的汗[]。松了一口气！
+    * 我点点头，心平气和[]。当然他已经调整好了！
+    * 我低声诅咒[]。又一次，我被贬低了！
 
-...but it can happen at several different places in the story. We don't want to have to write copies of the content for each different place, but when the content is finished it needs to know where to return to. We can do this using parameters:
+...但这一事件可以发生在故事中的多个位置。我们不希望为每个不同的地方编写内容的副本，但一旦内容完成，它需要知道接下来应该返回哪里。我们可以通过使用参数来实现：
 
 	=== crossing_the_date_line(-> return_to) ===
 	...
@@ -1900,7 +1900,7 @@ But this flat structure makes certain things difficult: for example, imagine a g
 	...
 
 	=== outside_honolulu ===
-	We arrived at the large island of Honolulu.
+	我们来到了大岛檀香山。
 	- (postscript)
 		-> crossing_the_date_line(-> done)
 	- (done)
@@ -1909,83 +1909,84 @@ But this flat structure makes certain things difficult: for example, imagine a g
 	...
 
 	=== outside_pitcairn_island ===
-	The boat sailed along the water towards the tiny island.
+	船只沿着水面驶向小岛。
 	- (postscript)
 		-> crossing_the_date_line(-> done)
 	- (done)
 		-> END
 
-Both of these locations now call and execute the same segment of storyflow, but once finished they return to where they need to go next.
+这两个位置现在都调用并执行相同的故事段落，但一旦完成，它们会返回到需要前往的地方。
 
-But what if the section of story being called is more complex - what if it spreads across several knots? Using the above, we'd have to keep passing the 'return-to' parameter from knot to knot, to ensure we always knew where to return.
+但是，如果被调用的故事部分更复杂——例如，跨越了多个节点——该怎么办？使用上面的方式，我们需要不断将 `return-to` 参数从节点传递到节点，以确保始终知道该返回哪里。
 
-So instead, **ink** integrates this into the language with a new kind of divert, that functions rather like a subroutine, and is called a 'tunnel'.
+因此，**ink** 引入了一种新的分支方式，称为“隧道”，它类似于子例程，可以直接调用并管理返回流程。
 
-### Tunnels run sub-stories
+### Tunnels run sub-stories 隧道执行子故事
 
-The tunnel syntax looks like a divert, with another divert on the end:
+隧道的语法看起来像一个分支，末尾还有另一个分支：
 
 	-> crossing_the_date_line ->
 
-This means "do the crossing_the_date_line story, then continue from here".
+这意味着“执行 crossing_the_date_line 故事，然后从这里继续”。
 
-Inside the tunnel itself, the syntax is simplified from the parameterised example: all we do is end the tunnel using the `->->` statement which means, essentially, "go on".
+在隧道本身，语法比参数化的例子更简化：我们只需要使用 `->->` 来结束隧道，它意味着“继续”。
 
 	=== crossing_the_date_line ===
-	// this is a tunnel!
+	// 这是一个隧道！
 	...
 	- 	->->
 
-Note that tunnel knots aren't declared as such, so the compiler won't check that tunnels really do end in `->->` statements, except at run-time. So you will need to write carefully to ensure that all the flows into a tunnel really do come out again.
+注意，隧道节点并没有特别声明为隧道，因此编译器不会在运行时检查隧道是否确实以 `->->` 语句结束。所以，你需要小心地编写代码，确保所有进入隧道的流程都能正确退出。
 
-Tunnels can also be chained together, or finish on a normal divert:
+隧道也可以进行链式调用，或者在结束时进行常规的分支：
 
 	...
-	// this runs the tunnel, then diverts to 'done'
+	// 执行隧道后，再转到 'done'
 	-> crossing_the_date_line -> done
 	...
 
 	...
-	//this runs one tunnel, then another, then diverts to 'done'
+	// 执行一个隧道，再执行另一个隧道，然后转到 'done'
 	-> crossing_the_date_line -> check_foggs_health -> done
 	...
 
-Tunnels can be nested, so the following is valid:
+隧道也可以进行嵌套，因此以下示例是合法的：
 
 	=== plains ===
 	= night_time
-		The dark grass is soft under your feet.
+		黑色的草地柔软地铺在你的脚下。
 		+	[Sleep]
 			-> sleep_here -> wake_here -> day_time
 	= day_time
-		It is time to move on.
+		是时候继续前进了。
 
 	=== wake_here ===
-		You wake as the sun rises.
-		+	[Eat something]
+		你在阳光下醒来。
+		+	[吃点东西]
 			-> eat_something ->
-		+	[Make a move]
+		+	[继续前进]
 		-	->->
 
 	=== sleep_here ===
-		You lie down and try to close your eyes.
+		你躺下并试图闭上眼睛。
 		-> monster_attacks ->
-		Then it is time to sleep.
+		然后是睡觉的时间。
 		-> dream ->
 		->->
 
-... and so on.
+... 以此类推。
 
 
-#### Advanced: Tunnels can return elsewhere
+#### Advanced: Tunnels can return elsewhere 隧道可以返回其他地方
 
-Sometimes, in a story, things happen. So sometimes a tunnel can't guarantee that it will always want to go back to where it came from. **ink** supplies a syntax to allow you to "returning from a tunnel but actually go somewhere else" but it should be used with caution as the possibility of getting very confused is very high indeed.
+有时，在故事中发生的事情可能无法确保隧道总是返回它的起点。**ink** 提供了一种语法，使你能够“从隧道返回时实际上前往其他地方”，但应谨慎使用，因为这种操作很容易导致混乱。
 
-Still, there are cases where it's indispensable:
+尽管如此，在某些情况下，这种功能是必不可少的：
+
 
 	=== fall_down_cliff 
 	-> hurt(5) -> 
-	You're still alive! You pick yourself up and walk on.
+	你还活着！你扶着自己站起来，继续前进。
 	
 	=== hurt(x)
 		~ stamina -= x 
@@ -1994,228 +1995,228 @@ Still, there are cases where it's indispensable:
 		}
 	
 	=== youre_dead
-	Suddenly, there is a white light all around you. Fingers lift an eyepiece from your forehead. 'You lost, buddy. Out of the chair.'
+	突然，四周弥漫着白光。有人从你的额头上摘下一个眼镜片。‘你输了，伙计。离开椅子。’
 	 
-And even in less drastic situations, we might want to break up the structure:
+即使在不那么剧烈的情况下，我们也可能希望打破结构：
  
 	-> talk_to_jim ->
  
 	 === talk_to_jim
 	 - (opts) 	
-		*	[ Ask about the warp lacelles ] 
+		*	[ 询问关于 warp lacelles ] 
 			-> warp_lacells ->
-		*	[ Ask about the shield generators ] 
+		*	[ 询问关于 shield generators ] 
 			-> shield_generators ->	
-		* 	[ Stop talking ]
+		* 	[ 停止交谈 ]
 			->->
 	 - -> opts 
 
 	 = warp_lacells
 		{ shield_generators : ->-> argue }
-		"Don't worry about the warp lacelles. They're fine."
+		"别担心 warp lacelles。它们没问题。"
 		->->
 
 	 = shield_generators
 		{ warp_lacells : ->-> argue }
-		"Forget about the shield generators. They're good."
+		"别担心 shield generators。它们没问题。"
 		->->
 	 
 	 = argue 
-	 	"What's with all these questions?" Jim demands, suddenly. 
+	 	"这些问题怎么这么多？" 吉姆突然问道。
 	 	...
 	 	->->
 
-#### Advanced: Tunnels use a call-stack
+#### Advanced: Tunnels use a call-stack 隧道使用调用栈
 
-Tunnels are on a call-stack, so can safely recurse.
+隧道是基于调用栈的，因此它们可以安全地递归。
 
 
-## 2) Threads
+## 2) Threads 线程
 
-So far, everything in ink has been entirely linear, despite all the branching and diverting. But it's actually possible for a writer to 'fork' a story into different sub-sections, to cover more possible player actions.
+到目前为止，尽管有很多分支和转向，**ink** 中的一切仍然是线性的。但实际上，作家可以将故事“分叉”成不同的子部分，以涵盖更多可能的玩家行为。
 
-We call this 'threading', though it's not really threading in the sense that computer scientists mean it: it's more like stitching in new content from various places.
+我们称之为“线程”，尽管这与计算机科学中的“线程”概念有所不同：它更像是从不同地方将新内容拼接到一起。
 
-Note that this is definitely an advanced feature: the engineering stories becomes somewhat more complex once threads are involved!
+请注意，这是一个高级功能：一旦涉及到线程，工程故事会变得更加复杂！
 
-### Threads join multiple sections together
+### Threads join multiple sections together 线程将多个部分连接在一起
 
-Threads allow you to compose sections of content from multiple sources in one go. For example:
+线程允许你将多个来源的内容部分合并成一个整体。例如：
 
     == thread_example ==
-    I had a headache; threading is hard to get your head around.
+    我头痛；线程很难让你理清头绪。
     <- conversation
     <- walking
 
 
     == conversation ==
-    It was a tense moment for Monty and me.
-     * "What did you have for lunch today?"[] I asked.
-        "Spam and eggs," he replied.
-     * "Nice weather, we're having,"[] I said.
-        "I've seen better," he replied.
+    这是蒙提和我之间紧张的时刻。
+     * "今天午饭吃了什么？"[] 我问。
+        "午餐吃的是午餐肉和鸡蛋。" 他回答。
+     * "今天天气不错。"[] 我说。
+        "我见过更好的。" 他回答。
      - -> house
 
     == walking ==
-    We continued to walk down the dusty road.
-     * [Continue walking]
+    我们继续沿着尘土飞扬的路走。
+     * [继续走]
         -> house
 
     == house ==
-    Before long, we arrived at his house.
+    不久后，我们到达了他的家。
     -> END
 
-It allows multiple sections of story to combined together into a single section:
+它允许将多个故事部分合并成一个部分：
 
-    I had a headache; threading is hard to get your head around.
-    It was a tense moment for Monty and me.
-    We continued to walk down the dusty road.
-    1: "What did you have for lunch today?"
-    2: "Nice weather, we're having,"
-    3: Continue walking
+    我头痛；线程很难让你理清头绪。
+    这是蒙提和我之间紧张的时刻。
+    我们继续沿着尘土飞扬的路走。
+    1: "今天午饭吃了什么？"
+    2: "今天天气不错。"
+    3: 继续走
 
-On encountering a thread statement such as `<- conversation`, the compiler will fork the story flow. The first fork considered will run the content at `conversation`, collecting up any options it finds. Once it has run out of flow here it'll then run the other fork.
+当遇到像 `<- conversation` 这样的线程语句时，编译器将会分叉故事流程。第一次分叉会执行 `conversation` 中的内容，收集所有选项。执行完 `conversation` 中的内容后，流程会继续执行下一个分叉。
 
-All the content is collected and shown to the player. But when a choice is chosen, the engine will move to that fork of the story and collapse and discard the others.
+所有内容都会被收集并显示给玩家。但当玩家选择一个选项时，引擎会转到该分叉的故事，并丢弃其他分支。
 
-Note that global variables are *not* forked, including the read counts of knots and stitches.
+注意，全局变量不会被分叉，包括节点和拼接点的读取次数。
 
-### Uses of threads
+### Uses of threads 线程的用途
 
-In a normal story, threads might never be needed.
+在普通故事中，可能永远不需要线程。
 
-But for games with lots of independent moving parts, threads quickly become essential. Imagine a game in which characters move independently around a map: the main story hub for a room might look like the following:
+但是对于有许多独立活动的游戏来说，线程变得非常重要。假设一个游戏中角色在地图上独立移动：房间的主故事中心可能如下所示：
 
-	CONST HALLWAY = 1
-	CONST OFFICE = 2
+  	CONST HALLWAY = 1
+    CONST OFFICE = 2
 
-	VAR player_location = HALLWAY
-	VAR generals_location = HALLWAY
-	VAR doctors_location = OFFICE
+    VAR player_location = HALLWAY
+    VAR generals_location = HALLWAY
+    VAR doctors_location = OFFICE
 
-	== run_player_location
-		{
-			- player_location == HALLWAY: -> hallway
-		}
+    == run_player_location
+        {
+            - player_location == HALLWAY: -> hallway
+        }
 
-	== hallway ==
-		<- characters_present(HALLWAY)
-		*	[Drawers]	-> examine_drawers
-		* 	[Wardrobe] -> examine_wardrobe
-		*  [Go to Office] 	-> go_office
-		-	-> run_player_location
-	= examine_drawers
-		// etc...
+    == hallway ==
+        <- characters_present(HALLWAY)
+        * [抽屉] -> examine_drawers
+        * [衣柜] -> examine_wardrobe
+        * [去办公室] -> go_office
+        - -> run_player_location
+    = examine_drawers
+        // 等等...
 
-	// Here's the thread, which mixes in dialogue for characters you share the room with at the moment.
+    // 这是线程，它将你和在房间里的角色的对话混合在一起。
 
-	== characters_present(room)
-		{ generals_location == room:
-			<- general_conversation
-		}
-		{ doctors_location == room:
-			<- doctor_conversation
-		}
-		-> DONE
+    == characters_present(room)
+        { generals_location == room:
+            <- general_conversation
+        }
+        { doctors_location == room:
+            <- doctor_conversation
+        }
+        -> DONE
 
-	== general_conversation
-		*	[Ask the General about the bloodied knife]
-			"It's a bad business, I can tell you."
-		-	-> run_player_location
+    == general_conversation
+        * [询问将军关于血迹斑斑的刀] 
+            "这是个糟糕的事情，我可以告诉你。"
+        - -> run_player_location
 
-	== doctor_conversation
-		*	[Ask the Doctor about the bloodied knife]
-			"There's nothing strange about blood, is there?"
-		-	-> run_player_location
-
-
-
-Note in particular, that we need an explicit way to return the player who has gone down a side-thread to return to the main flow. In most cases, threads will either need a parameter telling them where to return to, or they'll need to end the current story section.
+    == doctor_conversation
+        * [询问医生关于血迹斑斑的刀] 
+            "血液本身没什么奇怪的，不是吗？"
+        - -> run_player_location
 
 
-### When does a side-thread end?
 
-Side-threads end when they run out of flow to process: and note, they collect up options to display later (unlike tunnels, which collect options, display them and follow them until they hit an explicit return, possibly several moves later).
 
-Sometimes a thread has no content to offer - perhaps there is no conversation to have with a character after all, or perhaps we have simply not written it yet. In that case, we must mark the end of the thread explicitly.
+特别需要注意的是，我们需要一种显式的方式让玩家返回到主流程。通常情况下，线程要么需要一个参数来告知它返回的位置，要么需要结束当前的故事部分。
 
-If we didn't, the end of content might be a story-bug or a hanging story thread, and we want the compiler to tell us about those.
+
+### When does a side-thread end? 侧线程何时结束？
+
+侧线程在没有内容可执行时结束：注意，它们会收集选项并在后续显示（与隧道不同，隧道会收集选项并在显示后继续执行，直到达到显式的返回，可能是几步之后）。
+
+有时，线程可能没有内容可提供——例如，或许没有与角色对话，或者我们还没写好这部分内容。此时，我们必须显式标记线程的结束。
+
+如果不标记结束，内容的结束可能成为故事的 bug 或悬挂的故事线程，编译器会提醒我们。
 
 ### Using `-> DONE`
 
-In cases where we want to mark the end of a thread, we use `-> DONE`: meaning "the flow intentionally ends here". If we don't, we might end up with a warning message - we can still play the game, but it's a reminder that we have unfinished business.
+在我们想标记线程结束的情况下，使用 `-> DONE`：意思是“此处流程有意结束”。如果没有使用 `-> DONE`，可能会生成警告消息；我们仍然可以玩游戏，但这提醒我们还有未完成的部分。
 
-The example at the start of this section will generate a warning; it can be fixed as follows:
+前面示例中的线程将会生成警告；可以通过以下方式修复：
 
     == thread_example ==
-    I had a headache; threading is hard to get your head around.
+    我头痛；线程很难让你理清头绪。
     <- conversation
     <- walking
     -> DONE
 
-The extra DONE tells ink that the flow here has ended and it should rely on the threads for the next part of the story.
+额外的 `DONE` 告诉 **ink** 流程在此结束，它应该依赖线程来进行故事的下一部分。
 
-Note that we don't need a `-> DONE` if the flow ends with options that fail their conditions. The engine treats this as a valid, intentional, end of flow state.
+请注意，如果流程以条件未满足的选项结束，我们不需要使用 `-> DONE`。引擎会将其视为有效的、有意的流程结束状态。
 
-**You do not need a `-> DONE` after an option has been chosen**. Once an option is chosen, a thread is no longer a thread - it is simply the normal story flow once more.
+**选项被选择后不需要 `-> DONE`**。一旦选项被选择，线程不再是线程——它只是普通的故事流程。
 
-Using `-> END` in this case will not end the thread, but the whole story flow. (And this is the real reason for having two different ways to end flow.)
+在这种情况下，使用 `-> END` 不会结束线程，而是结束整个故事流程。（这也是需要两种不同方式结束流程的真正原因。）
+
+#### Example: adding the same choice to several places 示例：将相同选择添加到多个地方
+
+线程可以用于将相同的选择添加到多个地方。当以这种方式使用时，通常会将一个分支作为参数传递，告诉故事在选择完成后该去哪里。
+
+    === outside_the_house
+    前台阶。房子里弥漫着谋杀和薰衣草的气味。
+    - (top)
+        <- review_case_notes(-> top)
+        * [通过前门] 
+            我走进了屋里。
+            -> the_hallway
+        * [闻闻空气]
+            我讨厌薰衣草。它让我想起香皂，而香皂让我想起我的婚姻。
+            -> top
+
+    === the_hallway
+    前厅。前门敞开，通向街道。一个小柜子。
+    - (top)
+        <- review_case_notes(-> top)
+        * [通过前门] 
+            我走到凉爽的阳光下。
+            -> outside_the_house
+        * [打开柜子]
+            键，更多的键。还需要多少锁？
+            -> top
+
+    === review_case_notes(-> go_back_to)
+    + {not done || TURNS_SINCE(-> done) > 10}
+        [查看我的案件笔记]
+        // 条件确保你不会反复查看
+        {I|我} 翻阅了我到目前为止做的笔记。仍然没有明显的嫌疑人。
+    - (done) -> go_back_to
+
+注意这与隧道不同，后者执行相同的内容块，但不提供玩家选择。因此，像下面这样的布局：
+
+    <- childhood_memories(-> next)
+    * [看窗外]
+        我在路上做白日梦……
+    - (next) 然后哨声响起……
+
+可能与以下内容做相同的事：
+
+    * [回忆我的童年]
+        -> think_back ->
+    * [看窗外]
+        我在路上做白日梦……
+    - (next) 然后哨声响起……
+
+但是，一旦被插入的选项包括多个选择，或者选择上有条件逻辑（当然，任何文本内容也是！），线程版本就变得更为实用。
 
 
-#### Example: adding the same choice to several places
+#### Example: organisation of wide choice points 广泛选择点的组织
 
-Threads can be used to add the same choice into lots of different places. When using them this way, it's normal to pass a divert as a parameter, to tell the story where to go after the choice is done.
-
-	=== outside_the_house
-	The front step. The house smells. Of murder. And lavender.
-	- (top)
-		<- review_case_notes(-> top)
-		*	[Go through the front door]
-			I stepped inside the house.
-			-> the_hallway
-		* 	[Sniff the air]
-			I hate lavender. It makes me think of soap, and soap makes me think about my marriage.
-			-> top
-
-	=== the_hallway
-	The hallway. Front door open to the street. Little bureau.
-	- (top)
-		<- review_case_notes(-> top)
-		*	[Go through the front door]
-			I stepped out into the cool sunshine.
-			-> outside_the_house
-		* 	[Open the bureau]
-			Keys. More keys. Even more keys. How many locks do these people need?
-			-> top
-
-	=== review_case_notes(-> go_back_to)
-	+	{not done || TURNS_SINCE(-> done) > 10}
-		[Review my case notes]
-		// the conditional ensures you don't get the option to check repeatedly
-	 	{I|Once again, I} flicked through the notes I'd made so far. Still not obvious suspects.
-	- 	(done) -> go_back_to
-
-Note this is different than a tunnel, which runs the same block of content but doesn't give a player a choice. So a layout like:
-
-	<- childhood_memories(-> next)
-	*	[Look out of the window]
-	 	I daydreamed as we rolled along...
-	 - (next) Then the whistle blew...
-
-might do exactly the same thing as:
-
-	*	[Remember my childhood]
-		-> think_back ->
-	*	[Look out of the window]
-		I daydreamed as we rolled along...
-	- 	(next) Then the whistle blew...
-
-but as soon as the option being threaded in includes multiple choices, or conditional logic on choices (or any text content, of course!), the thread version becomes more practical.
-
-
-#### Example: organisation of wide choice points
-
-A game which uses ink as a script rather than a literal output might often generate very large numbers of parallel choices, intended to be filtered by the player via some other in-game interaction - such as walking around an environment. Threads can be useful in these cases simply to divide up choices.
+一个使用 **ink** 作为脚本的游戏，而非字面输出的游戏，通常会生成大量并行的选择，这些选择通过其他游戏内的交互来过滤，比如在环境中四处走动。线程可以在这些情况下有用，用来划分这些选择。
 
 ```
 === the_kitchen
@@ -2224,13 +2225,13 @@ A game which uses ink as a script rather than a literal output might often gener
 	<- cupboards(-> top)
 	<- room_exits
 = drawers (-> goback)
-	// choices about the drawers...
+	// 关于抽屉的选择...  
 	...
 = cupboards(-> goback)
-	// choices about cupboards
+	// 关于橱柜的选择  
 	...
 = room_exits
-	// exits; doesn't need a "return point" as if you leave, you go elsewhere
+	// 出口；不需要“返回点”，因为如果离开，你就会去别的地方
 	...
 ```
 
