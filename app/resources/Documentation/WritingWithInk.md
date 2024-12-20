@@ -2235,81 +2235,78 @@ The following example is long, but appears in pretty much every inkle game to da
 	...
 ```
 
-# Part 5: Advanced State Tracking
+# Part 5: Advanced State Tracking 第五部分：高级状态跟踪
 
-Games with lots of interaction can get very complex, very quickly and the writer's job is often as much about maintaining continuity as it is about content.
+具有大量互动的游戏很快就会变得非常复杂，编剧的工作往往与其内容一样重要，甚至更多，是保持连续性。
 
-This becomes particularly important if the game text is intended to model anything - whether it's a game of cards, the player's knowledge of the gameworld so far, or the state of the various light-switches in a house.
+如果游戏文本旨在模拟任何事物——无论是扑克牌游戏、玩家迄今为止对游戏世界的了解，还是房子里各个灯开关的状态——这点就显得尤为重要。
 
-**ink** does not provide a full world-modelling system in the manner of a classic parser IF authoring language - there are no "objects", no concepts of "containment" or being "open" or "locked". However, it does provide a simple yet powerful system for tracking state-changes in a very flexible way, to enable writers to approximate world models where necessary.
+**Ink** 并不像经典的解析器互动小说（IF）创作语言那样提供完整的世界建模系统——没有“对象”、没有“包含”或“开启”或“锁定”的概念。然而，它确实提供了一个简单而强大的系统，以非常灵活的方式跟踪状态变化，使编剧在必要时能够近似地构建世界模型。
 
-#### Note: New feature alert!
+#### Note: New feature alert! 注意：新功能提示！
 
-This feature is very new to the language. That means we haven't begun to discover all the ways it might be used - but we're pretty sure it's going to be useful! So if you think of a clever usage we'd love to know!
+这个功能对于该语言来说非常新。这意味着我们还没有开始发现它可能的所有用法——但我们很确定它会很有用！所以如果您想到一个巧妙的用法，我们很乐意知道！
 
+## 1) Basic Lists 基本列表
 
-## 1) Basic Lists
+状态跟踪的基本单位是状态列表，使用 LIST 关键字定义。请注意，列表与 C# 中的列表（数组）完全不同。
 
-The basic unit of state-tracking is a list of states, defined using the `LIST` keyword. Note that a list is really nothing like a C# list (which is an array).
-
-For instance, we might have:
+例如，我们可能有：
 
 	LIST kettleState = cold, boiling, recently_boiled
 
-This line defines two things: firstly three new values - `cold`, `boiling` and `recently_boiled` - and secondly, a variable, called `kettleState`, to hold these states.
+这一行定义了两件事：首先是三个新值 - cold、boiling 和 recently_boiled - 其次是一个名为 kettleState 的变量，用于保存这些状态。
 
-We can tell the list what value to take:
+我们可以指定列表的值：
 
 	~ kettleState = cold
 
-We can change the value:
+我们可以更改值：
 
-	*	[Turn on kettle]
-		The kettle begins to bubble and boil.
+	*	[打开水壶]
+		水壶开始冒泡并沸腾。
 		~ kettleState = boiling
 
-We can query the value:
+我们可以查询值：
 
-	*	[Touch the kettle]
+	* [触摸水壶]
 		{ kettleState == cold:
-			The kettle is cool to the touch.
+			水壶摸起来很凉。
 		- else:
-		 	The outside of the kettle is very warm!
+			水壶的外部非常温暖！
 		}
 
-For convenience, we can give a list a value when it's defined using a bracket:
+为了方便，我们可以在定义时使用括号给列表赋值：
 
 	LIST kettleState = cold, (boiling), recently_boiled
-	// at the start of the game, this kettle is switched on. Edgy, huh?
+	// 游戏开始时，这个水壶已经被打开了。很酷吧？
 
-...and if the notation for that looks a bit redundant, there's a reason for that coming up in a few subsections time.
+…如果这种表示法看起来有点冗余，后面几个小节会有解释。
 
 
+## 2) Reusing Lists 重用列表
 
-## 2) Reusing Lists
-
-The above example is fine for the kettle, but what if we have a pot on the stove as well? We can then define a list of states, but put them into variables - and as many variables as we want.
+上面的示例适用于水壶，但如果我们还有一个锅在炉子上呢？我们可以定义一个状态列表，但将它们放入变量中，并且可以有任意多个变量。
 
 	LIST daysOfTheWeek = Monday, Tuesday, Wednesday, Thursday, Friday
 	VAR today = Monday
 	VAR tomorrow = Tuesday
 
-### States can be used repeatedly
-
-This allows us to use the same state machine in multiple places.
+### States can be used repeatedly 状态可以重复使用
+这允许我们在多个地方使用相同的状态机。
 
 	LIST heatedWaterStates = cold, boiling, recently_boiled
 	VAR kettleState = cold
 	VAR potState = cold
 
-	*	{kettleState == cold} [Turn on kettle]
-		The kettle begins to boil and bubble.
+	*	{kettleState == cold} [打开水壶]
+		水壶开始沸腾和冒泡。
 		~ kettleState = boiling
-	*	{potState == cold} [Light stove]
-	 	The water in the pot begins to boil and bubble.
+	*	{potState == cold} [点燃炉子]
+	 	锅里的水开始沸腾和冒泡。
 	 	~ potState = boiling
 
-But what if we add a microwave as well? We might want start generalising our functionality a bit:
+但是，如果我们还添加了微波炉呢？我们可能想要开始泛化我们的功能：
 
 	LIST heatedWaterStates = cold, boiling, recently_boiled
 	VAR kettleState = cold
@@ -2317,18 +2314,18 @@ But what if we add a microwave as well? We might want start generalising our fun
 	VAR microwaveState = cold
 
 	=== function boilSomething(ref thingToBoil, nameOfThing)
-		The {nameOfThing} begins to heat up.
+		{nameOfThing} 开始加热。
 		~ thingToBoil = boiling
 
 	=== do_cooking
-	*	{kettleState == cold} [Turn on kettle]
-		{boilSomething(kettleState, "kettle")}
-	*	{potState == cold} [Light stove]
-		{boilSomething(potState, "pot")}
-	*	{microwaveState == cold} [Turn on microwave]
-		{boilSomething(microwaveState, "microwave")}
+	* {kettleState == cold} [打开水壶]
+		{boilSomething(kettleState, "水壶")}
+	* {potState == cold} [点燃炉子]
+		{boilSomething(potState, "锅")}
+	* {microwaveState == cold} [打开微波炉]
+		{boilSomething(microwaveState, "微波炉")}
 
-or even...
+或者甚至…
 
 	LIST heatedWaterStates = cold, boiling, recently_boiled
 	VAR kettleState = cold
@@ -2336,69 +2333,70 @@ or even...
 	VAR microwaveState = cold
 
 	=== cook_with(nameOfThing, ref thingToBoil)
-	+ 	{thingToBoil == cold} [Turn on {nameOfThing}]
-	  	The {nameOfThing} begins to heat up.
+	+ {thingToBoil == cold} [打开 {nameOfThing}]
+		{nameOfThing} 开始加热。
 		~ thingToBoil = boiling
 		-> do_cooking.done
 
 	=== do_cooking
-	<- cook_with("kettle", kettleState)
-	<- cook_with("pot", potState)
-	<- cook_with("microwave", microwaveState)
+	<- cook_with("水壶", kettleState)
+	<- cook_with("锅", potState)
+	<- cook_with("微波炉", microwaveState)
 	- (done)
 
-Note that the "heatedWaterStates" list is still available as well, and can still be tested, and take a value.
+注意，“heatedWaterStates”列表仍然可用，并且仍然可以进行测试和赋值。
 
-#### List values can share names
 
-Reusing lists brings with it ambiguity. If we have:
+#### List values can share names 列表值可以共享名称
+
+重用列表会带来歧义。如果我们有：
 
 	LIST colours = red, green, blue, purple
 	LIST moods = mad, happy, blue
 
 	VAR status = blue
 
-... how can the compiler know which blue you meant?
+…编译器如何知道您指的是哪个 blue 呢？
 
-We resolve these using a `.` syntax similar to that used for knots and stitches.
+我们使用类似于结点和缝合所用的 . 语法来解决这些问题。
 
 	VAR status = colours.blue
 
-...and the compiler will issue an error until you specify.
+…并且编译器将在您指定之前发出错误。
 
-Note the "family name" of the state, and the variable containing a state, are totally separate. So
+请注意，状态的“族名称”和包含状态的变量是完全分开的。所以
 
 	{ statesOfGrace == statesOfGrace.fallen:
 		// is the current state "fallen"
 	}
 
-... is correct.
+…是正确的。
 
 
-#### Advanced: a LIST is actually a variable
+#### Advanced: a LIST is actually a variable 高级：一个 LIST 实际上是一个变量
 
-One surprising feature is the statement
-
-	LIST statesOfGrace = ambiguous, saintly, fallen
-
-actually does two things simultaneously: it creates three values, `ambiguous`, `saintly` and `fallen`, and gives them the name-parent `statesOfGrace` if needed; and it creates a variable called `statesOfGrace`.
-
-And that variable can be used like a normal variable. So the following is valid, if horribly confusing and a bad idea:
+一个令人惊讶的特性是语句
 
 	LIST statesOfGrace = ambiguous, saintly, fallen
 
-	~ statesOfGrace = 3.1415 // set the variable to a number not a list value
+实际上同时做了两件事：它创建了三个值，ambiguous、saintly 和 fallen，并在需要时赋予它们名称父级 statesOfGrace；同时它创建了一个名为 statesOfGrace 的变量。
 
-...and it wouldn't preclude the following from being fine:
+这个变量可以像普通变量一样使用。因此，以下是有效的，尽管极其混乱且不建议这样做：
+
+	LIST statesOfGrace = ambiguous, saintly, fallen
+
+	~ statesOfGrace = 3.1415 // 将变量设置为一个不是列表值的数字
+
+…并且这不会阻止以下内容的正常运行：
 
 	~ temp anotherStateOfGrace = statesOfGrace.saintly
 
 
 
 
-## 3) List Values
+## 3) List Values 列表值
 
-When a list is defined, the values are listed in an order, and that order is considered to be significant. In fact, we can treat these values as if they *were* numbers. (That is to say, they are enums.)
+当定义一个列表时，值按顺序列出，这个顺序被认为是有意义的。事实上，我们可以将这些值当作数字来对待。（也就是说，它们是枚举。）
 
 	LIST volumeLevel = off, quiet, medium, loud, deafening
 	VAR lecturersVolume = quiet
@@ -2409,176 +2407,176 @@ When a list is defined, the values are listed in an order, and that order is con
 
 		{ lecturersVolume > murmurersVolume:
 			~ murmurersVolume++
-			The murmuring gets louder.
+			低语声变得更大声。
 		}
 	}
 
-The values themselves can be printed using the usual `{...}` syntax, but this will print their name.
+这些值本身可以使用通常的 {...} 语法打印，但这将打印它们的名称。
 
-	The lecturer's voice becomes {lecturersVolume}.
+	讲师的声音变得 {lecturersVolume}。
 
-### Converting values to numbers
+### Converting values to numbers 将值转换为数字
 
-The numerical value, if needed, can be got explicitly using the LIST_VALUE function. Note the first value in a list has the value 1, and not the value 0.
+如果需要，可以使用 LIST_VALUE 函数显式获取数值。请注意，列表中的第一个值的值为 1，而不是 0。
 
-	The lecturer has {LIST_VALUE(deafening) - LIST_VALUE(lecturersVolume)} notches still available to him.
+	讲师还有 {LIST_VALUE(deafening) - LIST_VALUE(lecturersVolume)} 个刻度可用。
 
-### Converting numbers to values
+### Converting numbers to values 将数字转换为值
 
-You can go the other way by using the list's name as a function:
+你可以通过使用列表的名称作为函数来进行反向转换：
 
 	LIST Numbers = one, two, three
 	VAR score = one
-	~ score = Numbers(2) // score will be "two"
+	~ score = Numbers(2) // score 将是 "two"
 
-### Advanced: defining your own numerical values
+### Advanced: defining your own numerical values 定义你自己的数值
 
-By default, the values in a list start at 1 and go up by one each time, but you can specify your own values if you need to.
+默认情况下，列表中的值从 1 开始，每次增加 1，但如果需要，你可以指定自己的值。
 
 	LIST primeNumbers = two = 2, three = 3, five = 5
 
-If you specify a value, but not the next value, ink will assume an increment of 1. So the following is the same:
+如果你指定了一个值，但没有指定下一个值，ink 将假定下一个值递增 1。因此，以下内容是相同的：
 
 	LIST primeNumbers = two = 2, three, five = 5
 
 
-## 4) Multivalued Lists
+## 4) Multivalued Lists 多值列表
 
-The following examples have all included one deliberate untruth, which we'll now remove. Lists - and variables containing list values - do not have to contain only one value.
+以下示例中都包含了一个故意的不真实内容，现在我们将其移除。列表——以及包含列表值的变量——不必仅包含一个值。
 
-### Lists are boolean sets
+### Lists are boolean sets 列表是布尔集合
 
-A list variable is not a variable containing a number. Rather, a list is like the in/out nameboard in an accommodation block. It contains a list of names, each of which has a room-number associated with it, and a slider to say "in" or "out".
 
-Maybe no one is in:
+列表变量不是包含数字的变量。相反，列表就像住宿楼中的进出标牌。它包含一系列名称，每个名称都关联有一个房间号码，并有一个滑块来表示“在”或“出”。
+
+也许没人进去：
 
 	LIST DoctorsInSurgery = Adams, Bernard, Cartwright, Denver, Eamonn
 
-Maybe everyone is:
+也许每个人都在：
 
 	LIST DoctorsInSurgery = (Adams), (Bernard), (Cartwright), (Denver), (Eamonn)
 
-Or maybe some are and some aren't:
+或者可能有些人在，有些人不在：
 
 	LIST DoctorsInSurgery = (Adams), Bernard, (Cartwright), Denver, Eamonn
 
-Names in brackets are included in the initial state of the list.
+括号中的名称在列表的初始状态中被包含。
 
-Note that if you're defining your own values, you can place the brackets around the whole term or just the name:
+请注意，如果您定义自己的值，可以将括号放在整个术语周围或仅放在名称周围：
 
 	LIST primeNumbers = (two = 2), (three) = 3, (five = 5)
 
-#### Assiging multiple values
+#### Assiging multiple values 分配多个值
 
-We can assign all the values of the list at once as follows:
+我们可以一次性分配列表的所有值，如下所示：
 
 	~ DoctorsInSurgery = (Adams, Bernard)
 	~ DoctorsInSurgery = (Adams, Bernard, Eamonn)
 
-We can assign the empty list to clear a list out:
+我们可以将空列表赋值以清空列表：
 
 	~ DoctorsInSurgery = ()
 
 
-#### Adding and removing entries
+#### Adding and removing entries 添加和移除条目
 
-List entries can be added and removed, singly or collectively.
+列表条目可以单独或集体添加和移除。
 
 	~ DoctorsInSurgery = DoctorsInSurgery + Adams
- 	~ DoctorsInSurgery += Adams  // this is the same as the above
+ 	~ DoctorsInSurgery += Adams   // 这与上面的一样
 	~ DoctorsInSurgery -= Eamonn
 	~ DoctorsInSurgery += (Eamonn, Denver)
 	~ DoctorsInSurgery -= (Adams, Eamonn, Denver)
 
-Trying to add an entry that's already in the list does nothing. Trying to remove an entry that's not there also does nothing. Neither produces an error, and a list can never contain duplicate entries.
+尝试添加已存在于列表中的条目不会有任何效果。尝试移除不存在的条目也不会有任何效果。两者都不会产生错误，并且列表永远不会包含重复的条目。
 
+### Basic Queries 基本查询
 
-### Basic Queries
-
-We have a few basic ways of getting information about what's in a list:
+我们有几种基本方法来获取列表中的信息：
 
 	LIST DoctorsInSurgery = (Adams), Bernard, (Cartwright), Denver, Eamonn
 
 	{LIST_COUNT(DoctorsInSurgery)} 	//  "2"
 	{LIST_MIN(DoctorsInSurgery)} 		//  "Adams"
 	{LIST_MAX(DoctorsInSurgery)} 		//  "Cartwright"
-	{LIST_RANDOM(DoctorsInSurgery)} 	//  "Adams" or "Cartwright"
+	{LIST_RANDOM(DoctorsInSurgery)} 	//  "Adams" 或者 "Cartwright"
 
-#### Testing for emptiness
+#### Testing for emptiness 测试是否为空
 
-Like most values in ink, a list can be tested "as it is", and will return true, unless it's empty.
+像 Ink 中的大多数值一样，可以直接测试一个列表，如果它不为空则返回真。
 
-	{ DoctorsInSurgery: The surgery is open today. | Everyone has gone home. }
+	{ DoctorsInSurgery: 手术室今天开着。 | 每个人都回家了。 }
 
-#### Testing for exact equality
+#### Testing for exact equality 测试是否完全相等
 
-Testing multi-valued lists is slightly more complex than single-valued ones. Equality (`==`) now means 'set equality' - that is, all entries are identical.
+测试多值列表比单值列表稍微复杂一些。相等（==）现在意味着“集合相等”——也就是说，所有条目都相同。
 
-So one might say:
+例如，可以这样说：
 
 	{ DoctorsInSurgery == (Adams, Bernard):
-		Dr Adams and Dr Bernard are having a loud argument in one corner.
+		Dr Adams 和 Dr Bernard 在一个角落激烈争吵。
 	}
 
-If Dr Eamonn is in as well, the two won't argue, as the lists being compared won't be equal - DoctorsInSurgery will have an Eamonn that the list (Adams, Bernard) doesn't have.
+如果 Dr Eamonn 也在，双方将不会争吵，因为被比较的列表不相等——DoctorsInSurgery 会包含一个列表 (Adams, Bernard) 没有的 Eamonn。
 
-Not equals works as expected:
+不等于按预期工作：
 
 	{ DoctorsInSurgery != (Adams, Bernard):
-		At least Adams and Bernard aren't arguing.
+		至少 Adams 和 Bernard 没有在争吵。
 	}
 
-#### Testing for containment
+#### Testing for containment 测试是否包含
 
-What if we just want to simply ask if Adams and Bernard are present? For that we use a new operator, `has`, otherwise known as `?`.
+如果我们只是想简单地询问 Adams 和 Bernard 是否在场，可以使用新的运算符 has，也就是 ?。
 
 	{ DoctorsInSurgery ? (Adams, Bernard):
-		Dr Adams and Dr Bernard are having a hushed argument in one corner.
+		Dr Adams 和 Dr Bernard 在一个角落低声争吵。
 	}
 
-And `?` can apply to single values too:
+? 也可以应用于单个值：
 
 	{ DoctorsInSurgery has Eamonn:
-		Dr Eamonn is polishing his glasses.
+		Dr Eamonn 正在擦拭他的眼镜。
 	}
 
-We can also negate it, with `hasnt` or `!?` (not `?`). Note this starts to get a little complicated as
+我们也可以使用 hasnt 或 !?（不是 ?）来取反。请注意，这开始有点复杂，因为
 
 	DoctorsInSurgery !? (Adams, Bernard)
 
-does not mean neither Adams nor Bernard is present, only that they are not *both* present (and arguing).
+并不意味着 Adams 和 Bernard 都不在，只是他们不同时在场（并且不在争吵）。
 
-#### Warning: no lists contain the empty list
+#### Warning: no lists contain the empty list 警告：没有列表包含空列表
 
-Note that the test 
+请注意测试
 
 	SomeList ? ()
 
-will always return false, regardless of whether `SomeList` itself is empty. In practice this is the most useful default, as you'll often want to do tests like:
+将始终返回假，无论 SomeList 本身是否为空。在实践中，这是最有用的默认设置，因为您通常会想进行类似以下的测试：
 
 	SilverWeapons ? best_weapon_to_use 
 	
-to fail if the player is empty-handed.
+以在玩家空手时失败。
 
-#### Example: basic knowledge tracking
+#### Example: basic knowledge tracking 基本知识跟踪
 
-The simplest use of a multi-valued list is for tracking "game flags" tidily.
+多值列表最简单的用法是整齐地跟踪“游戏标志”。
 
 	LIST Facts = (Fogg_is_fairly_odd), 	first_name_phileas, (Fogg_is_English)
 
 	{Facts ? Fogg_is_fairly_odd:I smiled politely.|I frowned. Was he a lunatic?}
 	'{Facts ? first_name_phileas:Phileas|Monsieur}, really!' I cried.
 
-In particular, it allows us to test for multiple game flags in a single line.
+特别是，它允许我们在一行中测试多个游戏标志
 
 	{ Facts ? (Fogg_is_English, Fogg_is_fairly_odd):
-		<> 'I know Englishmen are strange, but this is *incredible*!'
+		<> '我知道英国人很奇怪，但这太*不可思议*了！'
 	}
 
 
-#### Example: a doctor's surgery
+#### Example: a doctor's surgery 示例：医生的诊所
 
-We're overdue a fuller example, so here's one.
+我们需要一个更完整的示例，所以这里有一个。
 
 	LIST DoctorsInSurgery = (Adams), Bernard, Cartwright, (Denver), Eamonn
 
@@ -2601,23 +2599,23 @@ We're overdue a fuller example, so here's one.
 
 	=== waiting_room
 		{whos_in_today()}
-		*	[Time passes...]
+		* 	[时间过去了...]
 			{doctorLeaves(Adams)} {doctorEnters(Cartwright)} {doctorEnters(Eamonn)}
 			{whos_in_today()}
 
-This produces:
+这将产生：
 
 	In the surgery today are Adams, Denver.
 
-	> Time passes...
+	> 时间过去了...
 
 	Dr Adams leaves for lunch. Dr Cartwright arrives in a fluster. Dr Eamonn arrives in a fluster.
 
 	In the surgery today are Cartwright, Denver, Eamonn.
 
-#### Advanced: nicer list printing
+#### Advanced: nicer list printing 高级：更美观的列表打印
 
-The basic list print is not especially attractive for use in-game. The following is better:
+基本的列表打印在游戏中不是特别吸引人。以下方法更好：
 
 	=== function listWithCommas(list, if_empty)
 	    {LIST_COUNT(list):
@@ -2635,29 +2633,30 @@ The basic list print is not especially attractive for use in-game. The following
 
 	My favourite dinosaurs are {listWithCommas(favouriteDinosaurs, "all extinct")}.
 
-It's probably also useful to have an is/are function to hand:
+拥有一个 is/are 函数也是很有用的：
 
 	=== function isAre(list)
 		{LIST_COUNT(list) == 1:is|are}
 
 	My favourite dinosaurs {isAre(favouriteDinosaurs)} {listWithCommas(favouriteDinosaurs, "all extinct")}.
 
-And to be pendantic:
+并且为了严谨：
 
 	My favourite dinosaur{LIST_COUNT(favouriteDinosaurs) != 1:s} {isAre(favouriteDinosaurs)} {listWithCommas(favouriteDinosaurs, "all extinct")}.
 
 
-#### Lists don't need to have multiple entries
+#### Lists don't need to have multiple entries 列表不需要包含多个条目
 
-Lists don't *have* to contain multiple values. If you want to use a list as a state-machine, the examples above will all work - set values using `=`, `++` and `--`; test them using `==`, `<`, `<=`, `>` and `>=`. These will all work as expected.
+列表不必须包含多个值。如果您想将列表用作状态机，上述所有示例都将正常工作——使用 =, ++ 和 -- 设置值；使用 ==, <, <=, > 和 >= 测试它们。这些都将按预期工作。
 
-### The "full" list
 
-Note that `LIST_COUNT`, `LIST_MIN` and `LIST_MAX` are refering to who's in/out of the list, not the full set of *possible* doctors. We can access that using
+### The "full" list “完整”列表
+
+请注意，LIST_COUNT、LIST_MIN 和 LIST_MAX 是指列表中谁在/不在，而不是所有可能的医生。我们可以使用以下方法访问：
 
 	LIST_ALL(element of list)
 
-or
+或
 
 	LIST_ALL(list containing elements of a list)
 
@@ -2665,44 +2664,44 @@ or
 	{LIST_COUNT(LIST_ALL(DoctorsInSurgery))} // "5"
 	{LIST_MIN(LIST_ALL(Eamonn))} 				// "Adams"
 
-Note that printing a list using `{...}` produces a bare-bones representation of the list; the values as words, delimited by commas.
+请注意，使用 {...} 打印列表会生成一个简洁的表示；值作为单词，用逗号分隔。
 
-#### Advanced: "refreshing" a list's type
+#### Advanced: "refreshing" a list's type 高级：“刷新”列表的类型
 
-If you really need to, you can make an empty list that knows what type of list it is.
+如果确实需要，您可以创建一个知道其类型的空列表。
 
 	LIST ValueList = first_value, second_value, third_value
 	VAR myList = ()
 
 	~ myList = ValueList()
 
-You'll then be able to do:
+然后您将能够执行：
 
 	{ LIST_ALL(myList) }
 
-#### Advanced: a portion of the "full" list
+#### Advanced: a portion of the "full" list 完整列表的一部分
 
-You can also retrieve just a "slice" of the full list, using the `LIST_RANGE` function. There are two formulations, both valid:
+您还可以使用 LIST_RANGE 函数仅检索完整列表的“切片”。有两种格式，两者都是有效的：
 
 	LIST_RANGE(list_name, min_integer_value, max_integer_value)
 
-and
+和
 
 	LIST_RANGE(list_name, min_value, max_value)
 	
-Min and max values here are inclusive. If the game can’t find the values, it’ll get as close as it can, but never go outside the range. So for example:
+这里的最小值和最大值是包含在内的。如果游戏找不到这些值，它将尽可能接近，但永远不会超出范围。例如：
 
 	{LIST_RANGE(LIST_ALL(primeNumbers), 10, 20)} 
 
-will produce 
+将产生
 	
 	11, 13, 17, 19
 
 
 
-### Example: Tower of Hanoi
+### Example: Tower of Hanoi 河内塔
 
-To demonstrate a few of these ideas, here's a functional Tower of Hanoi example, written so no one else has to write it.
+为了展示其中的一些概念，这里有一个功能性的河内塔示例，编写得让别人不必再写它。
 
 
 	LIST Discs = one, two, three, four, five, six, seven
@@ -2795,35 +2794,36 @@ To demonstrate a few of these ideas, here's a functional Tower of Hanoi example,
 
 
 
-## 5) Advanced List Operations
+## 5) Advanced List Operations 高级列表操作
 
-The above section covers basic comparisons. There are a few more powerful features as well, but - as anyone familiar with mathematical   sets will know - things begin to get a bit fiddly. So this section comes with an 'advanced' warning.
+上述部分涵盖了基本的比较。还有一些更强大的功能，但——正如任何熟悉数学集合的人所知——事情开始变得有点棘手。因此，本节附有“高级”警告。
 
-A lot of the features in this section won't be necessary for most games.
+本节中的许多功能对于大多数游戏来说并不必要。
 
-### Comparing lists
+### Comparing lists 比较列表
 
-We can compare lists less than exactly using `>`, `<`, `>=` and `<=`. Be warned! The definitions we use are not exactly standard fare. They are based on comparing the numerical value of the elements in the lists being tested.
+我们可以使用 `>`, `<`, `>=` 和 `<=` 来精确地比较列表。请注意！我们使用的定义并不完全是标准的。这些定义基于比较被测试列表中元素的数值。
 
-#### "Distinctly bigger than"
+#### "Distinctly bigger than" “明显大于”
 
-`LIST_A > LIST_B` means "the smallest value in A is bigger than the largest values in B": in other words, if put on a number line, the entirety of A is to the right of the entirety of B. `<` does the same in reverse.
+`LIST_A > LIST_B` 意味着“A 中的最小值大于 B 中的最大值”：换句话说，如果将它们放在数轴上，A 的全部都在 B 的全部右侧。`<` 则相反。
 
-#### "Definitely never smaller than"
 
-`LIST_A >= LIST_B` means - take a deep breath now - "the smallest value in A is at least the smallest value in B, and the largest value in A is at least the largest value in B". That is, if drawn on a number line, the entirety of A is either above B or overlaps with it, but B does not extend higher than A.
+#### "Definitely never smaller than" “绝对不小于”
 
-Note that `LIST_A > LIST_B` implies `LIST_A != LIST_B`, and `LIST_A >= LIST_B` allows `LIST_A == LIST_B` but precludes `LIST_A < LIST_B`, as you might hope.
+`LIST_A >= LIST_B` 意味着——现在深呼吸——“A 中的最小值至少与 B 中的最小值相等，且 A 中的最大值至少与 B 中的最大值相等”。也就是说，如果在数轴上绘制，A 的全部要么在 B 之上，要么与其重叠，但 B 不会延伸到比 A 更高的位置。
 
-#### Health warning!
+请注意，`LIST_A > LIST_B` 意味着 `LIST_A != LIST_B`，而 `LIST_A >= LIST_B` 允许 `LIST_A == LIST_B`，但排除了 `LIST_A < LIST_B`，如您所愿。
 
-`LIST_A >= LIST_B` is *not* the same as `LIST_A > LIST_B or LIST_A == LIST_B`.
+#### Health warning! 健康警告！
 
-The moral is, don't use these unless you have a clear picture in your mind.
+`LIST_A >= LIST_B` *不*等同于 `LIST_A > LIST_B or LIST_A == LIST_B`.
 
-### Inverting lists
+道德是，除非您心中有清晰的画面，否则不要使用这些操作。
 
-A list can be "inverted", which is the equivalent of going through the accommodation in/out name-board and flipping every switch to the opposite of what it was before.
+### Inverting lists 反转列表
+
+可以“反转”一个列表，这相当于通过住宿楼的进出标牌并将每个开关切换到其相反状态。
 
 	LIST GuardsOnDuty = (Smith), (Jones), Carter, Braithwaite
 
@@ -2831,7 +2831,7 @@ A list can be "inverted", which is the equivalent of going through the accommoda
 		~ GuardsOnDuty = LIST_INVERT(GuardsOnDuty)
 
 
-Note that `LIST_INVERT` on an empty list will return a null value, if the game doesn't have enough context to know what invert. If you need to handle that case, it's safest to do it by hand:
+请注意，LIST_INVERT 在空列表上将返回一个空值，如果游戏没有足够的上下文来知道如何反转。如果需要处理这种情况，最安全的方法是手动处理：
 
 	=== function changingOfTheGuard
 		{!GuardsOnDuty: // "is GuardsOnDuty empty right now?"
@@ -2840,19 +2840,20 @@ Note that `LIST_INVERT` on an empty list will return a null value, if the game d
 			~ GuardsOnDuty = LIST_INVERT(GuardsOnDuty)
 		}
 
-#### Footnote
+#### Footnote 注脚
 
-The syntax for inversion was originally `~ list` but we changed it because otherwise the line
+反转的语法最初是 ~ list，但我们更改了它，因为否则以下行
 
 	~ list = ~ list
 
-was not only functional, but actually caused list to invert itself, which seemed excessively perverse.
+不仅是功能性的，而且实际上会导致列表自身反转，这看起来过于反常。
 
-### Intersecting lists
 
-The `has` or `?` operator is, somewhat more formally, the "are you a subset of me" operator, ⊇, which includes the sets being equal, but which doesn't include if the larger set doesn't entirely contain the smaller set.
+### Intersecting lists 相交列表
 
-To test for "some overlap" between lists, we use the overlap operator, `^`, to get the *intersection*.
+has 或 ? 运算符在更正式的术语中是“你是我的子集吗”运算符，⊇，它包括集合相等的情况，但不包括较大的集合不完全包含较小的集合的情况。
+
+要测试列表之间的“部分重叠”，我们使用重叠运算符 ^ 来获取 交集。
 
 	LIST CoreValues = strength, courage, compassion, greed, nepotism, self_belief, delusions_of_godhood
 	VAR desiredValues = (strength, courage, compassion, self_belief )
@@ -2860,7 +2861,7 @@ To test for "some overlap" between lists, we use the overlap operator, `^`, to g
 
 	{desiredValues ^ actualValues} // prints "self_belief"
 
-The result is a new list, so you can test it:
+结果是一个新列表，因此您可以对其进行测试：
 
 	{desiredValues ^ actualValues: The new president has at least one desirable quality.}
 
@@ -2869,18 +2870,19 @@ The result is a new list, so you can test it:
 
 
 
-## 6) Multi-list Lists
+## 6) Multi-list Lists 多列表列表
 
 
-So far, all of our examples have included one large simplification, again - that the values in a list variable have to all be from the same list family. But they don't.
+到目前为止，我们所有的示例都包含了一个大的简化——即列表变量中的所有值必须来自同一个列表族。但事实并非如此。
 
-This allows us to use lists - which have so far played the role of state-machines and flag-trackers - to also act as general properties, which is useful for world modelling.
+这允许我们使用列表——迄今为止它们充当状态机和标志跟踪器的角色——来充当一般属性，这对于世界建模非常有用。
 
-This is our inception moment. The results are powerful, but also more like "real code" than anything that's come before.
+这是我们的起始时刻。结果非常强大，但也更像“真实代码”而不是之前的任何内容。
 
-### Lists to track objects
 
-For instance, we might define:
+### Lists to track objects 用于跟踪对象的列表
+
+例如，我们可能定义：
 
 	LIST Characters = Alfred, Batman, Robin
 	LIST Props = champagne_glass, newspaper
@@ -2888,45 +2890,46 @@ For instance, we might define:
 	VAR BallroomContents = (Alfred, Batman, newspaper)
 	VAR HallwayContents = (Robin, champagne_glass)
 
-We could then describe the contents of any room by testing its state:
+然后，我们可以通过测试其状态来描述任何房间的内容：
 
 	=== function describe_room(roomState)
 		{ roomState ? Alfred: Alfred is here, standing quietly in a corner. } { roomState ? Batman: Batman's presence dominates all. } { roomState ? Robin: Robin is all but forgotten. }
 		<> { roomState ? champagne_glass: A champagne glass lies discarded on the floor. } { roomState ? newspaper: On one table, a headline blares out WHO IS THE BATMAN? AND *WHO* IS HIS BARELY-REMEMBERED ASSISTANT? }
 
-So then:
+所以：
 
 	{ describe_room(BallroomContents) }
 
-produces:
+会生成：
 
 	Alfred is here, standing quietly in a corner. Batman's presence dominates all.
 
 	On one table, a headline blares out WHO IS THE BATMAN? AND *WHO* IS HIS BARELY-REMEMBERED ASSISTANT?
 
-While:
+而：
 
 	{ describe_room(HallwayContents) }
 
-gives:
+则会显示：
 
 	Robin is all but forgotten.
 
 	A champagne glass lies discarded on the floor.
 
-And we could have options based on combinations of things:
+我们还可以基于事物的组合创建选项：
 
 	*	{ currentRoomState ? (Batman, Alfred) } [Talk to Alfred and Batman]
 		'Say, do you two know each other?'
 
-### Lists to track multiple states
+### Lists to track multiple states 用于跟踪多重状态的列表
 
-We can model devices with multiple states. Back to the kettle again...
+我们可以为具有多个状态的设备建模。回到水壶的例子……
 
 	LIST OnOff = on, off
 	LIST HotCold = cold, warm, hot
 
-	VAR kettleState = (off, cold) // we need brackets because it's a proper, multi-valued list now
+	VAR kettleState = (off, cold) // 我们需要括号，因为它现在是一个真正的多值列表
+
 
 	=== function turnOnKettle() ===
 	{ kettleState ? hot:
@@ -2935,29 +2938,29 @@ We can model devices with multiple states. Back to the kettle again...
 		The water in the kettle begins to heat up.
 		~ kettleState -= off
 		~ kettleState += on
-		// note we avoid "=" as it'll remove all existing states
+		// 注意我们避免使用 "="，因为它会移除所有现有状态
 	}
 
 	=== function can_make_tea() ===
 		~ return kettleState ? (hot, off)
 
-These mixed states can make changing state a bit trickier, as the off/on above demonstrates, so the following helper function can be useful.
+这些混合状态可能会使状态变化变得更棘手，如上面的关闭/开启示例所示，因此以下辅助函数可能会很有用。
 
  	=== function changeStateTo(ref stateVariable, stateToReach)
- 		// remove all states of this type
+ 		// 移除所有此类型的状态
  		~ stateVariable -= LIST_ALL(stateToReach)
- 		// put back the state we want
+ 		// 放回我们想要的状态
  		~ stateVariable += stateToReach
 
- which enables code like:
+这使得代码如下成为可能：
 
  	~ changeState(kettleState, on)
  	~ changeState(kettleState, warm)
 
 
-#### How does this affect queries?
+#### How does this affect queries? 这如何影响查询？
 
-The queries given above mostly generalise nicely to multi-valued lists
+上述的查询大多很好地泛化到多值列表
 
     LIST Letters = a,b,c
     LIST Numbers = one, two, three
@@ -2978,9 +2981,9 @@ The queries given above mostly generalise nicely to multi-valued lists
 	{ LIST_INVERT(mixedList) }            // one, b, two
 
 
-## 7) Long example: crime scene
+## 7) Long example: crime scene 长示例：犯罪现场
 
-Finally, here's a long example, demonstrating a lot of ideas from this section in action. You might want to try playing it before reading through to better understand the various moving parts.
+最后，这是一个长示例，展示了本节中许多概念的实际应用。您可能想在阅读之前先尝试运行它，以更好地理解各种动态部分。
 
 	-> murder_scene
 
@@ -3328,14 +3331,14 @@ Finally, here's a long example, demonstrating a lot of ideas from this section i
 
 
 
-## 8) Summary
+## 8) Summary 总结
 
-To summarise a difficult section, **ink**'s list construction provides:
+总结一个复杂的部分，**ink** 的列表构造提供了：
 
-### Flags
-* 	Each list entry is an event
-* 	Use `+=` to mark an event as having occurred
-*  	Test using `?` and `!?`
+### Flags 标志
+* 每个列表条目是一个事件
+* 使用 `+=` 标记一个事件已发生
+* 使用 `?` 和 `!?` 进行测试
 
 Example:
 
@@ -3344,10 +3347,11 @@ Example:
 	{ GameEvents ? (foundSword, metGorgon) }
 	~ GameEvents += metGorgon
 
-### State machines
-* 	Each list entry is a state
-*  Use `=` to set the state; `++` and `--` to step forward or backward
-*  Test using `==`, `>` etc
+### State machines 状态机
+* 每个列表条目是一个状态
+* 使用 = 设置状态；使用 ++ 和 -- 向前或向后移动
+* 使用 ==, > 等进行测试
+
 
 Example:
 
@@ -3356,10 +3360,11 @@ Example:
 	{ PancakeState < ready_to_eat }
 	~ PancakeState++
 
-### Properties
-*	Each list is a different property, with values for the states that property can take (on or off, lit or unlit, etc)
-* 	Change state by removing the old state, then adding in the new
-*  Test using `?` and `!?`
+### Properties 属性
+* 每个列表是不同的属性，具有该属性可以采取的状态值（开或关，亮或暗，等等）
+* 通过移除旧状态然后添加新状态来改变状态
+* 使用 ? 和 !? 进行测试
+
 
 Example:
 
@@ -3377,60 +3382,60 @@ Example:
 
 
 
-# Part 6: International character support in identifiers
+# Part 6: International character support in identifiers 第六部分：标识符中的国际字符支持
 
-By default, ink has no limitations on the use of non-ASCII characters inside the story content. However, a limitation currently exsits
-on the characters that can be used for names of constants, variables, stictches, diverts and other named flow elements (a.k.a. *identifiers*).
+默认情况下，**ink** 对故事内容中使用非 ASCII 字符没有任何限制。然而，目前在常量、变量、缝合、分流和其他命名流程元素（即 *标识符*）的名称中可使用的字符存在限制。
 
-Sometimes it is inconvenient for a writer using a non-ASCII language to write a story because they have to constantly switch to naming identifiers in ASCII and then switching back to whatever language they are using for the story. In addition, naming identifiers in the author's own language could improve the overal readibility of the raw story format.
+有时，对于使用非 ASCII 语言的编剧来说，编写故事会很不方便，因为他们必须不断切换到使用 ASCII 命名标识符，然后再切换回用于故事的语言。此外，使用作者自己语言命名标识符可以提高原始故事格式的整体可读性。
 
-In an effort to assist in the above scenario, ink *automatically* supports a list of pre-defined non-ASCII character ranges that can be used as identifiers. In general, those ranges have been selected to include the alpha-numeric subset of the official unicode character range, which would suffice for naming identifiers. The below section gives more detailed information on the non-ASCII characters that ink automatically supports.
+为了协助上述场景，**ink** *自动*支持一系列预定义的非 ASCII 字符范围，这些字符范围可用作标识符。通常，这些范围的选择包括官方 Unicode 字符范围的字母数字子集，足以用于命名标识符。以下部分提供了 **ink** 自动支持的非 ASCII 字符的更详细信息。
 
-### Supported Identifier Characters
+### Supported Identifier Characters 支持的标识符字符
 
-The support for the additional character ranges in ink is currently limited to a predefined set of character ranges.
+**ink** 对标识符中使用非 ASCII 字符的支持目前限于一组预定义的字符范围。
 
-Below is a listing of the currently supported identifier ranges.
+以下是当前支持的标识符范围列表。
 
- - **Arabic**
+ - **阿拉伯语**
+  
+   启用阿拉伯语家族语言的字符，是官方 *阿拉伯语* Unicode 范围 `\u0600`-`\u06FF` 的子集。
+  
+  
+ - **亚美尼亚语**
+  
+   启用亚美尼亚语的字符，是官方 *亚美尼亚语* Unicode 范围 `\u0530`-`\u058F` 的子集。
+  
+  
+ - **西里尔字母**
+  
+   启用使用西里尔字母的语言的字符，是官方 *西里尔字母* Unicode 范围 `\u0400`-`\u04FF` 的子集。
+  
+  
+ - **希腊语**
+  
+   启用使用希腊字母的语言的字符，是官方 *希腊语和科普特语* Unicode 范围 `\u0370`-`\u03FF` 的子集。
+  
+  
+ - **希伯来语**
+  
+   启用使用希伯来字母的希伯来语字符，是官方 *希伯来语* Unicode 范围 `\u0590`-`\u05FF` 的子集。
+  
+  
+ - **拉丁扩展 A**
+  
+   启用拉丁字母的扩展字符范围子集——完全由官方 *拉丁扩展-A* Unicode 范围 `\u0100`-`\u017F` 表示。
+  
+  
+ - **拉丁扩展 B**
+  
+   启用拉丁字母的扩展字符范围子集——完全由官方 *拉丁扩展-B* Unicode 范围 `\u0180`-`\u024F` 表示。
+  
+ - **拉丁语补充**
+  
+   启用拉丁字母的扩展字符范围子集——完全由官方 *拉丁语补充* Unicode 范围 `\u0080` - `\u00FF` 表示。
 
-   Enables characters for languages of the Arabic family and is a subset of the official *Arabic* unicode range `\u0600`-`\u06FF`.
 
+**注意！** ink 文件应以 UTF-8 格式保存，以确保支持上述字符范围。
 
- - **Armenian**
+如果您希望在标识符中使用的特定字符范围尚未被支持，请随时在主要 ink 仓库上提交 [问题](/inkle/ink/issues/new) 或 [拉取请求](/inkle/ink/pulls)。
 
-   Enables characters for the Armenian language and is a subset of the official *Armenian* unicode range `\u0530`-`\u058F`.
-
-
- - **Cyrillic**
-
-   Enables characters for languages using the Cyrillic alphabet and is a subset of the official *Cyrillic* unicode range `\u0400`-`\u04FF`.
-
-
- - **Greek**
-
-   Enables characters for languages using the Greek alphabet and is a subset of the official *Greek and Coptic* unicode range `\u0370`-`\u03FF`.
-
-
- - **Hebrew**
-
-   Enables characters in Hebrew using the Hebrew alphabet and is a subset of the official *Hebrew* unicode range `\u0590`-`\u05FF`.
-
-
- - **Latin Extended A**
-
-   Enables an extended character range subset of the Latin alphabet - completely represented by the official *Latin Extended-A* unicode range `\u0100`-`\u017F`.
-
-
- - **Latin Extended B**
-
-   Enables an extended character range subset of the Latin alphabet - completely represented by the official *Latin Extended-B* unicode range `\u0180`-`\u024F`.
-
-- **Latin 1 Supplement**
-
-   Enables an extended character range subset of the Latin alphabet - completely represented by the official *Latin 1 Supplement* unicode range `\u0080` - `\u00FF`.
-
-
-**NOTE!** ink files should be saved in UTF-8 format, which ensures that the above character ranges are supported.
-
-If a particular character range that you would like to use within identifiers isn't supported, feel free to open an [issue](/inkle/ink/issues/new) or [pull request](/inkle/ink/pulls) on the main ink repo.
