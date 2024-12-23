@@ -389,7 +389,6 @@
 
     // Used to hook up the functionality for global functionality buttons
     function setupButtons(hasSave) {
-
         let rewindEl = document.getElementById("rewind");
         if (rewindEl) rewindEl.addEventListener("click", function(event) {
             removeAll("p");
@@ -399,34 +398,29 @@
         });
 
         let saveEl = document.getElementById("save");
-        if (saveEl) saveEl.addEventListener("click", function(event) {
-            try {
-                window.localStorage.setItem('save-state', savePoint);
-                document.getElementById("reload").removeAttribute("disabled");
-                window.localStorage.setItem('theme', document.body.classList.contains("dark") ? "dark" : "");
-            } catch (e) {
-                console.warn("Couldn't save state");
-            }
-
+        if (saveEl) saveEl.addEventListener("click", function() {
+            updateSaveSlotList();
+            document.getElementById("save-overlay").classList.remove("hidden");
         });
 
         let reloadEl = document.getElementById("reload");
-        if (!hasSave) {
+        
+        // 检查是否有存档
+        try {
+            const saves = JSON.parse(window.localStorage.getItem('save-slots') || '[]');
+            if (saves.length > 0) {
+                reloadEl.removeAttribute("disabled");
+            } else {
+                reloadEl.setAttribute("disabled", "disabled");
+            }
+        } catch (e) {
+            console.debug("Couldn't check saves");
             reloadEl.setAttribute("disabled", "disabled");
         }
-        reloadEl.addEventListener("click", function(event) {
-            if (reloadEl.getAttribute("disabled"))
-                return;
 
-            removeAll("p");
-            removeAll("img");
-            try {
-                let savedState = window.localStorage.getItem('save-state');
-                if (savedState) story.state.LoadJson(savedState);
-            } catch (e) {
-                console.debug("Couldn't load save state");
-            }
-            continueStory(true);
+        reloadEl.addEventListener("click", function() {
+            updateLoadSlotList();
+            document.getElementById("load-overlay").classList.remove("hidden");
         });
 
         let themeSwitchEl = document.getElementById("theme-switch");
@@ -434,6 +428,283 @@
             document.body.classList.add("switched");
             document.body.classList.toggle("dark");
         });
+
+        // 添加关闭按钮的事件监听
+        document.querySelector('#save-overlay .close-button').addEventListener('click', closeSaveOverlay);
+        document.querySelector('#load-overlay .close-button').addEventListener('click', closeLoadOverlay);
+    }
+
+    // 添加一个辅助函数来更新读取按钮状态
+    function updateReloadButtonState() {
+        const reloadEl = document.getElementById("reload");
+        try {
+            const saves = JSON.parse(window.localStorage.getItem('save-slots') || '[]');
+            if (saves.length > 0) {
+                reloadEl.removeAttribute("disabled");
+            } else {
+                reloadEl.setAttribute("disabled", "disabled");
+            }
+        } catch (e) {
+            console.debug("Couldn't check saves");
+            reloadEl.setAttribute("disabled", "disabled");
+        }
+    }
+
+    // 保存游戏进度
+    function saveGame() {
+        try {
+            window.localStorage.setItem('save-state', savePoint);
+            document.getElementById("reload").removeAttribute("disabled");
+            window.localStorage.setItem('theme', document.body.classList.contains("dark") ? "dark" : "");
+        } catch (e) {
+            console.warn("Couldn't save state");
+        }
+    }
+
+    // 读取游戏进度
+    function loadGame() {
+        if (reloadEl.getAttribute("disabled")) {
+            return;
+        }
+
+        removeAll("p");
+        removeAll("img");
+        try {
+            let savedState = window.localStorage.getItem('save-state');
+            if (savedState) story.state.LoadJson(savedState);
+        } catch (e) {
+            console.debug("Couldn't load save state");
+        }
+        continueStory(true);
+    }
+
+    // 在文件头添加新的变量
+    let saveSlots = [];
+
+    // 添加新的函数用于处理存档
+    function saveToSlot(slotIndex) {
+        try {
+            // 获取现有存档
+            saveSlots = JSON.parse(window.localStorage.getItem('save-slots') || '[]');
+            
+            // 创建新的存档数据
+            const saveData = {
+                savePoint: savePoint,
+                timestamp: new Date().toISOString(),
+                theme: document.body.classList.contains("dark") ? "dark" : ""
+            };
+            
+            // 更新指定位置的存档
+            saveSlots[slotIndex] = saveData;
+            
+            // 保存回 localStorage
+            window.localStorage.setItem('save-slots', JSON.stringify(saveSlots));
+            
+            // 更新读取按钮状态
+            updateReloadButtonState();
+            
+            // 关闭存档界面
+            closeSaveOverlay();
+        } catch (e) {
+            console.warn("Couldn't save state", e);
+        }
+    }
+
+    // 添加新的函数用于处理读档
+    function loadFromSlot(slotIndex) {
+        try {
+            saveSlots = JSON.parse(window.localStorage.getItem('save-slots') || '[]');
+            const saveData = saveSlots[slotIndex];
+            
+            if (saveData) {
+                removeAll("p");
+                removeAll("img");
+                
+                story.state.LoadJson(saveData.savePoint);
+                
+                // 设置主题
+                if (saveData.theme === "dark") {
+                    document.body.classList.add("dark");
+                } else {
+                    document.body.classList.remove("dark");
+                }
+                
+                continueStory(true);
+                
+                // 关闭读档界面
+                closeLoadOverlay();
+            }
+        } catch (e) {
+            console.debug("Couldn't load save state", e);
+        }
+    }
+
+    // 修改关闭对话框的函数
+    function closeSaveOverlay() {
+        const overlay = document.getElementById("save-overlay");
+        overlay.classList.add("fade-out");
+        setTimeout(() => {
+            overlay.classList.add("hidden");
+            overlay.classList.remove("fade-out");
+        }, 200);
+    }
+
+    function closeLoadOverlay() {
+        const overlay = document.getElementById("load-overlay");
+        overlay.classList.add("fade-out");
+        setTimeout(() => {
+            overlay.classList.add("hidden");
+            overlay.classList.remove("fade-out");
+        }, 200);
+    }
+
+    // 添加 ESC 键关闭功能
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            const saveOverlay = document.getElementById("save-overlay");
+            const loadOverlay = document.getElementById("load-overlay");
+            
+            if (!saveOverlay.classList.contains("hidden")) {
+                closeSaveOverlay();
+            }
+            if (!loadOverlay.classList.contains("hidden")) {
+                closeLoadOverlay();
+            }
+        }
+    });
+
+    // 添加点击遮罩关闭功能
+    document.addEventListener('click', function(event) {
+        if (event.target.classList.contains('modal-overlay')) {
+            if (event.target.id === 'save-overlay') {
+                closeSaveOverlay();
+            } else if (event.target.id === 'load-overlay') {
+                closeLoadOverlay();
+            }
+        }
+    });
+
+    // 更新存档列表显示
+    function updateSaveSlotList() {
+        const saveSlotList = document.getElementById('save-slot-list');
+        saveSlotList.innerHTML = ''; // 清空现有内容
+        
+        // 获取现有存档
+        const saves = JSON.parse(window.localStorage.getItem('save-slots') || '[]');
+        
+        // 显示现有存档
+        saves.forEach((save, index) => {
+            const slot = document.createElement('div');
+            slot.className = 'save-slot';
+            
+            const date = new Date(save.timestamp);
+            const formattedDate = `${date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2,'0')}-${date.getDate().toString().padStart(2,'0')} ${date.getHours().toString().padStart(2,'0')}:${date.getMinutes().toString().padStart(2,'0')}`;
+            
+            slot.innerHTML = `
+                <div class="slot-content">
+                    <div class="number">存档 ${index + 1}</div>
+                    <div class="content">存档时间: ${formattedDate}</div>
+                    <div class="time"></div>
+                </div>
+                <button class="delete-button">×</button>
+            `;
+
+            // 使用事件委托处理点击事件
+            const slotContent = slot.querySelector('.slot-content');
+            slotContent.addEventListener('click', () => saveToSlot(index));
+
+            const deleteButton = slot.querySelector('.delete-button');
+            deleteButton.addEventListener('click', (event) => {
+                event.stopPropagation();
+                confirmDeleteSlot(index, true);
+            });
+            
+            saveSlotList.appendChild(slot);
+        });
+        
+        // 添加"创建新存档"按钮
+        const newSlot = document.createElement('div');
+        newSlot.className = 'save-slot new-save';
+        newSlot.innerHTML = `
+            <div class="slot-content">
+                <div class="number">新存档</div>
+                <div class="content">创建新的存档</div>
+                <div class="time"></div>
+            </div>
+        `;
+        newSlot.addEventListener('click', () => saveToSlot(saves.length));
+        
+        saveSlotList.appendChild(newSlot);
+    }
+
+    // 更新读档列表显示
+    function updateLoadSlotList() {
+        const loadSlotList = document.getElementById('load-slot-list');
+        loadSlotList.innerHTML = ''; // 清空现有内容
+        
+        // 获取现有存档
+        const saves = JSON.parse(window.localStorage.getItem('save-slots') || '[]');
+        
+        if (saves.length === 0) {
+            const emptyNotice = document.createElement('div');
+            emptyNotice.className = 'empty-notice';
+            emptyNotice.textContent = '没有找到任何存档';
+            loadSlotList.appendChild(emptyNotice);
+            return;
+        }
+        
+        // 显示所有存档
+        saves.forEach((save, index) => {
+            const slot = document.createElement('div');
+            slot.className = 'save-slot';
+            
+            const date = new Date(save.timestamp);
+            const formattedDate = `${date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2,'0')}-${date.getDate().toString().padStart(2,'0')} ${date.getHours().toString().padStart(2,'0')}:${date.getMinutes().toString().padStart(2,'0')}`;
+            
+            slot.innerHTML = `
+                <div class="slot-content">
+                    <div class="number">存档 ${index + 1}</div>
+                    <div class="content">存档时间: ${formattedDate}</div>
+                    <div class="time"></div>
+                </div>
+                <button class="delete-button">×</button>
+            `;
+
+            // 使用事件委托处理点击事件
+            const slotContent = slot.querySelector('.slot-content');
+            slotContent.addEventListener('click', () => loadFromSlot(index));
+
+            const deleteButton = slot.querySelector('.delete-button');
+            deleteButton.addEventListener('click', (event) => {
+                event.stopPropagation();
+                confirmDeleteSlot(index, false);
+            });
+            
+            loadSlotList.appendChild(slot);
+        });
+    }
+
+    // 添加删除存档的确认和执行函数
+    function confirmDeleteSlot(index, isSaveList) {
+        if (confirm(`确认要删除存档 ${index + 1} 吗？`)) {
+            try {
+                let saves = JSON.parse(window.localStorage.getItem('save-slots') || '[]');
+                saves.splice(index, 1);
+                window.localStorage.setItem('save-slots', JSON.stringify(saves));
+                
+                // 更新界面
+                if (isSaveList) {
+                    updateSaveSlotList();
+                } else {
+                    updateLoadSlotList();
+                }
+                
+                // 更新读取按钮状态
+                updateReloadButtonState();
+            } catch (e) {
+                console.warn("Couldn't delete save", e);
+            }
+        }
     }
 
 })(storyContent);

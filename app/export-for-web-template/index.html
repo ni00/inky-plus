@@ -12,7 +12,30 @@
 </head>
 
 <body>
+    <div id="save-overlay" class="modal-overlay hidden">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2>存档列表</h2>
+                <button class="close-button">×</button>
+            </div>
+            <div class="slot-list" id="save-slot-list">
+                <!-- 存档列表将由 JavaScript 动态生成 -->
+            </div>
+        </div>
+    </div>
 
+    <div id="load-overlay" class="modal-overlay hidden">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2>读档列表</h2>
+                <button class="close-button">×</button>
+            </div>
+            <div class="slot-list" id="load-slot-list">
+                <!-- 读档列表将由 JavaScript 动态生成 -->
+            </div>
+        </div>
+    </div>
+    
     <div class="outerContainer">
         <h3 class="written-in-ink"><a href="https://www.inklestudios.com/ink">WRITTEN IN INK</a></h3>
 
