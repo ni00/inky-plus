@@ -1,8 +1,8 @@
 @import url('https://fonts.googleapis.com/css?family=Open+Sans:300,700|Quattrocento:700');
 
 body {
-    font-family: 'Open Sans', sans-serif;
-    font-weight: lighter;
+    font-family: "PingFang SC", "Hiragino Sans GB", "Heiti SC", "Microsoft YaHei", "WenQuanYi Micro Hei";
+    font-weight: normal;
     background: white;
     overflow: hidden;
 }
@@ -16,7 +16,7 @@ body {
 h1,
 h2 {
     text-align: center;
-    font-family: "Quattrocento", Georgia, 'Times New Roman', Times, serif;
+    font-family: "PingFang SC", "Hiragino Sans GB", "Heiti SC", "Microsoft YaHei", "WenQuanYi Micro Hei";
     margin: 0;
     padding: 0;
 }
@@ -29,7 +29,7 @@ h1 {
 h2 {
     font-size: 14pt;
     font-style: italic;
-    font-family: sans-serif;
+    font-family: "PingFang SC", "Hiragino Sans GB", "Heiti SC", "Microsoft YaHei", "WenQuanYi Micro Hei";
     font-weight: lighter;
     color: #BBB;
 }
@@ -50,7 +50,7 @@ h2 {
 .written-in-ink {
     z-index: 3;
     font-size: 9pt;
-    font-family: sans-serif;
+    font-family: "PingFang SC", "Hiragino Sans GB", "Heiti SC", "Microsoft YaHei", "WenQuanYi Micro Hei";
     text-align: center;
     font-weight: 700;
     position: fixed;
@@ -104,7 +104,7 @@ h2 {
     margin: 0 auto;
     padding: 20px;
     padding-top: 4em;
-    background: white;
+    /* background: white; */
 }
 
 @media screen and (prefers-reduced-motion: no-preference) {
@@ -117,20 +117,20 @@ p {
     font-size: 13pt;
     color: #888;
     line-height: 1.7em;
-    font-weight: lighter;
+    font-weight: normal;
 }
 
 a {
     font-weight: 700;
     color: #b97c2c;
-    font-family: sans-serif;
+    font-family: "PingFang SC", "Hiragino Sans GB", "Heiti SC", "Microsoft YaHei", "WenQuanYi Micro Hei";
     text-decoration: none;
 }
 
 .unclickable {
     font-weight: 700;
     color: #4f3411;
-    font-family: sans-serif;
+    font-family: "PingFang SC", "Hiragino Sans GB", "Heiti SC", "Microsoft YaHei", "WenQuanYi Micro Hei";
     text-decoration: none;
     cursor: not-allowed;
 }
@@ -536,4 +536,100 @@ body.dark {
 /* 新存档按钮不需要删除按钮 */
 .new-save .delete-button {
     display: none;
+}
+
+/* 背景图 */
+.bg {
+    visibility: hidden;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+}
+
+/* 定义keyframe动画，命名为blink */
+@keyframes blink {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+/* 添加兼容性前缀 */
+@-webkit-keyframes blink {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+@-moz-keyframes blink {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+@-ms-keyframes blink {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+@-o-keyframes blink {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+/* 定义blink类*/
+.blink {
+    /* color: red; */
+    /* font-size: 46px; */
+    -o-animation: blink 1s linear infinite;
+    -webkit-animation: blink 1s linear infinite;
+    -moz-animation: blink 1s linear infinite;
+    -ms-animation: blink 1s linear infinite;
+    animation: blink 1s linear infinite;
 }

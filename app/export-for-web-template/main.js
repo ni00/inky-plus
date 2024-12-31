@@ -1,5 +1,7 @@
 (function(storyContent) {
 
+    let isSingleSentenceModeEnabled = false;
+
     // Create ink story from the content using inkjs
     var story = new inkjs.Story(storyContent);
 
@@ -140,9 +142,76 @@
                     setVisible(".header", false);
 
                     if( tag == "RESTART" ) {
+                        isSingleSentenceModeEnabled = false;
                         restart();
                         return;
                     }
+                }
+                
+                // 单句模式
+                else if (splitTag && splitTag.property == "SINGLE_SENTENCE") {
+                    if (splitTag.val == "on") {
+                        isSingleSentenceModeEnabled = true;
+                    } else if (splitTag.val == "off") {
+                        isSingleSentenceModeEnabled = false;
+                    }
+                }
+
+                // 可控制宽度的图片
+                else if (splitTag && splitTag.property == "SIZE_IMAGE") {
+                    let imageElement = document.createElement('img');
+
+                    let content = splitTag.val;
+                    let idx = content.indexOf("@");
+                    if (idx != null) {
+                        let size = content.substr(0, idx).trim();
+                        let src = content.substr(idx + 1).trim();
+                        imageElement.src = src;
+                        imageElement.style.width = size;
+                        storyContainer.appendChild(imageElement);
+
+                        imageElement.onload = () => {
+                            console.log(`scrollingto ${previousBottomEdge}`)
+                            scrollDown(previousBottomEdge)
+                        }
+
+                        showAfter(delay, imageElement);
+                        delay += 200.0;
+                    }
+                }
+
+                // 背景图片
+                else if (splitTag && splitTag.property == "BG_IMAGE") {
+                    if (splitTag.val == "hide") {
+                        hideBg();
+                    } else {
+                        showBg(splitTag.val);
+                    }
+                }
+
+                // 背景音乐
+                else if (splitTag && splitTag.property == "BGM") {
+                    if (splitTag.val == "stop") {
+                        // 停止
+                        stopBgm()
+                    } else if (splitTag.val == "pause") {
+                        // 暂停
+                        pauseBgm()
+                    } else if (splitTag.val == "resume") {
+                        // 继续
+                        resumeBgm()
+                    } else {
+                        // 播放
+                        playBgm(splitTag.val)
+                    }
+                }
+
+                // 音效
+                else if (splitTag && splitTag.property == "SE") {
+                    // 播放 SE
+                    console.log("play se: " + splitTag.val);
+                    let se = new Audio(splitTag.val);
+                    se.play();
                 }
             }
 		
@@ -163,6 +232,12 @@
             // Fade in paragraph after a short delay
             showAfter(delay, paragraphElement);
             delay += 200.0;
+
+            if (isSingleSentenceModeEnabled && story.currentChoices.length == 0) {
+                // 中断 continue，等待用户点击
+                addSingleSentenceHint();
+                break;
+            }
         }
 
         // Create HTML choices from ink choices
@@ -229,6 +304,11 @@
 
                     // Aaand loop
                     continueStory();
+
+                    // 防止冒泡
+                    if (isSingleSentenceModeEnabled) {
+                        event.stopPropagation();
+                    }
                 });
             }
         });
@@ -432,6 +512,18 @@
         // 添加关闭按钮的事件监听
         document.querySelector('#save-overlay .close-button').addEventListener('click', closeSaveOverlay);
         document.querySelector('#load-overlay .close-button').addEventListener('click', closeLoadOverlay);
+
+        // 设置单句模式点击事件
+        storyContainer.addEventListener("click", function (event) {
+            // removeSingleSentenceHint();
+            if (!isSingleSentenceModeEnabled) {
+                return
+            }
+            if (story.canContinue) {
+                removeSingleSentenceHint();
+                continueStory(false)
+            }
+        })
     }
 
     // 添加一个辅助函数来更新读取按钮状态
@@ -450,34 +542,6 @@
         }
     }
 
-    // 保存游戏进度
-    function saveGame() {
-        try {
-            window.localStorage.setItem('save-state', savePoint);
-            document.getElementById("reload").removeAttribute("disabled");
-            window.localStorage.setItem('theme', document.body.classList.contains("dark") ? "dark" : "");
-        } catch (e) {
-            console.warn("Couldn't save state");
-        }
-    }
-
-    // 读取游戏进度
-    function loadGame() {
-        if (reloadEl.getAttribute("disabled")) {
-            return;
-        }
-
-        removeAll("p");
-        removeAll("img");
-        try {
-            let savedState = window.localStorage.getItem('save-state');
-            if (savedState) story.state.LoadJson(savedState);
-        } catch (e) {
-            console.debug("Couldn't load save state");
-        }
-        continueStory(true);
-    }
-
     // 在文件头添加新的变量
     let saveSlots = [];
 
@@ -491,7 +555,13 @@
             const saveData = {
                 savePoint: savePoint,
                 timestamp: new Date().toISOString(),
-                theme: document.body.classList.contains("dark") ? "dark" : ""
+                theme: document.body.classList.contains("dark") ? "dark" : "",
+                isSingleSentenceModeEnabled: isSingleSentenceModeEnabled,
+                // 添加 BGM 相关状态
+                bgm: {
+                    isPlaying: isBgmPlaying(),
+                    src: getBgmSrc()
+                }
             };
             
             // 更新指定位置的存档
@@ -527,6 +597,21 @@
                     document.body.classList.add("dark");
                 } else {
                     document.body.classList.remove("dark");
+                }
+                
+                // 恢复单句模式状态
+                isSingleSentenceModeEnabled = saveData.isSingleSentenceModeEnabled || false;
+                
+                // 恢复 BGM 状态
+                if (saveData.bgm) {
+                    if (saveData.bgm.src) {
+                        playBgm(saveData.bgm.src);
+                        if (!saveData.bgm.isPlaying) {
+                            pauseBgm();
+                        }
+                    } else {
+                        stopBgm();
+                    }
                 }
                 
                 continueStory(true);
@@ -707,4 +792,100 @@
         }
     }
 
+    // 显示单句模式提示
+    function addSingleSentenceHint() {
+        removeSingleSentenceHint()
+        if (story.canContinue) {
+            setTimeout(function () {
+                var hint = document.createElement('p');
+                hint.innerText = "▽";
+                hint.id = "single-sentence-hint"
+                storyContainer.appendChild(hint);
+                hint.classList.add("blink")
+            }, 400);
+        }
+    }
+
+    // 移除单句模式提示
+    function removeSingleSentenceHint() {
+        var hint = document.getElementById("single-sentence-hint")
+        if (hint) {
+            hint.parentElement.removeChild(hint)
+        }
+    }
+
+    // 隐藏背景图
+    function hideBg() {
+        let bgImg = document.getElementById("bg_img")
+        if (bgImg) {
+            bgImg.style.visibility = "hidden";
+        }
+    }
+
+    // 显示背景图
+    function showBg(src) {
+        let bgImg = document.getElementById("bg_img")
+        if (bgImg) {
+            bgImg.onload = function () {
+                bgImg.style.visibility = "visible";
+            }
+            bgImg.src = src;
+        }
+    }
+
+    // 播放背景音乐
+    function playBgm(src) {
+        console.log("play bgm: " + src);
+        if ('bgm' in this) {
+            this.bgm.pause();
+            this.bgm.removeAttribute('src');
+            this.bgm.load();
+        }
+
+        this.bgm = new Audio(src);
+        this.bgm.play();
+        this.bgm.loop = true;
+    }
+
+    // 继续播放背景音乐
+    function resumeBgm() {
+        console.log("resume bgm")
+        if ('bgm' in this) {
+            this.bgm.play()
+        }
+    }
+
+    // 暂停背景音乐
+    function pauseBgm() {
+        console.log("pause bgm")
+        if ('bgm' in this) {
+            this.bgm.pause();
+        }
+    }
+
+    // 停止背景音乐
+    function stopBgm() {
+        console.log("stop bgm")
+        if ('bgm' in this) {
+            this.bgm.pause();
+            this.bgm.load();
+            this.bgm.loop = true;
+        }
+    }
+
+    // 判断背景音乐是否正在播放
+    function isBgmPlaying() {
+        if ('bgm' in this) {
+            return !this.bgm.paused;
+        }
+        return false;
+    }
+
+    // 获取背景音乐的 src
+    function getBgmSrc() {
+        if ('bgm' in this) {
+            return this.bgm.src;
+        }
+        return undefined;
+    }
 })(storyContent);
