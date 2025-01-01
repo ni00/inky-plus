@@ -2,6 +2,11 @@
 
     let isSingleSentenceModeEnabled = false;
 
+    // 通常随机数 SEED 会被存档，即使 load & save，下一个随机数也是相同的
+    // 如果想每次读档后的随机数不同，则打开它
+    // 打开为 true，关闭为 false，默认关闭
+    let refreshRandomSeedWhenLoad = false
+
     // Create ink story from the content using inkjs
     var story = new inkjs.Story(storyContent);
 
@@ -612,6 +617,12 @@
                     } else {
                         stopBgm();
                     }
+                }
+                
+                // 如果需要刷新随机数，则刷新
+                if (refreshRandomSeedWhenLoad) {
+                    story.state.storySeed = new Date().getTime() % 100;
+                    story.state.previousRandom = 0
                 }
                 
                 continueStory(true);
