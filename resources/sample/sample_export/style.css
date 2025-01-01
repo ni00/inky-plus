@@ -633,3 +633,34 @@ body.dark {
     -ms-animation: blink 1s linear infinite;
     animation: blink 1s linear infinite;
 }
+
+/* 输入框样式 */
+#input-box {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    font-size: 13pt;
+    border: 2px solid #b97c2c;
+    border-radius: 4px;
+    background: white;
+    color: #888;
+    font-family: inherit;
+}
+
+.dark #input-box {
+    background: #222;
+    border-color: #cc8f1a;
+    color: #fff;
+}
+
+#input-box:focus {
+    outline: none;
+    border-color: #4a3011;
+    box-shadow: 0 0 5px rgba(185, 124, 44, 0.5);
+}
+
+.dark #input-box:focus {
+    border-color: #e6a01c;
+    box-shadow: 0 0 5px rgba(204, 143, 26, 0.5);
+}

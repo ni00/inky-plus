@@ -1,5 +1,6 @@
 (function (storyContent) {
   let isSingleSentenceModeEnabled = false;
+  let saveSlots = [];
 
   // 通常随机数 SEED 会被存档，即使 load & save，下一个随机数也是相同的
   // 如果想每次读档后的随机数不同，则打开它
@@ -563,9 +564,6 @@
       reloadEl.setAttribute("disabled", "disabled");
     }
   }
-
-  // 在文件头添加新的变量
-  let saveSlots = [];
 
   // 添加新的函数用于处理存档
   function saveToSlot(slotIndex) {
