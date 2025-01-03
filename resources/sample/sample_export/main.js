@@ -54,7 +54,7 @@
 
   // Main story processing function. Each time this is called it generates
   // all the next content up as far as the next set of choices.
-  function continueStory(firstTime) {
+  async function continueStory(firstTime) {
     var paragraphIndex = 0;
     var delay = 0.0;
 
@@ -251,9 +251,8 @@
       }
 
       if (nextInputBox) {
-        // 中断 continue，添加一个输入框
-        addInputBox(nextInputVariableName, delay);
-        break;
+        // 等待输入框的处理完成
+        await addInputBox(nextInputVariableName, delay);
       }
     }
 
@@ -297,7 +296,7 @@
       // Click on choice
       if (isClickable) {
         var choiceAnchorEl = choiceParagraphElement.querySelectorAll("a")[0];
-        choiceAnchorEl.addEventListener("click", function (event) {
+        choiceAnchorEl.addEventListener("click", async function (event) {
           // Don't follow <a> link
           event.preventDefault();
 
@@ -316,7 +315,7 @@
           savePoint = story.state.toJson();
 
           // Aaand loop
-          continueStory();
+          await continueStory();
 
           // 防止冒泡
           if (isSingleSentenceModeEnabled) {
@@ -332,16 +331,11 @@
     if (!firstTime) scrollDown(previousBottomEdge);
   }
 
-  function restart() {
+  async function restart() {
     story.ResetState();
-
     setVisible(".header", true);
-
-    // set save point to here
     savePoint = story.state.toJson();
-
-    continueStory(true);
-
+    await continueStory(true);
     outerScrollContainer.scrollTo(0, 0);
   }
 
@@ -601,7 +595,7 @@
   }
 
   // 添加新的函数用于处理读档
-  function loadFromSlot(slotIndex) {
+  async function loadFromSlot(slotIndex) {
     try {
       saveSlots = JSON.parse(window.localStorage.getItem("save-slots") || "[]");
       const saveData = saveSlots[slotIndex];
@@ -641,7 +635,7 @@
           story.state.previousRandom = 0;
         }
 
-        continueStory(true);
+        await continueStory(true);
 
         // 关闭读档界面
         closeLoadOverlay();
@@ -847,7 +841,7 @@
 
   // 显示一个输入框，用于输入数据
   function addInputBox(variableName, delay = 400) {
-    if (story.canContinue) {
+    return new Promise((resolve) => {
         setTimeout(function () {
             // 移除已存在的输入框（如果有）
             var existingInput = document.getElementById("input-box");
@@ -876,8 +870,8 @@
                         // 移除输入框
                         inputBox.parentElement.removeChild(inputBox);
                         
-                        // 继续故事
-                        continueStory();
+                        // 解析 Promise
+                        resolve();
                     }
                 }
             });
@@ -887,7 +881,7 @@
             // 自动聚焦到输入框
             inputBox.focus();
         }, delay);
-    }
+    });
   }
 
   // 移除单句模式提示
