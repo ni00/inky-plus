@@ -252,6 +252,7 @@
 
       if (nextInputBox) {
         // 等待输入框的处理完成
+        nextInputBox = false;
         await addInputBox(nextInputVariableName, delay);
       }
     }
@@ -844,39 +845,53 @@
     return new Promise((resolve) => {
         setTimeout(function () {
             // 移除已存在的输入框（如果有）
-            var existingInput = document.getElementById("input-box");
+            var existingInput = document.getElementById("input-container");
             if (existingInput) {
                 existingInput.parentElement.removeChild(existingInput);
             }
 
-            // 创建新的输入框
+            // 创建输入框容器
+            var container = document.createElement("div");
+            container.id = "input-container";
+
+            // 创建输入框
             var inputBox = document.createElement("input");
             inputBox.id = "input-box";
             inputBox.type = "text";
             inputBox.placeholder = "请在此输入...";
-            
-            // 添加回车键事件监听
-            inputBox.addEventListener("keypress", function(event) {
-                if (event.key === "Enter") {
-                    event.preventDefault();
-                    // 获取输入的值
-                    var inputValue = inputBox.value.trim();
-                    if (inputValue) {
-                        // 将输入值保存到 ink 变量中
-                        if (variableName) {
-                            story.variablesState[variableName] = inputValue;
-                        }
-                        
-                        // 移除输入框
-                        inputBox.parentElement.removeChild(inputBox);
-                        
-                        // 解析 Promise
-                        resolve();
-                    }
-                }
-            });
 
-            storyContainer.appendChild(inputBox);
+            // 创建确定按钮
+            var submitButton = document.createElement("button");
+            submitButton.id = "input-submit";
+            submitButton.textContent = "确定";
+            
+            // 处理提交
+            function handleSubmit() {
+                var inputValue = inputBox.value.trim();
+                if (inputValue) {
+                    // 将输入值保存到 ink 变量中
+                    if (variableName) {
+                        story.variablesState[variableName] = inputValue;
+                    }
+                    
+                    // 移除输入框容器
+                    if (container && container.parentElement) {
+                        container.parentElement.removeChild(container);
+                    }
+                    
+                    // 解析 Promise
+                    resolve();
+                }
+            }
+
+            // 添加点击事件
+            submitButton.addEventListener("click", handleSubmit);
+
+            // 将输入框和按钮添加到容器中
+            container.appendChild(inputBox);
+            container.appendChild(submitButton);
+            
+            storyContainer.appendChild(container);
             
             // 自动聚焦到输入框
             inputBox.focus();

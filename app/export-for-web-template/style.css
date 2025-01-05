@@ -634,12 +634,18 @@ body.dark {
     animation: blink 1s linear infinite;
 }
 
+/* 输入框容器样式 */
+#input-container {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    margin: 10px 0;
+}
+
 /* 输入框样式 */
 #input-box {
-    display: block;
-    width: 100%;
+    flex: 1;
     padding: 10px;
-    margin: 10px 0;
     font-size: 13pt;
     border: 2px solid #b97c2c;
     border-radius: 4px;
@@ -648,10 +654,35 @@ body.dark {
     font-family: inherit;
 }
 
+/* 确定按钮样式 */
+#input-submit {
+    padding: 10px 20px;
+    font-size: 13pt;
+    background: #b97c2c;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+#input-submit:hover {
+    background: #a16923;
+}
+
+/* 深色主题样式 */
 .dark #input-box {
     background: #222;
     border-color: #cc8f1a;
     color: #fff;
+}
+
+.dark #input-submit {
+    background: #cc8f1a;
+}
+
+.dark #input-submit:hover {
+    background: #b37d15;
 }
 
 #input-box:focus {
