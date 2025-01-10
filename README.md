@@ -7,6 +7,8 @@ from Inky v0.15.1
 
 点击此处查看 [Inky README](README_inky.md)
 
+点击此处查看 [Sample](https://ahayoo.com/niky-sample/)
+
 ## 功能列表
 
 - [x]中文优化：顶部中文菜单、机翻中文帮助文档、中文字体优化
