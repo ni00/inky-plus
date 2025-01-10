@@ -245,9 +245,8 @@
       delay += 200.0;
 
       if (isSingleSentenceModeEnabled && story.currentChoices.length == 0) {
-        // 中断 continue，等待用户点击
-        addSingleSentenceHint(delay);
-        break;
+        // 等待单句模式提示显示完成
+        await addSingleSentenceHint(delay);
       }
 
       if (nextInputBox) {
@@ -529,17 +528,17 @@
       .querySelector("#load-overlay .close-button")
       .addEventListener("click", closeLoadOverlay);
 
-    // 设置单句模式点击事件
-    storyContainer.addEventListener("click", function (event) {
-      // removeSingleSentenceHint();
-      if (!isSingleSentenceModeEnabled) {
-        return;
-      }
-      if (story.canContinue) {
-        removeSingleSentenceHint();
-        continueStory(false);
-      }
-    });
+    // // 设置单句模式点击事件
+    // storyContainer.addEventListener("click", function (event) {
+    //   // removeSingleSentenceHint();
+    //   if (!isSingleSentenceModeEnabled) {
+    //     return;
+    //   }
+    //   if (story.canContinue) {
+    //     removeSingleSentenceHint();
+    //     continueStory(false);
+    //   }
+    // });
   }
 
   // 添加一个辅助函数来更新读取按钮状态
@@ -826,17 +825,44 @@
     }
   }
 
-  // 显示单句模式提示
+  // 修改 addSingleSentenceHint 函数
   function addSingleSentenceHint(delay = 400) {
-    removeSingleSentenceHint();
-    if (story.canContinue) {
-        setTimeout(function () {
-            var hint = document.createElement("p");
-            hint.innerText = "▽";
-            hint.id = "single-sentence-hint";
-            storyContainer.appendChild(hint);
-            hint.classList.add("blink");
-        }, delay);
+    return new Promise((resolve) => {
+        removeSingleSentenceHint();
+        if (story.canContinue) {
+            setTimeout(function () {
+                var hint = document.createElement("p");
+                hint.innerText = "▽";
+                hint.id = "single-sentence-hint";
+                storyContainer.appendChild(hint);
+                hint.classList.add("blink");
+                
+                // 使用 requestAnimationFrame 确保元素已被渲染
+                requestAnimationFrame(() => {
+                    // 滚动到提示元素可见
+                    scrollDown(contentBottomEdgeY());
+                });
+                
+                // 添加一次性点击事件监听器
+                const clickHandler = () => {
+                    removeSingleSentenceHint();
+                    storyContainer.removeEventListener('click', clickHandler);
+                    resolve();
+                };
+                
+                storyContainer.addEventListener('click', clickHandler);
+            }, delay);
+        } else {
+            resolve();
+        }
+    });
+  }
+
+  // 修改 removeSingleSentenceHint 函数，确保只移除提示元素
+  function removeSingleSentenceHint() {
+    var hint = document.getElementById("single-sentence-hint");
+    if (hint) {
+        hint.parentElement.removeChild(hint);
     }
   }
 
@@ -897,14 +923,6 @@
             inputBox.focus();
         }, delay);
     });
-  }
-
-  // 移除单句模式提示
-  function removeSingleSentenceHint() {
-    var hint = document.getElementById("single-sentence-hint");
-    if (hint) {
-      hint.parentElement.removeChild(hint);
-    }
   }
 
   // 隐藏背景图

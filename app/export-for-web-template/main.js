@@ -219,8 +219,7 @@
           console.log("play se: " + splitTag.val);
           let se = new Audio(splitTag.val);
           se.play();
-        } 
-        else if (splitTag && splitTag.property == "INPUT") {
+        } else if (splitTag && splitTag.property == "INPUT") {
           nextInputBox = true;
           nextInputVariableName = splitTag.val;
         }
@@ -245,9 +244,8 @@
       delay += 200.0;
 
       if (isSingleSentenceModeEnabled && story.currentChoices.length == 0) {
-        // 中断 continue，等待用户点击
-        addSingleSentenceHint(delay);
-        break;
+        // 等待单句模式提示显示完成
+        await addSingleSentenceHint(delay);
       }
 
       if (nextInputBox) {
@@ -528,18 +526,6 @@
     document
       .querySelector("#load-overlay .close-button")
       .addEventListener("click", closeLoadOverlay);
-
-    // 设置单句模式点击事件
-    storyContainer.addEventListener("click", function (event) {
-      // removeSingleSentenceHint();
-      if (!isSingleSentenceModeEnabled) {
-        return;
-      }
-      if (story.canContinue) {
-        removeSingleSentenceHint();
-        continueStory(false);
-      }
-    });
   }
 
   // 添加一个辅助函数来更新读取按钮状态
@@ -826,85 +812,104 @@
     }
   }
 
-  // 显示单句模式提示
+  // 修改 addSingleSentenceHint 函数
   function addSingleSentenceHint(delay = 400) {
-    removeSingleSentenceHint();
-    if (story.canContinue) {
+    return new Promise((resolve) => {
+      removeSingleSentenceHint();
+      if (story.canContinue) {
         setTimeout(function () {
-            var hint = document.createElement("p");
-            hint.innerText = "▽";
-            hint.id = "single-sentence-hint";
-            storyContainer.appendChild(hint);
-            hint.classList.add("blink");
+          var hint = document.createElement("p");
+          hint.innerText = "▽";
+          hint.id = "single-sentence-hint";
+          storyContainer.appendChild(hint);
+          hint.classList.add("blink");
+
+          // 使用 requestAnimationFrame 确保元素已被渲染
+          requestAnimationFrame(() => {
+            // 滚动到提示元素可见
+            scrollDown(contentBottomEdgeY());
+          });
+
+          // 添加一次性点击事件监听器
+          const clickHandler = () => {
+            removeSingleSentenceHint();
+            storyContainer.removeEventListener("click", clickHandler);
+            resolve();
+          };
+
+          storyContainer.addEventListener("click", clickHandler);
         }, delay);
+      } else {
+        resolve();
+      }
+    });
+  }
+
+  // 修改 removeSingleSentenceHint 函数，确保只移除提示元素
+  function removeSingleSentenceHint() {
+    var hint = document.getElementById("single-sentence-hint");
+    if (hint) {
+      hint.parentElement.removeChild(hint);
     }
   }
 
   // 显示一个输入框，用于输入数据
   function addInputBox(variableName, delay = 400) {
     return new Promise((resolve) => {
-        setTimeout(function () {
-            // 移除已存在的输入框（如果有）
-            var existingInput = document.getElementById("input-container");
-            if (existingInput) {
-                existingInput.parentElement.removeChild(existingInput);
+      setTimeout(function () {
+        // 移除已存在的输入框（如果有）
+        var existingInput = document.getElementById("input-container");
+        if (existingInput) {
+          existingInput.parentElement.removeChild(existingInput);
+        }
+
+        // 创建输入框容器
+        var container = document.createElement("div");
+        container.id = "input-container";
+
+        // 创建输入框
+        var inputBox = document.createElement("input");
+        inputBox.id = "input-box";
+        inputBox.type = "text";
+        inputBox.placeholder = "请在此输入...";
+
+        // 创建确定按钮
+        var submitButton = document.createElement("button");
+        submitButton.id = "input-submit";
+        submitButton.textContent = "确定";
+
+        // 处理提交
+        function handleSubmit() {
+          var inputValue = inputBox.value.trim();
+          if (inputValue) {
+            // 将输入值保存到 ink 变量中
+            if (variableName) {
+              story.variablesState[variableName] = inputValue;
             }
 
-            // 创建输入框容器
-            var container = document.createElement("div");
-            container.id = "input-container";
-
-            // 创建输入框
-            var inputBox = document.createElement("input");
-            inputBox.id = "input-box";
-            inputBox.type = "text";
-            inputBox.placeholder = "请在此输入...";
-
-            // 创建确定按钮
-            var submitButton = document.createElement("button");
-            submitButton.id = "input-submit";
-            submitButton.textContent = "确定";
-            
-            // 处理提交
-            function handleSubmit() {
-                var inputValue = inputBox.value.trim();
-                if (inputValue) {
-                    // 将输入值保存到 ink 变量中
-                    if (variableName) {
-                        story.variablesState[variableName] = inputValue;
-                    }
-                    
-                    // 移除输入框容器
-                    if (container && container.parentElement) {
-                        container.parentElement.removeChild(container);
-                    }
-                    
-                    // 解析 Promise
-                    resolve();
-                }
+            // 移除输入框容器
+            if (container && container.parentElement) {
+              container.parentElement.removeChild(container);
             }
 
-            // 添加点击事件
-            submitButton.addEventListener("click", handleSubmit);
+            // 解析 Promise
+            resolve();
+          }
+        }
 
-            // 将输入框和按钮添加到容器中
-            container.appendChild(inputBox);
-            container.appendChild(submitButton);
-            
-            storyContainer.appendChild(container);
-            
-            // 自动聚焦到输入框
-            inputBox.focus();
-        }, delay);
+        // 添加点击事件
+        submitButton.addEventListener("click", handleSubmit);
+
+        // 将输入框和按钮添加到容器中
+        container.appendChild(inputBox);
+        container.appendChild(submitButton);
+
+        storyContainer.appendChild(container);
+
+        // 自动聚焦到输入框
+        inputBox.focus();
+      }, delay);
     });
-  }
-
-  // 移除单句模式提示
-  function removeSingleSentenceHint() {
-    var hint = document.getElementById("single-sentence-hint");
-    if (hint) {
-      hint.parentElement.removeChild(hint);
-    }
   }
 
   // 隐藏背景图
