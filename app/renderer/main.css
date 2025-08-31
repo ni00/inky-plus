@@ -40,7 +40,7 @@ div {
 
 #toolbar {
   position: absolute;
-  top: 0;
+  top: 40px;
   width: 100%;
   height: 56px;
   background: #FBFBFB;
@@ -66,13 +66,14 @@ h1.title {
   padding: 0;
   text-align: center;
   overflow: hidden;
-  top: 2px;
+  top: 42px; /* 40px (enhanced toolbar) + 2px offset */
   z-index: 100;
   -webkit-user-select: none;
   pointer-events: none;
 }
 
 .win32 #toolbar, .linux #toolbar {
+  top: 36px;
   height: 34px;
   background: white;
 }
@@ -508,7 +509,7 @@ img.issue-icon.warning {
 #main {
   display: block;
   position: absolute;
-  top: 56px;
+  top: 96px; /* 56px (original toolbar) + 40px (enhanced toolbar) */
   left: 0;
   right: 0;
   bottom: 0;
@@ -516,7 +517,7 @@ img.issue-icon.warning {
 }
 
 .win32 #main, .linux #main {
-  top: 34px;
+  top: 70px; /* 34px (original toolbar) + 36px (enhanced toolbar) */
 }
 
 #editor {
@@ -927,4 +928,85 @@ img.issue-icon.warning {
 
 .sidebar .nav-wrapper::-webkit-scrollbar-thumb {
   background: #DDDDDD;
+}
+
+/* Enhanced Toolbar */
+#enhanced-toolbar {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 40px;
+  background: #F8F8F8;
+  border-bottom: 1px solid #DDD;
+  z-index: 51;
+  cursor: default;
+  -webkit-user-select: none;
+}
+
+.win32 #enhanced-toolbar, .linux #enhanced-toolbar {
+  top: 0;
+  height: 36px;
+  background: #F5F5F5;
+}
+
+#enhanced-toolbar div {
+  cursor: default;
+}
+
+#enhanced-toolbar .buttons {
+  position: absolute;
+  border: 0;
+  height: 32px;
+  background: none;
+  bottom: 4px;
+}
+
+#enhanced-toolbar .buttons.left {
+  left: 10px;
+  text-align: left;
+}
+
+#enhanced-toolbar .buttons.center {
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+}
+
+#enhanced-toolbar .buttons.right {
+  right: 10px;
+  text-align: right;
+}
+
+#enhanced-toolbar .button {
+  position: relative;
+  display: inline-block;
+  border: 0;
+  width: 32px;
+  height: 32px;
+  background: none;
+  margin: 0 2px;
+  border-radius: 3px;
+  -webkit-app-region: no-drag;
+}
+
+#enhanced-toolbar .button:hover {
+  background: #E8E8E8;
+}
+
+#enhanced-toolbar .button.selected {
+  background: #D0D0D0;
+}
+
+#enhanced-toolbar .button .icon {
+  font-size: 14pt;
+  color: #666;
+  line-height: 32px;
+}
+
+#enhanced-toolbar .button:hover .icon {
+  color: #333;
+}
+
+#enhanced-toolbar .button.selected .icon {
+  color: #000;
 }

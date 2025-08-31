@@ -164,4 +164,29 @@
 }
 .window.focus .sidebar .nav-wrapper::-webkit-scrollbar-thumb {
     background: #323232;
+}/* 
+Enhanced Toolbar Focus Theme */
+.window.focus #enhanced-toolbar {
+  background: #F9F9F9;
+  border-bottom: 1px solid #CCC;
+}
+
+.window.focus #enhanced-toolbar .button:hover {
+  background: #EFEFEF;
+}
+
+.window.focus #enhanced-toolbar .button.selected {
+  background: #E0E0E0;
+}
+
+.window.focus #enhanced-toolbar .button .icon {
+  color: #777;
+}
+
+.window.focus #enhanced-toolbar .button:hover .icon {
+  color: #444;
+}
+
+.window.focus #enhanced-toolbar .button.selected .icon {
+  color: #111;
 }

@@ -168,4 +168,29 @@
 
 .window.dark .sidebar .nav-wrapper::-webkit-scrollbar-thumb {
     background: #323232;
+}/* 
+Enhanced Toolbar Dark Theme */
+.window.dark #enhanced-toolbar {
+  background: #2D2D2D;
+  border-bottom: 1px solid #444;
+}
+
+.window.dark #enhanced-toolbar .button:hover {
+  background: #404040;
+}
+
+.window.dark #enhanced-toolbar .button.selected {
+  background: #555;
+}
+
+.window.dark #enhanced-toolbar .button .icon {
+  color: #AAA;
+}
+
+.window.dark #enhanced-toolbar .button:hover .icon {
+  color: #CCC;
+}
+
+.window.dark #enhanced-toolbar .button.selected .icon {
+  color: #FFF;
 }
