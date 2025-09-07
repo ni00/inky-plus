@@ -1,26 +1,70 @@
-# Niky
+# Inky Plus
 
-from Inky v0.15.1
+基于 [Niky](https://gitee.com/firzencode/niky) 项目的进一步迭代开发版本
 
-基于 Inky 改造的特殊版本，通过修改模版，对原有功能进行扩展。
-直接用 Inky 导出到 Web 项目后，即可自动包含对应功能。
+本项目继承了 Niky 的所有功能特性，并在此基础上新增了强大的 AI 辅助功能，为 Ink 交互小说创作提供更智能的开发体验。
 
-点击此处查看 [Inky README](README_inky.md)
+## 🚀 新增 AI 功能
 
-点击此处查看 [Sample](https://ahayoo.com/niky-sample/)
+- [x] **AI 故事生成器** - 基于主题、角色、背景等参数智能生成完整的 Ink 故事框架
+- [x] **AI 语法修复** - 自动检测并修复 Ink 语法错误，提升开发效率  
+- [x] **多主题导出** - 支持多种主题样式的 Web 导出功能
+- [x] **智能配置** - 支持 OpenAI 及兼容接口的灵活配置
 
-## 功能列表
+## 📋 继承功能列表
 
-- [x]中文优化：顶部中文菜单、机翻中文帮助文档、中文字体优化
-- [x]存档优化：无限存档位
-- [X]单句模式：开启后每次点击出现一句话
-- [x]图片功能改进：可以控制图片大小，可以设置背景图片
-- [x]音乐音效改进：更加好用的方式控制背景音乐和音效
-- [x]随机数改进：可选在读档后动态设置随机数种子，避免每次读档后随机数相同
-- [x]输入框：通过输入框获取用户输入，并保存到变量中
-- [x]问题修复：当选项在底部时，无法显示完全，需要手动滚动一下的问题
+基于 Niky 项目的完整功能：
 
-## 使用说明
+- [x] **中文优化** - 顶部中文菜单、机翻中文帮助文档、中文字体优化
+- [x] **存档优化** - 无限存档位支持
+- [x] **单句模式** - 开启后每次点击出现一句话
+- [x] **图片功能改进** - 可控制图片大小，支持背景图片设置
+- [x] **音乐音效改进** - 更便捷的背景音乐和音效控制方式
+- [x] **随机数改进** - 可选在读档后动态设置随机数种子
+- [x] **输入框功能** - 通过输入框获取用户输入并保存到变量
+- [x] **界面优化** - 修复选项显示问题等用户体验改进
+
+## 🎯 项目继承关系
+
+```
+Inky (原版) → Niky (中文优化版) → Inky Plus (AI增强版)
+```
+
+- **Inky**: inkle 公司开发的原版 [inky](https://github.com/inkle/inky) 编辑器
+- **Niky**: [firzencode](https://gitee.com/firzencode/niky) 开发的中文优化版本
+- **Inky Plus**: 本项目，在 Niky 基础上增加 AI 辅助功能
+
+## 🤖 AI 功能使用指南
+
+### AI 故事生成器
+
+1. 点击工具栏中的 ⚡ 按钮打开 AI 故事生成器
+2. 填写故事参数：
+   - **主题**: 如赛博朋克、蒸汽朋克等
+   - **主角**: 角色设定和描述
+   - **背景**: 故事发生的时间地点
+   - **冲突**: 核心矛盾和目标
+   - **基调**: 选择故事的情感色彩
+3. 点击"🎲 智能随机生成"可一键生成完整配置
+4. 点击"生成故事"开始 AI 创作
+
+### AI 语法修复
+
+1. 当编辑器检测到 Ink 语法错误时
+2. 点击工具栏中的 🔧 按钮
+3. AI 会自动分析错误并提供修复方案
+4. 预览修复结果后选择是否应用
+
+### AI 设置配置
+
+1. 点击工具栏中的 ⚙️ 按钮
+2. 配置 API 参数：
+   - **提供商**: OpenAI 或自定义兼容接口
+   - **API Key**: 你的 API 密钥
+   - **模型**: 如 gpt-4, gpt-3.5-turbo 等
+   - **参数**: 温度值、最大 Token 数等
+
+## 📖 Niky 功能使用说明
 
 ### 中文优化
 
@@ -153,9 +197,50 @@ let refreshRandomSeedWhenLoad = true
 
 ```
 
-## 许可证
+## 🛠️ 开发与构建
 
-The MIT License (MIT)
+### 环境要求
+- Node.js 14+
+- npm 或 yarn
+
+### 安装依赖
+```bash
+cd app
+npm install
+```
+
+### 运行开发版本
+```bash
+# macOS/Linux
+./RUN.command
+
+# Windows  
+RUN.bat
+```
+
+### 构建发布版本
+```bash
+# macOS
+./BUILD_FOR_MAC.command
+
+# Linux
+./BUILD_FOR_LINUX.sh
+
+# Windows
+BUILD_FOR_WINDOWS.bat
+```
+
+## 🤝 贡献
+
+欢迎提交 Issue 和 Pull Request 来改进项目！
+
+## 📄 许可证
+
+本项目基于 MIT 许可证开源
+
+### 原始许可证声明
+
+The MIT License (MIT)  
 Copyright (c) 2016 inkle Ltd.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
@@ -163,3 +248,9 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+## 🙏 致谢
+
+- 感谢 [inkle](https://github.com/inkle/inky) 提供的原版 Inky 编辑器
+- 感谢 [firzencode](https://gitee.com/firzencode/niky) 开发的 Niky 中文优化版本
+- 感谢所有为开源社区做出贡献的开发者们
