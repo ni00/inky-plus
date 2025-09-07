@@ -52,7 +52,12 @@ ipcMain.on('show-context-menu', (event) => {
 
 
 ipcMain.handle("showSaveDialog", async (event,saveOptions) => {
-    return dialog.showSaveDialog(saveOptions) 
+    return dialog.showSaveDialog(saveOptions)
+
+})
+
+ipcMain.handle("showOpenDialog", async (event, openOptions) => {
+    return dialog.showOpenDialog(openOptions)
 
 })
 

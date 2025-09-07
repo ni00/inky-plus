@@ -4,6 +4,8 @@ const { AIService } = require('./aiService.js');
 const EditorView = require('../editorView.js').EditorView;
 const LiveCompiler = require('../liveCompiler.js').LiveCompiler;
 const Swal = require('sweetalert2');
+const path = require('path');
+const fs = require('fs');
 
 class AIStoryGenerator {
     constructor() {
@@ -872,6 +874,463 @@ class AIStoryGenerator {
         return div.innerHTML;
     }
 
+    // 显示多主题导出对话框
+    async showThemeExportDialog() {
+        const themes = this.getAvailableThemes();
+
+        const result = await Swal.fire({
+            title: '选择导出主题',
+            html: this.createThemeSelectionHTML(themes),
+            width: '700px',
+            heightAuto: false,
+            showCancelButton: true,
+            confirmButtonText: '选择导出文件夹',
+            cancelButtonText: '取消',
+            customClass: {
+                popup: 'theme-export-popup',
+                confirmButton: 'btn-primary',
+                cancelButton: 'btn-secondary'
+            },
+            preConfirm: () => {
+                return this.getSelectedTheme();
+            },
+            didOpen: (popup) => {
+                // 设置最大高度为页面高度的70%
+                const maxHeight = window.innerHeight * 0.7;
+                popup.style.maxHeight = maxHeight + 'px';
+
+                // 确保内容可滚动
+                const content = popup.querySelector('.swal2-html-container');
+                if (content) {
+                    content.style.maxHeight = (maxHeight - 120) + 'px';
+                    content.style.overflowY = 'auto';
+                    content.style.paddingRight = '10px';
+                }
+
+                this.bindThemeSelectionEvents();
+            }
+        });
+
+        if (result.isConfirmed && result.value) {
+            await this.performThemeExport(result.value);
+        }
+    }
+
+    // 获取可用的主题列表
+    getAvailableThemes() {
+        return [
+            {
+                id: 'default',
+                name: '默认主题',
+                description: '经典的 Inky 默认样式',
+                preview: '📄'
+            },
+            {
+                id: 'wechat-chat',
+                name: '森林',
+                description: '宁静森林风格，适合叙事类故事',
+                preview: '🌲'
+            },
+            {
+                id: 'cyberpunk',
+                name: '赛博朋克',
+                description: '霓虹闪烁的未来都市风格',
+                preview: '🌆'
+            },
+            {
+                id: 'cthulhu',
+                name: '克苏鲁',
+                description: '古老神秘的诡异氛围',
+                preview: '📜'
+            },
+            {
+                id: 'sci-fi',
+                name: '科幻',
+                description: '全息投影的未来科技感',
+                preview: '🚀'
+            },
+            {
+                id: 'fantasy',
+                name: '魔幻',
+                description: '中世纪魔法卷轴风格',
+                preview: '🏰'
+            }
+        ];
+    }
+
+    // 创建主题选择HTML
+    createThemeSelectionHTML(themes) {
+        const themeCards = themes.map(theme => `
+            <div class="theme-card" data-theme-id="${theme.id}">
+                <input type="radio" name="selected-theme" value="${theme.id}" id="theme-${theme.id}" style="display: none;">
+                <label for="theme-${theme.id}" class="theme-card-content">
+                    <div class="theme-preview">${theme.preview}</div>
+                    <div class="theme-info">
+                        <h4>${theme.name}</h4>
+                        <p>${theme.description}</p>
+                    </div>
+                    <div class="theme-radio">
+                        <div class="radio-indicator"></div>
+                    </div>
+                </label>
+            </div>
+        `).join('');
+
+        return `
+            <div class="theme-selection-dialog">
+                <p class="selection-hint">请选择您想要的导出主题风格：</p>
+                <div class="theme-grid">
+                    ${themeCards}
+                </div>
+                <div class="export-options">
+                    <label class="option-label">
+                        <input type="checkbox" id="include-assets" checked>
+                        <span>包含默认资源文件</span>
+                    </label>
+                </div>
+            </div>
+        `;
+    }
+
+    // 绑定主题选择事件
+    bindThemeSelectionEvents() {
+        const self = this;
+
+        // 主题卡片点击事件
+        $('.theme-card').on('click', function() {
+            const themeId = $(this).data('theme-id');
+            $(`#theme-${themeId}`).prop('checked', true);
+            $('.theme-card').removeClass('selected');
+            $(this).addClass('selected');
+        });
+
+        // 默认选择第一个主题
+        $('.theme-card').first().click();
+    }
+
+    // 获取选中的主题
+    getSelectedTheme() {
+        const selectedTheme = $('input[name="selected-theme"]:checked').val();
+        const includeAssets = $('#include-assets').is(':checked');
+
+        if (!selectedTheme) {
+            Swal.showValidationMessage('请选择一个主题');
+            return false;
+        }
+
+        return {
+            themeId: selectedTheme,
+            includeAssets: includeAssets
+        };
+    }
+
+    // 执行主题导出
+    async performThemeExport(options) {
+        const { themeId, includeAssets } = options;
+
+        // 显示导出进度
+        const progressDialog = Swal.fire({
+            title: '正在导出...',
+            html: `
+                <div class="export-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="export-progress-fill"></div>
+                    </div>
+                    <div class="progress-text" id="export-progress-text">准备导出...</div>
+                </div>
+            `,
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            showCancelButton: false,
+            showConfirmButton: false,
+            customClass: {
+                popup: 'export-progress-popup'
+            }
+        });
+
+        try {
+            // 更新进度
+            this.updateExportProgress(20, '编译故事...');
+
+            // 获取 InkProject 实例
+            const InkProject = require('../inkProject.js').InkProject;
+            const inkProject = InkProject.currentProject;
+
+            if (!inkProject) {
+                throw new Error('没有找到当前项目');
+            }
+
+            // 调用现有的导出逻辑，但使用自定义模板
+            await this.exportWithTheme(inkProject, themeId, includeAssets);
+
+            this.updateExportProgress(100, '导出完成！');
+
+            // 关闭进度对话框
+            Swal.close();
+
+            // 显示成功消息
+            await Swal.fire({
+                icon: 'success',
+                title: '导出成功！',
+                text: '您的故事已使用选定主题导出',
+                timer: 2000,
+                showConfirmButton: false
+            });
+
+        } catch (error) {
+            Swal.close();
+
+            await Swal.fire({
+                icon: 'error',
+                title: '导出失败',
+                text: error.message
+            });
+
+            console.error('Theme export error:', error);
+        }
+    }
+
+    // 使用指定主题导出
+    async exportWithTheme(inkProject, themeId, includeAssets) {
+        this.updateExportProgress(40, '准备主题模板...');
+
+        // 获取主题模板路径
+        const themeTemplatePath = path.join(__dirname, '../../export-themes', themeId);
+        const defaultTemplatePath = path.join(__dirname, '../export-for-web-template');
+
+        // 如果主题不存在，使用默认主题
+        let actualTemplatePath = themeTemplatePath;
+        if (!fs.existsSync(themeTemplatePath)) {
+            console.warn(`Theme ${themeId} not found, using default theme`);
+            actualTemplatePath = defaultTemplatePath;
+        }
+
+        this.updateExportProgress(60, '编译故事内容...');
+
+        // 首先编译故事内容
+        const inkJsCompatible = true;
+        const LiveCompiler = require('../liveCompiler.js').LiveCompiler;
+
+        return new Promise((resolve, reject) => {
+            LiveCompiler.exportJson(inkJsCompatible, async (err, compiledJsonTempPath) => {
+                if (err) {
+                    reject(new Error(`编译失败: ${err}`));
+                    return;
+                }
+
+                try {
+                    // 让用户选择导出文件夹
+                    const { ipcRenderer } = require('electron');
+                    const result = await ipcRenderer.invoke('showOpenDialog', {
+                        title: '选择导出文件夹',
+                        defaultPath: inkProject.defaultExportPath ?
+                            path.dirname(inkProject.defaultExportPath) :
+                            path.join(require('os').homedir(), 'Desktop'),
+                        properties: ['openDirectory', 'createDirectory'],
+                        buttonLabel: '选择文件夹'
+                    });
+
+                    if (result.filePaths && result.filePaths.length > 0) {
+                        const exportDir = result.filePaths[0];
+                        const htmlFileName = 'index.html';
+                        const htmlFilePath = path.join(exportDir, htmlFileName);
+
+                        this.updateExportProgress(80, '生成导出文件...');
+
+                        // 使用自定义模板进行导出
+                        await this.performCustomExport(inkProject, htmlFilePath, exportDir, actualTemplatePath, compiledJsonTempPath, includeAssets);
+
+                        this.updateExportProgress(100, '导出完成');
+                        resolve();
+                    } else {
+                        resolve(); // 用户取消了选择
+                    }
+                } catch (error) {
+                    reject(error);
+                }
+            });
+        });
+    }
+
+    // 执行自定义导出
+    async performCustomExport(inkProject, htmlFilePath, exportDir, templatePath, compiledJsonTempPath, includeAssets) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                // 读取主题模板文件
+                const indexTemplate = fs.readFileSync(path.join(templatePath, 'index.html'), 'utf8');
+                const styleTemplate = fs.readFileSync(path.join(templatePath, 'style.css'), 'utf8');
+
+                // 获取故事标题
+                let storyTitle = path.basename(inkProject.mainInk.filename(), '.ink') || 'story';
+                const mainInkTagDict = inkProject.mainInk.symbols.globalDictionaryStyleTags;
+                if (mainInkTagDict && mainInkTagDict["title"]) {
+                    storyTitle = mainInkTagDict["title"];
+                }
+
+                // 替换模板变量
+                let processedIndex = indexTemplate
+                    .replace(/##STORY TITLE##/g, storyTitle)
+                    .replace(/##JAVASCRIPT FILENAME##/g, inkProject.jsFilename());
+
+                // 确保导出目录存在
+                if (!fs.existsSync(exportDir)) {
+                    fs.mkdirSync(exportDir, { recursive: true });
+                }
+
+                // 复制样式文件
+                fs.writeFileSync(path.join(exportDir, 'style.css'), styleTemplate);
+
+                // 复制 index.html
+                fs.writeFileSync(htmlFilePath, processedIndex);
+
+                // 复制必要的资源文件
+                const defaultTemplatePath = path.join(__dirname, '../../export-for-web-template');
+                const nodeModulesPath = path.join(__dirname, '../../node_modules/inkjs/dist');
+
+                // 定义文件映射：目标文件名 -> 源文件路径
+                const fileMappings = [
+                    {
+                        destName: 'ink.js',
+                        sourcePath: path.join(nodeModulesPath, 'ink.js')
+                    },
+                    {
+                        destName: 'main.js',
+                        sourcePath: path.join(defaultTemplatePath, 'main.js')
+                    }
+                ];
+
+                console.log('File mappings for export:');
+                fileMappings.forEach(mapping => {
+                    console.log(`- ${mapping.destName}: ${mapping.sourcePath} -> ${path.join(exportDir, mapping.destName)}`);
+                });
+
+                // 使用 Promise.all 来处理多个异步文件复制
+                const copyPromises = fileMappings.map(mapping => {
+                    return new Promise((resolveCopy, rejectCopy) => {
+                        const { destName, sourcePath } = mapping;
+                        const destPath = path.join(exportDir, destName);
+
+                        if (fs.existsSync(sourcePath)) {
+                            fs.copyFile(sourcePath, destPath, (err) => {
+                                if (err) {
+                                    console.error(`Failed to copy ${destName}:`, err);
+                                    rejectCopy(err);
+                                } else {
+                                    console.log(`Successfully copied ${destName}`);
+                                    resolveCopy();
+                                }
+                            });
+                        } else {
+                            console.warn(`Source file not found: ${sourcePath}`);
+                            rejectCopy(new Error(`Required file ${destName} not found at ${sourcePath}`));
+                        }
+                    });
+                });
+
+                // 等待所有资源文件复制完成
+                await Promise.all(copyPromises);
+
+                // 复制故事 JS 文件 - 使用自定义的同步转换方法
+                const storyJsPath = path.join(exportDir, inkProject.jsFilename());
+                await this.convertJSONToJSFile(compiledJsonTempPath, storyJsPath);
+
+                // 如果需要包含其他资源文件
+                if (includeAssets) {
+                    await this.copyAdditionalAssets(defaultTemplatePath, exportDir);
+                }
+
+                console.log('Export completed successfully');
+                console.log(`Files exported to: ${exportDir}`);
+                console.log(`- index.html: ${htmlFilePath}`);
+                console.log(`- style.css: ${path.join(exportDir, 'style.css')}`);
+                console.log(`- main.js: ${path.join(exportDir, 'main.js')}`);
+                console.log(`- ink.js: ${path.join(exportDir, 'ink.js')}`);
+                console.log(`- story JS: ${storyJsPath}`);
+                resolve();
+
+            } catch (error) {
+                console.error('Export failed:', error);
+                reject(error);
+            }
+        });
+    }
+
+    // 自定义的同步 JSON 到 JS 转换方法
+    convertJSONToJSFile(jsonFilePath, targetJSPath) {
+        return new Promise((resolve, reject) => {
+            fs.readFile(jsonFilePath, 'utf8', (err, jsonContent) => {
+                if (err) {
+                    reject(new Error(`Failed to read JSON file: ${err.message}`));
+                    return;
+                }
+
+                const jsContent = `var storyContent = ${jsonContent};`;
+
+                fs.writeFile(targetJSPath, jsContent, 'utf8', (writeErr) => {
+                    if (writeErr) {
+                        reject(new Error(`Failed to write JS file: ${writeErr.message}`));
+                    } else {
+                        console.log(`Successfully created JS file: ${targetJSPath}`);
+                        resolve();
+                    }
+                });
+            });
+        });
+    }
+
+    // 复制额外的资源文件
+    copyAdditionalAssets(sourceDir, targetDir) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                // 复制可能存在的其他资源文件
+                const optionalFiles = [
+                    'story.js',
+                    'story.json'
+                ];
+
+                const copyPromises = optionalFiles.map(file => {
+                    return new Promise((resolveCopy, rejectCopy) => {
+                        const sourcePath = path.join(sourceDir, file);
+                        const destPath = path.join(targetDir, file);
+
+                        if (fs.existsSync(sourcePath)) {
+                            fs.copyFile(sourcePath, destPath, (err) => {
+                                if (err) {
+                                    console.warn(`Failed to copy optional file ${file}:`, err);
+                                    resolveCopy(); // 对于可选文件，不因失败而中断整个过程
+                                } else {
+                                    console.log(`Successfully copied optional file ${file}`);
+                                    resolveCopy();
+                                }
+                            });
+                        } else {
+                            resolveCopy(); // 文件不存在，跳过
+                        }
+                    });
+                });
+
+                await Promise.all(copyPromises);
+                resolve();
+            } catch (error) {
+                reject(error);
+            }
+        });
+    }
+
+    // 更新导出进度
+    updateExportProgress(percent, status = '') {
+        const progressFill = document.getElementById('export-progress-fill');
+        const progressText = document.getElementById('export-progress-text');
+
+        if (progressFill) {
+            progressFill.style.width = percent + '%';
+        }
+
+        if (progressText && status) {
+            progressText.textContent = status;
+        }
+    }
+
     // 绑定事件
     bindEvents() {
         const self = this;
@@ -891,6 +1350,12 @@ class AIStoryGenerator {
         // Ink语法修复按钮点击事件
         $("#enhanced-toolbar .ink-syntax-fixer.button").on("click", function (event) {
             self.showInkFixDialog();
+            event.preventDefault();
+        });
+
+        // 导出按钮点击事件
+        $("#enhanced-toolbar .export-compiled.button").on("click", function (event) {
+            self.showThemeExportDialog();
             event.preventDefault();
         });
     }

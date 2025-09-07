@@ -974,3 +974,377 @@
     max-height: 120px;
   }
 }
+
+/* Theme Export Dialog Styles */
+.theme-selection-dialog {
+  text-align: left;
+  padding: 10px 0;
+}
+
+.theme-selection-dialog .selection-hint {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #666;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.theme-selection-dialog .theme-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.theme-selection-dialog .theme-card {
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: #fff;
+  overflow: hidden;
+}
+
+.theme-selection-dialog .theme-card:hover {
+  border-color: #007bff;
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
+  transform: translateY(-2px);
+}
+
+.theme-selection-dialog .theme-card.selected {
+  border-color: #007bff;
+  background: #f8f9ff;
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
+}
+
+.theme-selection-dialog .theme-card-content {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.theme-selection-dialog .theme-preview {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  margin-right: 15px;
+  flex-shrink: 0;
+}
+
+.theme-selection-dialog .theme-info {
+  flex: 1;
+}
+
+.theme-selection-dialog .theme-info h4 {
+  margin: 0 0 5px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.theme-selection-dialog .theme-info p {
+  margin: 0;
+  font-size: 13px;
+  color: #666;
+  line-height: 1.4;
+}
+
+.theme-selection-dialog .theme-radio {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin-left: 15px;
+  flex-shrink: 0;
+}
+
+.theme-selection-dialog .radio-indicator {
+  width: 12px;
+  height: 12px;
+  border: 2px solid #ddd;
+  border-radius: 50%;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.theme-selection-dialog .theme-card.selected .radio-indicator {
+  border-color: #007bff;
+  background: #007bff;
+}
+
+.theme-selection-dialog .radio-indicator::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: white;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.theme-selection-dialog .theme-card.selected .radio-indicator::after {
+  opacity: 1;
+}
+
+.theme-selection-dialog .export-options {
+  padding: 15px;
+  border-top: 1px solid #e9ecef;
+  background: #f8f9fa;
+  border-radius: 0 0 8px 8px;
+  margin-top: -15px;
+}
+
+.theme-selection-dialog .option-label {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #495057;
+  cursor: pointer;
+  margin: 0;
+}
+
+.theme-selection-dialog .option-label input[type="checkbox"] {
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+/* 导出信息样式 */
+.theme-selection-dialog .export-info {
+  margin: 20px 0;
+}
+
+.theme-selection-dialog .info-box {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.theme-selection-dialog .info-box h4 {
+  margin: 0 0 12px 0;
+  color: #495057;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.theme-selection-dialog .info-box p {
+  margin: 8px 0;
+  color: #666;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.theme-selection-dialog .info-box ul {
+  margin: 12px 0;
+  padding-left: 20px;
+  color: #495057;
+}
+
+.theme-selection-dialog .info-box li {
+  margin: 4px 0;
+  font-size: 13px;
+}
+
+.theme-selection-dialog .info-box .note {
+  background: #e7f3ff;
+  border-left: 3px solid #0066cc;
+  padding: 8px 12px;
+  margin: 12px 0 0 0;
+  font-style: italic;
+  color: #0066cc;
+}
+
+/* 暗色主题支持 */
+.dark .theme-selection-dialog .info-box {
+  background: #2d2d2d;
+  border-color: #444;
+  color: #e0e0e0;
+}
+
+.dark .theme-selection-dialog .info-box h4 {
+  color: #e0e0e0;
+}
+
+.dark .theme-selection-dialog .info-box p,
+.dark .theme-selection-dialog .info-box li {
+  color: #aaa;
+}
+
+.dark .theme-selection-dialog .info-box .note {
+  background: #1a3a40;
+  border-left-color: #17a2b8;
+  color: #17a2b8;
+}
+
+/* Export Progress Styles */
+.export-progress {
+  width: 100%;
+  margin: 20px 0;
+}
+
+.export-progress .progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #f0f0f0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.export-progress .progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #28a745, #20c997);
+  width: 0%;
+  transition: width 0.3s ease;
+  border-radius: 4px;
+}
+
+.export-progress .progress-text {
+  text-align: center;
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+}
+
+/* Theme Export Popup Styles */
+.theme-export-popup {
+  max-height: 80vh !important;
+  overflow: hidden !important;
+}
+
+.theme-export-popup .swal2-html-container {
+  max-height: calc(80vh - 140px) !important;
+  overflow-y: auto !important;
+  padding-right: 10px;
+}
+
+.export-progress-popup {
+  max-height: 60vh !important;
+  overflow: hidden !important;
+}
+
+.export-progress-popup .swal2-html-container {
+  max-height: calc(60vh - 100px) !important;
+  overflow-y: auto !important;
+  padding-right: 10px;
+}
+
+/* Dark Theme Support for Theme Dialog */
+.dark .theme-selection-dialog .theme-card {
+  border-color: #444;
+  background: #2d2d2d;
+}
+
+.dark .theme-selection-dialog .theme-card:hover {
+  border-color: #0d6efd;
+  background: #2d2d2d;
+}
+
+.dark .theme-selection-dialog .theme-card.selected {
+  border-color: #0d6efd;
+  background: #1a1a2e;
+}
+
+.dark .theme-selection-dialog .theme-info h4 {
+  color: #e0e0e0;
+}
+
+.dark .theme-selection-dialog .theme-info p {
+  color: #aaa;
+}
+
+.dark .theme-selection-dialog .radio-indicator {
+  border-color: #666;
+}
+
+.dark .theme-selection-dialog .theme-card.selected .radio-indicator {
+  border-color: #0d6efd;
+  background: #0d6efd;
+}
+
+.dark .theme-selection-dialog .export-options {
+  background: #2d2d2d;
+  border-color: #444;
+}
+
+.dark .theme-selection-dialog .option-label {
+  color: #e0e0e0;
+}
+
+.dark .theme-selection-dialog .selection-hint {
+  color: #aaa;
+}
+
+.dark .export-progress .progress-bar {
+  background: #444;
+}
+
+.dark .export-progress .progress-fill {
+  background: linear-gradient(90deg, #198754, #17a2b8);
+}
+
+.dark .export-progress .progress-text {
+  color: #aaa;
+}
+
+/* Responsive Design for Theme Dialog */
+@media (max-width: 768px) {
+  .theme-selection-dialog .theme-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .theme-selection-dialog .theme-card-content {
+    padding: 12px;
+  }
+
+  .theme-selection-dialog .theme-preview {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+
+  .theme-selection-dialog .theme-info h4 {
+    font-size: 14px;
+  }
+
+  .theme-selection-dialog .theme-info p {
+    font-size: 12px;
+  }
+
+  .theme-export-popup {
+    width: 95vw !important;
+    max-height: 90vh !important;
+  }
+
+  .theme-export-popup .swal2-html-container {
+    max-height: calc(90vh - 180px) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .theme-selection-dialog .theme-card-content {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .theme-selection-dialog .theme-preview {
+    margin-right: 0;
+    margin-bottom: 10px;
+  }
+
+  .theme-selection-dialog .theme-radio {
+    margin-left: 0;
+    margin-top: 10px;
+  }
+}

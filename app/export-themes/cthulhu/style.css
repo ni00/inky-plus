@@ -1,0 +1,619 @@
+/* 克苏鲁主题样式 */
+@import url('https://fonts.font.im/css?family=Old+Standard+TT:400,400i,700|Special+Elite&display=swap');
+
+body {
+    font-family: 'Old Standard TT', 'Times New Roman', serif;
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 25%, #1f1f1f 50%, #0f0f0f 75%, #000000 100%);
+    background-attachment: fixed;
+    color: #d4af37;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    position: relative;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background:
+        radial-gradient(circle at 30% 70%, rgba(212, 175, 55, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 70% 30%, rgba(139, 69, 19, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(160, 82, 45, 0.05) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 1;
+}
+
+body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image:
+        radial-gradient(circle at 25% 25%, rgba(212, 175, 55, 0.05) 1px, transparent 1px),
+        radial-gradient(circle at 75% 75%, rgba(139, 69, 19, 0.05) 1px, transparent 1px);
+    background-size: 50px 50px;
+    opacity: 0.3;
+    pointer-events: none;
+    z-index: 1;
+}
+
+@media screen and (prefers-reduced-motion: no-preference) {
+    body.switched {
+        transition: color 0.6s, background-color 0.6s;
+    }
+}
+
+h1, h2 {
+    text-align: center;
+    font-family: 'Special Elite', 'Old Standard TT', serif;
+    margin: 0;
+    padding: 0;
+    text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+}
+
+h1 {
+    font-size: 36pt;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: #d4af37;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    font-style: italic;
+    text-shadow:
+        0 0 5px #d4af37,
+        0 0 10px #d4af37,
+        0 0 15px rgba(212, 175, 55, 0.3);
+}
+
+h2 {
+    font-size: 14pt;
+    font-weight: 400;
+    color: #8b4513;
+    font-style: italic;
+    text-shadow: 0 0 5px rgba(139, 69, 19, 0.5);
+}
+
+.header {
+    padding-top: 4em;
+    padding-bottom: 4em;
+    position: relative;
+    z-index: 2;
+}
+
+/* 古老的羊皮纸容器样式 */
+.cthulhu-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px;
+    background: linear-gradient(135deg, #2c2c2c 0%, #1a1a1a 50%, #2c2c2c 100%);
+    border: 3px solid #d4af37;
+    border-radius: 12px;
+    box-shadow:
+        0 0 20px rgba(212, 175, 55, 0.2),
+        inset 0 0 30px rgba(0, 0, 0, 0.8);
+    position: relative;
+    z-index: 2;
+    backdrop-filter: blur(3px);
+}
+
+.cthulhu-container::before {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    right: -3px;
+    bottom: -3px;
+    background: linear-gradient(45deg,
+        #d4af37, #8b4513, #654321, #daa520, #d4af37);
+    border-radius: 12px;
+    z-index: -1;
+    opacity: 0.3;
+    animation: parchment-glow 4s ease-in-out infinite alternate;
+}
+
+@keyframes parchment-glow {
+    from { opacity: 0.3; }
+    to { opacity: 0.6; }
+}
+
+/* 羊皮纸纹理效果 */
+.cthulhu-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image:
+        radial-gradient(circle at 20% 80%, rgba(212, 175, 55, 0.1) 1px, transparent 1px),
+        radial-gradient(circle at 80% 20%, rgba(139, 69, 19, 0.1) 1px, transparent 1px),
+        radial-gradient(circle at 40% 40%, rgba(160, 82, 45, 0.05) 1px, transparent 1px);
+    background-size: 30px 30px, 40px 40px, 60px 60px;
+    opacity: 0.4;
+    pointer-events: none;
+    border-radius: 9px;
+}
+
+/* 故事内容样式 */
+#story {
+    background: rgba(42, 42, 42, 0.8);
+    border: 2px solid #8b4513;
+    border-radius: 8px;
+    padding: 30px;
+    margin: 25px 0;
+    position: relative;
+    box-shadow:
+        0 0 15px rgba(139, 69, 19, 0.3),
+        inset 0 0 20px rgba(0, 0, 0, 0.6);
+    font-family: 'Old Standard TT', serif;
+}
+
+#story::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #d4af37, #8b4513, #daa520);
+}
+
+p {
+    font-size: 14pt;
+    color: #e6d7b3;
+    line-height: 1.8;
+    margin: 20px 0;
+    text-shadow: 0 0 2px rgba(212, 175, 55, 0.3);
+    font-weight: 400;
+    text-align: justify;
+    text-justify: inter-word;
+}
+
+strong {
+    color: #d4af37;
+    font-weight: 700;
+    text-shadow: 0 0 5px #d4af37;
+    font-style: italic;
+}
+
+/* 神秘的选择项样式 */
+.choice {
+    text-align: center;
+    margin: 35px 0;
+}
+
+.choice a {
+    display: inline-block;
+    padding: 8px 16px;
+    margin: 6px 8px;
+    background: linear-gradient(135deg, #8b4513 0%, #d4af37 50%, #8b4513 100%);
+    color: #2c2c2c;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 12pt;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Special Elite', serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border: 2px solid #d4af37;
+    box-shadow:
+        0 0 10px rgba(212, 175, 55, 0.4),
+        0 4px 8px rgba(0, 0, 0, 0.5);
+    transition: all 0.4s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.choice a::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.6s;
+}
+
+.choice a:hover {
+    background: linear-gradient(135deg, #d4af37 0%, #daa520 50%, #d4af37 100%);
+    box-shadow:
+        0 0 20px rgba(212, 175, 55, 0.8),
+        0 6px 15px rgba(0, 0, 0, 0.7);
+    transform: translateY(-4px) scale(1.05);
+    color: #000;
+}
+
+.choice a:hover::before {
+    left: 100%;
+}
+
+.choice a.unclickable {
+    background: #444;
+    border-color: #666;
+    color: #666;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.choice a.unclickable:hover {
+    background: #444;
+    transform: none;
+    box-shadow: none;
+}
+
+/* 古老的头部信息 */
+.written-in-ink {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(90deg, #2c2c2c 0%, #1a1a1a 50%, #2c2c2c 100%);
+    color: #d4af37;
+    text-align: center;
+    padding: 12px;
+    font-size: 11pt;
+    font-weight: 700;
+    z-index: 3;
+    border-bottom: 2px solid #d4af37;
+    font-family: 'Special Elite', serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-shadow: 0 0 5px #d4af37;
+}
+
+.written-in-ink a {
+    color: #d4af37;
+    text-decoration: none;
+    text-shadow: 0 0 5px #d4af37;
+}
+
+/* 神秘的控制按钮 */
+#controls {
+    position: fixed;
+    top: 10px;
+    right: 20px;
+    z-index: 4;
+    background: rgba(42, 42, 42, 0.9);
+    padding: 12px 18px;
+    border-radius: 8px;
+    border: 2px solid #8b4513;
+    box-shadow:
+        0 0 10px rgba(139, 69, 19, 0.4),
+        inset 0 0 10px rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(5px);
+}
+
+#controls a {
+    color: #d4af37;
+    text-decoration: none;
+    font-size: 11pt;
+    margin: 0 8px;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-family: 'Special Elite', serif;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    text-shadow: 0 0 3px #d4af37;
+    border: 1px solid transparent;
+    cursor: pointer;
+}
+
+#controls a:hover {
+    background: #d4af37;
+    color: #2c2c2c;
+    text-shadow: none;
+    border-color: #8b4513;
+}
+
+/* 结局样式 */
+.end {
+    text-align: center;
+    font-weight: bold;
+    color: #d4af37;
+    padding: 35px 25px;
+    text-shadow:
+        0 0 5px #d4af37,
+        0 0 10px #d4af37,
+        0 0 15px rgba(212, 175, 55, 0.5);
+    font-size: 16pt;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-style: italic;
+}
+
+/* 深色主题 */
+body.dark {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 25%, #1f1f1f 50%, #0f0f0f 75%, #000000 100%);
+    color: #d4af37;
+}
+
+/* Modal/Dialog Styles for Save/Load System */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 1;
+    transition: opacity 0.2s ease-in;
+}
+
+.modal-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.modal-container {
+    background-color: rgba(26, 15, 8, 0.95);
+    border: 3px solid #d4af37;
+    box-shadow:
+        0 0 25px rgba(212, 175, 55, 0.3),
+        inset 0 0 30px rgba(0, 0, 0, 0.8);
+    width: 80%;
+    max-width: 800px;
+    max-height: 80vh;
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+    transform: translateY(0);
+    transition: transform 0.2s ease-out;
+    color: #d4af37;
+}
+
+.dark .modal-container {
+    background-color: rgba(0, 0, 0, 0.95);
+    color: #d4af37;
+}
+
+.modal-overlay.hidden .modal-container {
+    transform: translateY(20px);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #d4af37;
+    padding-bottom: 10px;
+}
+
+.modal-header h2 {
+    margin: 0;
+    color: #d4af37;
+    text-shadow: 0 0 8px #d4af37;
+    font-family: 'Special Elite', serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-style: italic;
+}
+
+.close-button {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0 8px;
+    color: #d4af37;
+    transition: all 0.2s ease;
+    text-shadow: 0 0 5px #d4af37;
+}
+
+.close-button:hover {
+    color: #daa520;
+    text-shadow: 0 0 8px #daa520;
+    transform: scale(1.1);
+}
+
+.close-button:active {
+    transform: scale(0.95);
+}
+
+.close-button:focus {
+    outline: none;
+}
+
+.close-button:focus-visible {
+    box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.5);
+    border-radius: 4px;
+}
+
+.slot-list {
+    overflow-y: auto;
+    max-height: calc(80vh - 100px);
+    padding-right: 10px;
+}
+
+.save-slot {
+    display: flex;
+    padding: 15px;
+    border: 2px solid #8b4513;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    align-items: center;
+    background: rgba(139, 69, 19, 0.1);
+    transition: all 0.3s ease;
+}
+
+.save-slot:hover {
+    background-color: rgba(212, 175, 55, 0.1);
+    border-color: #d4af37;
+    transform: translateX(5px);
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
+}
+
+.save-slot .number {
+    width: 60px;
+    font-weight: bold;
+    color: #d4af37;
+    font-family: 'Special Elite', serif;
+    text-shadow: 0 0 3px #d4af37;
+}
+
+.save-slot .content {
+    flex-grow: 1;
+    font-size: 14px;
+    color: #f4e4bc;
+    font-family: 'Old Standard TT', serif;
+    text-shadow: 0 0 2px rgba(212, 175, 55, 0.3);
+}
+
+.save-slot .time {
+    width: 150px;
+    text-align: right;
+    color: #daa520;
+    font-size: 12px;
+    font-family: 'Special Elite', serif;
+    text-shadow: 0 0 3px #daa520;
+}
+
+.empty-slot {
+    color: #666;
+    background-color: rgba(0, 0, 0, 0.3);
+    border-color: #666;
+}
+
+.empty-slot:hover {
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.new-save {
+    border: 2px dashed #d4af37;
+    background-color: rgba(212, 175, 55, 0.05);
+}
+
+.new-save:hover {
+    border-color: #daa520;
+    background-color: rgba(218, 165, 32, 0.1);
+}
+
+.empty-notice {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+    font-style: italic;
+    font-family: 'Old Standard TT', serif;
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+.fade-out {
+    animation: fadeOut 0.2s ease-out forwards;
+}
+
+.slot-content {
+    display: flex;
+    flex-grow: 1;
+    cursor: pointer;
+    align-items: center;
+}
+
+.delete-button {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0 8px;
+    color: #666;
+    transition: all 0.2s ease;
+    margin-left: 10px;
+}
+
+.delete-button:hover {
+    color: #ff4444;
+    text-shadow: 0 0 5px #ff4444;
+    transform: scale(1.1);
+}
+
+.new-save .delete-button {
+    display: none;
+}
+
+/* 响应式设计 */
+@media screen and (max-width: 768px) {
+    .cthulhu-container {
+        margin: 15px;
+        padding: 25px;
+    }
+
+    h1 {
+        font-size: 28pt;
+        letter-spacing: 2px;
+    }
+
+    #story {
+        padding: 20px;
+    }
+
+    .choice a {
+        padding: 12px 24px;
+        font-size: 12pt;
+    }
+
+    #controls {
+        top: 5px;
+        right: 10px;
+        padding: 8px 12px;
+    }
+
+    .modal-container {
+        width: 95%;
+        max-width: none;
+        margin: 10px;
+    }
+}
+
+/* 美化滚动条样式 */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(26, 15, 8, 0.3);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #d4af37;
+    border-radius: 4px;
+    transition: background 0.3s ease;
+    box-shadow: 0 0 5px rgba(212, 175, 55, 0.3);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #daa520;
+    box-shadow: 0 0 8px rgba(218, 165, 32, 0.5);
+}
+
+::-webkit-scrollbar-thumb:active {
+    background: #b8860b;
+    box-shadow: 0 0 10px rgba(184, 134, 11, 0.7);
+}
+
+::-webkit-scrollbar-corner {
+    background: rgba(26, 15, 8, 0.3);
+}
+
+/* Firefox 滚动条样式 */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #d4af37 rgba(26, 15, 8, 0.3);
+}

@@ -1,0 +1,662 @@
+/* 魔幻主题样式 */
+@import url('https://fonts.font.im/css?family=Cinzel:wght@400;500;600;700;900|MedievalSharp&display=swap');
+
+body {
+    font-family: 'Cinzel', 'Times New Roman', serif;
+    background: linear-gradient(135deg, #1a0a0a 0%, #2d1a0a 25%, #1a2d0a 50%, #0a1a2d 75%, #2d0a1a 100%);
+    background-attachment: fixed;
+    color: #daa520;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    position: relative;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background:
+        radial-gradient(circle at 20% 80%, rgba(218, 165, 32, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(139, 69, 19, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 60%, rgba(184, 134, 11, 0.05) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 1;
+}
+
+body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image:
+        radial-gradient(circle at 15% 85%, rgba(218, 165, 32, 0.08) 2px, transparent 2px),
+        radial-gradient(circle at 85% 15%, rgba(139, 69, 19, 0.08) 2px, transparent 2px),
+        radial-gradient(circle at 50% 50%, rgba(184, 134, 11, 0.05) 1px, transparent 1px);
+    background-size: 60px 60px, 80px 80px, 40px 40px;
+    opacity: 0.4;
+    pointer-events: none;
+    z-index: 1;
+}
+
+@media screen and (prefers-reduced-motion: no-preference) {
+    body.switched {
+        transition: color 0.6s, background-color 0.6s;
+    }
+}
+
+h1, h2 {
+    text-align: center;
+    font-family: 'MedievalSharp', 'Cinzel', serif;
+    margin: 0;
+    padding: 0;
+    text-shadow: 0 0 8px rgba(218, 165, 32, 0.6);
+}
+
+h1 {
+    font-size: 42pt;
+    font-weight: 900;
+    margin-bottom: 25px;
+    color: #daa520;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-style: italic;
+    text-shadow:
+        0 0 5px #daa520,
+        0 0 10px #daa520,
+        0 0 15px #daa520,
+        0 0 20px rgba(218, 165, 32, 0.4);
+    animation: magical-glow 3s ease-in-out infinite alternate;
+}
+
+@keyframes magical-glow {
+    from {
+        text-shadow:
+            0 0 5px #daa520,
+            0 0 10px #daa520,
+            0 0 15px #daa520,
+            0 0 20px rgba(218, 165, 32, 0.4);
+        transform: scale(1);
+    }
+    to {
+        text-shadow:
+            0 0 5px #daa520,
+            0 0 10px #daa520,
+            0 0 15px #daa520,
+            0 0 20px rgba(218, 165, 32, 0.4),
+            0 0 25px rgba(218, 165, 32, 0.6);
+        transform: scale(1.02);
+    }
+}
+
+h2 {
+    font-size: 16pt;
+    font-weight: 500;
+    color: #8b4513;
+    font-style: italic;
+    text-shadow: 0 0 5px rgba(139, 69, 19, 0.5);
+}
+
+.header {
+    padding-top: 4em;
+    padding-bottom: 4em;
+    position: relative;
+    z-index: 2;
+}
+
+/* 魔法卷轴容器样式 */
+.fantasy-container {
+    max-width: 950px;
+    margin: 0 auto;
+    padding: 45px;
+    background: linear-gradient(135deg, #2d1810 0%, #1a0f08 50%, #2d1810 100%);
+    border: 4px solid #daa520;
+    border-radius: 20px;
+    box-shadow:
+        0 0 25px rgba(218, 165, 32, 0.3),
+        inset 0 0 30px rgba(0, 0, 0, 0.8);
+    position: relative;
+    z-index: 2;
+    backdrop-filter: blur(5px);
+}
+
+.fantasy-container::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    background: linear-gradient(45deg,
+        #daa520, #8b4513, #b8860b, #daa520);
+    border-radius: 20px;
+    z-index: -1;
+    animation: magic-border 5s ease-in-out infinite alternate;
+}
+
+@keyframes magic-border {
+    from { opacity: 0.4; filter: brightness(1); }
+    to { opacity: 0.8; filter: brightness(1.2); }
+}
+
+/* 卷轴纹理效果 */
+.fantasy-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image:
+        radial-gradient(circle at 25% 75%, rgba(218, 165, 32, 0.1) 2px, transparent 2px),
+        radial-gradient(circle at 75% 25%, rgba(139, 69, 19, 0.1) 2px, transparent 2px),
+        linear-gradient(rgba(218, 165, 32, 0.05) 1px, transparent 1px);
+    background-size: 40px 40px, 60px 60px, 20px 20px;
+    opacity: 0.6;
+    pointer-events: none;
+    border-radius: 16px;
+}
+
+/* 故事内容样式 */
+#story {
+    background: rgba(26, 15, 8, 0.9);
+    border: 3px solid #8b4513;
+    border-radius: 12px;
+    padding: 35px;
+    margin: 30px 0;
+    position: relative;
+    box-shadow:
+        0 0 20px rgba(139, 69, 19, 0.4),
+        inset 0 0 25px rgba(0, 0, 0, 0.7);
+    font-family: 'Cinzel', serif;
+}
+
+#story::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #daa520, #b8860b, #daa520);
+    border-radius: 12px 12px 0 0;
+}
+
+p {
+    font-size: 15pt;
+    color: #f4e4bc;
+    line-height: 1.9;
+    margin: 22px 0;
+    text-shadow: 0 0 2px rgba(218, 165, 32, 0.3);
+    font-weight: 400;
+    text-align: justify;
+    text-justify: inter-word;
+}
+
+strong {
+    color: #daa520;
+    font-weight: 700;
+    text-shadow: 0 0 6px #daa520;
+    font-style: italic;
+}
+
+/* 魔法选择项样式 */
+.choice {
+    text-align: center;
+    margin: 40px 0;
+}
+
+.choice a {
+    display: inline-block;
+    padding: 10px 20px;
+    margin: 8px 12px;
+    background: linear-gradient(135deg, #daa520 0%, #b8860b 50%, #daa520 100%);
+    color: #2d1810;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 12pt;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'MedievalSharp', serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border: 3px solid #daa520;
+    box-shadow:
+        0 0 15px rgba(218, 165, 32, 0.5),
+        0 5px 10px rgba(0, 0, 0, 0.5);
+    transition: all 0.4s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.choice a::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transition: left 0.7s;
+}
+
+.choice a:hover {
+    background: linear-gradient(135deg, #b8860b 0%, #daa520 50%, #b8860b 100%);
+    box-shadow:
+        0 0 25px rgba(218, 165, 32, 0.8),
+        0 8px 20px rgba(0, 0, 0, 0.7);
+    transform: translateY(-5px) scale(1.05);
+    color: #000;
+}
+
+.choice a:hover::before {
+    left: 100%;
+}
+
+.choice a.unclickable {
+    background: #444;
+    border-color: #666;
+    color: #666;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.choice a.unclickable:hover {
+    background: #444;
+    transform: none;
+    box-shadow: none;
+}
+
+/* 古老的魔法头部信息 */
+.written-in-ink {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(90deg, #2d1810 0%, #1a0f08 50%, #2d1810 100%);
+    color: #daa520;
+    text-align: center;
+    padding: 15px;
+    font-size: 12pt;
+    font-weight: 700;
+    z-index: 3;
+    border-bottom: 3px solid #daa520;
+    font-family: 'MedievalSharp', serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-shadow: 0 0 5px #daa520;
+}
+
+.written-in-ink a {
+    color: #daa520;
+    text-decoration: none;
+    text-shadow: 0 0 5px #daa520;
+}
+
+/* 魔法控制按钮 */
+#controls {
+    position: fixed;
+    top: 12px;
+    right: 20px;
+    z-index: 4;
+    background: rgba(45, 24, 16, 0.9);
+    padding: 14px 20px;
+    border-radius: 12px;
+    border: 2px solid #daa520;
+    box-shadow:
+        0 0 15px rgba(218, 165, 32, 0.4),
+        inset 0 0 15px rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(5px);
+}
+
+#controls a {
+    color: #daa520;
+    text-decoration: none;
+    font-size: 12pt;
+    margin: 0 8px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-family: 'MedievalSharp', serif;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    text-shadow: 0 0 3px #daa520;
+    border: 1px solid transparent;
+    cursor: pointer;
+}
+
+#controls a:hover {
+    background: #daa520;
+    color: #2d1810;
+    text-shadow: none;
+    border-color: #b8860b;
+    box-shadow: 0 0 10px rgba(218, 165, 32, 0.6);
+}
+
+/* 结局样式 */
+.end {
+    text-align: center;
+    font-weight: bold;
+    color: #daa520;
+    padding: 40px 25px;
+    text-shadow:
+        0 0 5px #daa520,
+        0 0 10px #daa520,
+        0 0 15px #daa520,
+        0 0 20px rgba(218, 165, 32, 0.5);
+    font-size: 18pt;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-style: italic;
+    font-family: 'MedievalSharp', serif;
+}
+
+/* 深色主题 */
+body.dark {
+    background: linear-gradient(135deg, #1a0a0a 0%, #2d1a0a 25%, #1a2d0a 50%, #0a1a2d 75%, #2d0a1a 100%);
+    color: #daa520;
+}
+
+/* Modal/Dialog Styles for Save/Load System */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 1;
+    transition: opacity 0.2s ease-in;
+}
+
+.modal-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.modal-container {
+    background-color: rgba(26, 15, 8, 0.95);
+    border: 4px solid #daa520;
+    box-shadow:
+        0 0 30px rgba(218, 165, 32, 0.4),
+        inset 0 0 35px rgba(0, 0, 0, 0.8);
+    width: 80%;
+    max-width: 800px;
+    max-height: 80vh;
+    border-radius: 15px;
+    padding: 25px;
+    position: relative;
+    transform: translateY(0);
+    transition: transform 0.2s ease-out;
+    color: #daa520;
+}
+
+.dark .modal-container {
+    background-color: rgba(0, 0, 0, 0.95);
+    color: #daa520;
+}
+
+.modal-overlay.hidden .modal-container {
+    transform: translateY(20px);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 3px solid #daa520;
+    padding-bottom: 12px;
+}
+
+.modal-header h2 {
+    margin: 0;
+    color: #daa520;
+    text-shadow: 0 0 10px #daa520;
+    font-family: 'MedievalSharp', serif;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-style: italic;
+    font-size: 18pt;
+}
+
+.close-button {
+    background: none;
+    border: none;
+    font-size: 26px;
+    cursor: pointer;
+    padding: 0 10px;
+    color: #daa520;
+    transition: all 0.3s ease;
+    text-shadow: 0 0 6px #daa520;
+}
+
+.close-button:hover {
+    color: #b8860b;
+    text-shadow: 0 0 12px #b8860b;
+    transform: scale(1.2);
+}
+
+.close-button:active {
+    transform: scale(0.9);
+}
+
+.close-button:focus {
+    outline: none;
+}
+
+.close-button:focus-visible {
+    box-shadow: 0 0 0 3px rgba(218, 165, 32, 0.6);
+    border-radius: 6px;
+}
+
+.slot-list {
+    overflow-y: auto;
+    max-height: calc(80vh - 120px);
+    padding-right: 12px;
+}
+
+.save-slot {
+    display: flex;
+    padding: 18px;
+    border: 3px solid #daa520;
+    margin-bottom: 10px;
+    border-radius: 12px;
+    align-items: center;
+    background: rgba(218, 165, 32, 0.08);
+    transition: all 0.4s ease;
+}
+
+.save-slot:hover {
+    background-color: rgba(218, 165, 32, 0.15);
+    border-color: #b8860b;
+    transform: translateX(8px) scale(1.02);
+    box-shadow: 0 0 20px rgba(218, 165, 32, 0.3);
+}
+
+.save-slot .number {
+    width: 70px;
+    font-weight: bold;
+    color: #daa520;
+    font-family: 'MedievalSharp', serif;
+    text-shadow: 0 0 4px #daa520;
+    font-size: 16pt;
+}
+
+.save-slot .content {
+    flex-grow: 1;
+    font-size: 15px;
+    color: #f4e4bc;
+    font-family: 'Cinzel', serif;
+    text-shadow: 0 0 2px rgba(218, 165, 32, 0.4);
+}
+
+.save-slot .time {
+    width: 160px;
+    text-align: right;
+    color: #b8860b;
+    font-size: 13px;
+    font-family: 'MedievalSharp', serif;
+    text-shadow: 0 0 4px #b8860b;
+}
+
+.empty-slot {
+    color: #666;
+    background-color: rgba(0, 0, 0, 0.3);
+    border-color: #666;
+}
+
+.empty-slot:hover {
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.new-save {
+    border: 3px dashed #daa520;
+    background-color: rgba(218, 165, 32, 0.05);
+}
+
+.new-save:hover {
+    border-color: #b8860b;
+    background-color: rgba(184, 134, 11, 0.1);
+}
+
+.empty-notice {
+    text-align: center;
+    padding: 25px;
+    color: #666;
+    font-style: italic;
+    font-family: 'Cinzel', serif;
+    font-size: 15px;
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+.fade-out {
+    animation: fadeOut 0.3s ease-out forwards;
+}
+
+.slot-content {
+    display: flex;
+    flex-grow: 1;
+    cursor: pointer;
+    align-items: center;
+}
+
+.delete-button {
+    background: none;
+    border: none;
+    font-size: 22px;
+    cursor: pointer;
+    padding: 0 10px;
+    color: #666;
+    transition: all 0.3s ease;
+    margin-left: 12px;
+}
+
+.delete-button:hover {
+    color: #ff4444;
+    text-shadow: 0 0 6px #ff4444;
+    transform: scale(1.2);
+}
+
+.new-save .delete-button {
+    display: none;
+}
+
+/* 响应式设计 */
+@media screen and (max-width: 768px) {
+    .fantasy-container {
+        margin: 15px;
+        padding: 25px;
+    }
+
+    h1 {
+        font-size: 32pt;
+        letter-spacing: 1px;
+    }
+
+    #story {
+        padding: 25px;
+    }
+
+    .choice a {
+        padding: 14px 26px;
+        font-size: 13pt;
+    }
+
+    #controls {
+        top: 5px;
+        right: 10px;
+        padding: 10px 15px;
+    }
+
+    .modal-container {
+        width: 95%;
+        max-width: none;
+        margin: 10px;
+        padding: 20px;
+    }
+
+    .modal-header h2 {
+        font-size: 16pt;
+    }
+
+    .save-slot {
+        padding: 15px;
+    }
+
+    .save-slot .number {
+        width: 60px;
+        font-size: 14pt;
+    }
+}
+
+/* 美化滚动条样式 */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(26, 15, 8, 0.3);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #daa520;
+    border-radius: 4px;
+    transition: background 0.3s ease;
+    box-shadow: 0 0 5px rgba(218, 165, 32, 0.3);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #b8860b;
+    box-shadow: 0 0 8px rgba(184, 134, 11, 0.5);
+}
+
+::-webkit-scrollbar-thumb:active {
+    background: #daa520;
+    box-shadow: 0 0 10px rgba(218, 165, 32, 0.7);
+}
+
+::-webkit-scrollbar-corner {
+    background: rgba(26, 15, 8, 0.3);
+}
+
+/* Firefox 滚动条样式 */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #daa520 rgba(26, 15, 8, 0.3);
+}

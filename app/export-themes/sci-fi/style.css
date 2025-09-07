@@ -1,0 +1,639 @@
+/* 科幻主题样式 */
+@import url('https://fonts.font.im/css?family=Orbitron:wght@300;400;500;700;900|Rajdhani:wght@300;400;500;600;700&display=swap');
+
+body {
+    font-family: 'Rajdhani', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    background: linear-gradient(135deg, #0a0a1a 0%, #1a0a2e 25%, #2e0a1a 50%, #1a2e0a 75%, #0a1a2e 100%);
+    background-attachment: fixed;
+    color: #00ffff;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    position: relative;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background:
+        radial-gradient(circle at 10% 90%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 90% 10%, rgba(255, 0, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(255, 255, 0, 0.05) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 1;
+}
+
+body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image:
+        linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 0, 255, 0.1) 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.3;
+    pointer-events: none;
+    z-index: 1;
+}
+
+@media screen and (prefers-reduced-motion: no-preference) {
+    body.switched {
+        transition: color 0.6s, background-color 0.6s;
+    }
+}
+
+h1, h2 {
+    text-align: center;
+    font-family: 'Orbitron', 'Rajdhani', sans-serif;
+    margin: 0;
+    padding: 0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+h1 {
+    font-size: 38pt;
+    font-weight: 900;
+    margin-bottom: 20px;
+    color: #00ffff;
+    text-shadow:
+        0 0 5px #00ffff,
+        0 0 10px #00ffff,
+        0 0 15px #00ffff,
+        0 0 20px #00ffff;
+    animation: hologram-pulse 3s ease-in-out infinite alternate;
+}
+
+@keyframes hologram-pulse {
+    from {
+        text-shadow:
+            0 0 5px #00ffff,
+            0 0 10px #00ffff,
+            0 0 15px #00ffff,
+            0 0 20px #00ffff;
+        opacity: 1;
+    }
+    to {
+        text-shadow:
+            0 0 5px #00ffff,
+            0 0 10px #00ffff,
+            0 0 15px #00ffff,
+            0 0 20px #00ffff,
+            0 0 25px #00ffff,
+            0 0 30px #00ffff;
+        opacity: 0.9;
+    }
+}
+
+h2 {
+    font-size: 14pt;
+    font-weight: 400;
+    color: #ff00ff;
+    text-shadow: 0 0 5px #ff00ff;
+}
+
+.header {
+    padding-top: 4em;
+    padding-bottom: 4em;
+    position: relative;
+    z-index: 2;
+}
+
+/* 全息容器样式 */
+.sci-fi-container {
+    max-width: 950px;
+    margin: 0 auto;
+    padding: 35px;
+    background: rgba(10, 10, 26, 0.8);
+    border: 2px solid #00ffff;
+    border-radius: 15px;
+    box-shadow:
+        0 0 20px rgba(0, 255, 255, 0.3),
+        inset 0 0 20px rgba(0, 255, 255, 0.1);
+    position: relative;
+    z-index: 2;
+    backdrop-filter: blur(8px);
+}
+
+.sci-fi-container::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg,
+        #00ffff, #ff00ff, #ffff00, #00ff00, #00ffff);
+    border-radius: 15px;
+    z-index: -1;
+    animation: hologram-border 4s linear infinite;
+}
+
+@keyframes hologram-border {
+    0% { opacity: 1; filter: hue-rotate(0deg); }
+    25% { opacity: 0.8; filter: hue-rotate(90deg); }
+    50% { opacity: 0.6; filter: hue-rotate(180deg); }
+    75% { opacity: 0.8; filter: hue-rotate(270deg); }
+    100% { opacity: 1; filter: hue-rotate(360deg); }
+}
+
+/* 全息网格效果 */
+.sci-fi-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image:
+        linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 0, 255, 0.1) 1px, transparent 1px);
+    background-size: 25px 25px;
+    opacity: 0.4;
+    pointer-events: none;
+    border-radius: 13px;
+}
+
+/* 故事内容样式 */
+#story {
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid #ff00ff;
+    border-radius: 10px;
+    padding: 28px;
+    margin: 22px 0;
+    position: relative;
+    box-shadow:
+        0 0 15px rgba(255, 0, 255, 0.2),
+        inset 0 0 15px rgba(0, 0, 0, 0.8);
+    font-family: 'Rajdhani', sans-serif;
+}
+
+#story::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #00ffff, #ff00ff, #ffff00);
+    border-radius: 10px 10px 0 0;
+}
+
+p {
+    font-size: 14pt;
+    color: #e0e0ff;
+    line-height: 1.8;
+    margin: 18px 0;
+    text-shadow: 0 0 3px rgba(255, 255, 255, 0.3);
+    font-weight: 400;
+}
+
+strong {
+    color: #ffff00;
+    font-weight: 600;
+    text-shadow: 0 0 5px #ffff00;
+}
+
+/* 未来选择项样式 */
+.choice {
+    text-align: center;
+    margin: 32px 0;
+}
+
+.choice a {
+    display: inline-block;
+    padding: 8px 16px;
+    margin: 6px 8px;
+    background: linear-gradient(135deg, #00ffff 0%, #ff00ff 50%, #00ffff 100%);
+    color: #000;
+    text-decoration: none;
+    border-radius: 20px;
+    font-size: 12pt;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: 'Orbitron', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border: 2px solid #00ffff;
+    box-shadow:
+        0 0 15px rgba(0, 255, 255, 0.4),
+        0 4px 10px rgba(0, 0, 0, 0.4);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.choice a::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s;
+}
+
+.choice a:hover {
+    background: linear-gradient(135deg, #ff00ff 0%, #00ffff 50%, #ff00ff 100%);
+    box-shadow:
+        0 0 25px rgba(255, 0, 255, 0.6),
+        0 6px 15px rgba(0, 0, 0, 0.5);
+    transform: translateY(-3px) scale(1.02);
+}
+
+.choice a:hover::before {
+    left: 100%;
+}
+
+.choice a.unclickable {
+    background: #333;
+    border-color: #666;
+    color: #666;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.choice a.unclickable:hover {
+    background: #333;
+    transform: none;
+    box-shadow: none;
+}
+
+/* 科技头部信息 */
+.written-in-ink {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(90deg, #000 0%, #1a0033 50%, #000 100%);
+    color: #00ffff;
+    text-align: center;
+    padding: 12px;
+    font-size: 10pt;
+    font-weight: 700;
+    z-index: 3;
+    border-bottom: 1px solid #00ffff;
+    font-family: 'Orbitron', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-shadow: 0 0 5px #00ffff;
+}
+
+.written-in-ink a {
+    color: #00ffff;
+    text-decoration: none;
+    text-shadow: 0 0 5px #00ffff;
+}
+
+/* 全息控制按钮 */
+#controls {
+    position: fixed;
+    top: 8px;
+    right: 20px;
+    z-index: 4;
+    background: rgba(0, 0, 0, 0.8);
+    padding: 10px 15px;
+    border-radius: 20px;
+    border: 1px solid #00ffff;
+    box-shadow:
+        0 0 15px rgba(0, 255, 255, 0.3),
+        inset 0 0 10px rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+}
+
+#controls a {
+    color: #00ffff;
+    text-decoration: none;
+    font-size: 11pt;
+    margin: 0 6px;
+    padding: 6px 12px;
+    border-radius: 15px;
+    font-family: 'Orbitron', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    text-shadow: 0 0 3px #00ffff;
+    border: 1px solid transparent;
+    cursor: pointer;
+}
+
+#controls a:hover {
+    background: #00ffff;
+    color: #000;
+    text-shadow: none;
+    border-color: #ff00ff;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+/* 结局样式 */
+.end {
+    text-align: center;
+    font-weight: bold;
+    color: #ffff00;
+    padding: 30px 20px;
+    text-shadow:
+        0 0 5px #ffff00,
+        0 0 10px #ffff00,
+        0 0 15px #ffff00;
+    font-size: 16pt;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-family: 'Orbitron', sans-serif;
+}
+
+/* 深色主题 */
+body.dark {
+    background: linear-gradient(135deg, #0a0a1a 0%, #1a0a2e 25%, #2e0a1a 50%, #1a2e0a 75%, #0a1a2e 100%);
+    color: #00ffff;
+}
+
+/* Modal/Dialog Styles for Save/Load System */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 1;
+    transition: opacity 0.2s ease-in;
+}
+
+.modal-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.modal-container {
+    background-color: rgba(10, 10, 26, 0.95);
+    border: 2px solid #00ffff;
+    box-shadow:
+        0 0 25px rgba(0, 255, 255, 0.4),
+        inset 0 0 25px rgba(0, 0, 0, 0.9);
+    width: 80%;
+    max-width: 850px;
+    max-height: 80vh;
+    border-radius: 12px;
+    padding: 22px;
+    position: relative;
+    transform: translateY(0);
+    transition: transform 0.2s ease-out;
+    color: #00ffff;
+}
+
+.dark .modal-container {
+    background-color: rgba(0, 0, 0, 0.95);
+    color: #00ffff;
+}
+
+.modal-overlay.hidden .modal-container {
+    transform: translateY(20px);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #00ffff;
+    padding-bottom: 12px;
+}
+
+.modal-header h2 {
+    margin: 0;
+    color: #00ffff;
+    text-shadow: 0 0 8px #00ffff;
+    font-family: 'Orbitron', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 16pt;
+}
+
+.close-button {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0 8px;
+    color: #00ffff;
+    transition: all 0.3s ease;
+    text-shadow: 0 0 5px #00ffff;
+}
+
+.close-button:hover {
+    color: #ff00ff;
+    text-shadow: 0 0 8px #ff00ff;
+    transform: scale(1.1);
+}
+
+.close-button:active {
+    transform: scale(0.95);
+}
+
+.close-button:focus {
+    outline: none;
+}
+
+.close-button:focus-visible {
+    box-shadow: 0 0 0 2px rgba(0, 255, 255, 0.5);
+    border-radius: 4px;
+}
+
+.slot-list {
+    overflow-y: auto;
+    max-height: calc(80vh - 110px);
+    padding-right: 10px;
+}
+
+.save-slot {
+    display: flex;
+    padding: 16px;
+    border: 1px solid #00ffff;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    align-items: center;
+    background: rgba(0, 255, 255, 0.05);
+    transition: all 0.3s ease;
+}
+
+.save-slot:hover {
+    background-color: rgba(0, 255, 255, 0.1);
+    border-color: #ff00ff;
+    transform: translateX(5px);
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+}
+
+.save-slot .number {
+    width: 65px;
+    font-weight: bold;
+    color: #00ffff;
+    font-family: 'Orbitron', sans-serif;
+    text-shadow: 0 0 4px #00ffff;
+    font-size: 14pt;
+}
+
+.save-slot .content {
+    flex-grow: 1;
+    font-size: 14px;
+    color: #e0e0ff;
+    font-family: 'Rajdhani', sans-serif;
+    text-shadow: 0 0 2px rgba(255, 255, 255, 0.3);
+}
+
+.save-slot .time {
+    width: 150px;
+    text-align: right;
+    color: #ff00ff;
+    font-size: 12px;
+    font-family: 'Orbitron', sans-serif;
+    text-shadow: 0 0 4px #ff00ff;
+}
+
+.empty-slot {
+    color: #666;
+    background-color: rgba(0, 0, 0, 0.3);
+    border-color: #666;
+}
+
+.empty-slot:hover {
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.new-save {
+    border: 2px dashed #00ffff;
+    background-color: rgba(0, 255, 255, 0.05);
+}
+
+.new-save:hover {
+    border-color: #ff00ff;
+    background-color: rgba(255, 0, 255, 0.1);
+}
+
+.empty-notice {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+    font-style: italic;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 14px;
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+.fade-out {
+    animation: fadeOut 0.2s ease-out forwards;
+}
+
+.slot-content {
+    display: flex;
+    flex-grow: 1;
+    cursor: pointer;
+    align-items: center;
+}
+
+.delete-button {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0 8px;
+    color: #666;
+    transition: all 0.2s ease;
+    margin-left: 10px;
+}
+
+.delete-button:hover {
+    color: #ff4444;
+    text-shadow: 0 0 5px #ff4444;
+    transform: scale(1.1);
+}
+
+.new-save .delete-button {
+    display: none;
+}
+
+/* 响应式设计 */
+@media screen and (max-width: 768px) {
+    .sci-fi-container {
+        margin: 15px;
+        padding: 20px;
+    }
+
+    h1 {
+        font-size: 30pt;
+    }
+
+    #story {
+        padding: 20px;
+    }
+
+    .choice a {
+        padding: 12px 22px;
+        font-size: 12pt;
+    }
+
+    #controls {
+        top: 5px;
+        right: 10px;
+        padding: 8px 12px;
+    }
+
+    .modal-container {
+        width: 95%;
+        max-width: none;
+        margin: 10px;
+    }
+}
+
+/* 美化滚动条样式 */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(10, 10, 26, 0.3);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #00ffff;
+    border-radius: 4px;
+    transition: background 0.3s ease;
+    box-shadow: 0 0 5px rgba(0, 255, 255, 0.3);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #ff00ff;
+    box-shadow: 0 0 8px rgba(255, 0, 255, 0.5);
+}
+
+::-webkit-scrollbar-thumb:active {
+    background: #ffff00;
+    box-shadow: 0 0 10px rgba(255, 255, 0, 0.7);
+}
+
+::-webkit-scrollbar-corner {
+    background: rgba(10, 10, 26, 0.3);
+}
+
+/* Firefox 滚动条样式 */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: #00ffff rgba(10, 10, 26, 0.3);
+}
