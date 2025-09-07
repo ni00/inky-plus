@@ -180,7 +180,7 @@ class AIStoryGenerator {
         const self = this;
 
         // 提供商选择事件
-        $('#swal-provider').on('change', function() {
+        $('#swal-provider').on('change', function () {
             const provider = $(this).val();
             if (provider === 'custom') {
                 $('.custom-url-group').show();
@@ -349,12 +349,12 @@ class AIStoryGenerator {
         const self = this;
 
         // 智能随机按钮事件
-        $('.smart-random-btn').on('click', function() {
+        $('.smart-random-btn').on('click', function () {
             self.applySmartRandom();
         });
 
         // 随机按钮事件
-        $('.random-btn').on('click', function() {
+        $('.random-btn').on('click', function () {
             const field = $(this).data('field');
             const randomValue = self.getRandomValue(field);
             if (randomValue) {
@@ -374,7 +374,7 @@ class AIStoryGenerator {
         };
 
         // 获取选中的基调
-        $('.tone-checkboxes input[type="checkbox"]:checked').each(function() {
+        $('.tone-checkboxes input[type="checkbox"]:checked').each(function () {
             config.tone.push($(this).val());
         });
 
@@ -555,54 +555,99 @@ class AIStoryGenerator {
             return;
         }
 
+        // 创建取消控制器
+        this.abortController = new AbortController();
+        let isAborted = false;
+
         // 显示生成进度
-        Swal.fire({
+        const progressDialog = Swal.fire({
             title: '正在生成故事...',
-            html: '<div class="progress-container"><div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div></div>',
+            html: `
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <div class="progress-text" id="progress-text">准备中...</div>
+                </div>
+            `,
             allowOutsideClick: false,
             allowEscapeKey: false,
+            showCancelButton: true,
             showConfirmButton: false,
+            cancelButtonText: '停止生成',
             customClass: {
-                popup: 'ai-progress-popup'
+                popup: 'ai-progress-popup',
+                cancelButton: 'btn-danger'
+            }
+        });
+
+        // 处理取消按钮点击
+        progressDialog.then((result) => {
+            if (result.dismiss === Swal.DismissReason.cancel) {
+                // 用户点击了停止按钮
+                isAborted = true;
+                this.abortController.abort();
             }
         });
 
         try {
-            const storyContent = await AIService.generateStory(config, (progress) => {
-                this.updateProgress(progress);
-            }, aiConfig);
+            const storyContent = await AIService.generateStory(config, (progress, status) => {
+                this.updateProgress(progress, status);
+            }, aiConfig, this.abortController.signal);
 
-            // 将生成的内容插入到编辑器
-            EditorView.insert(storyContent + "\n\n");
+            // 如果没有被取消，处理成功结果
+            if (!isAborted) {
+                // 将生成的内容插入到编辑器
+                EditorView.insert(storyContent + "\n\n");
 
-            // 关闭进度对话框
-            Swal.close();
+                // 关闭进度对话框
+                Swal.close();
 
-            // 显示成功消息
-            await Swal.fire({
-                icon: 'success',
-                title: '生成完成！',
-                text: '故事已添加到编辑器中',
-                timer: 2000,
-                showConfirmButton: false
-            });
+                // 显示成功消息
+                await Swal.fire({
+                    icon: 'success',
+                    title: '生成完成！',
+                    text: '故事已添加到编辑器中',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            }
 
         } catch (error) {
             Swal.close();
-            await Swal.fire({
-                icon: 'error',
-                title: '生成失败',
-                text: error.message
-            });
-            console.error("AI生成错误:", error);
+
+            if (error.name === 'AbortError' || isAborted) {
+                // 用户主动取消
+                await Swal.fire({
+                    icon: 'info',
+                    title: '生成已停止',
+                    text: '故事生成已被用户取消',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            } else {
+                // 其他错误
+                await Swal.fire({
+                    icon: 'error',
+                    title: '生成失败',
+                    text: error.message
+                });
+                console.error("AI生成错误:", error);
+            }
         }
     }
 
     // 更新进度
-    updateProgress(percent) {
+    updateProgress(percent, status = '') {
         const progressFill = document.getElementById('progress-fill');
+        const progressText = document.getElementById('progress-text');
+
         if (progressFill) {
             progressFill.style.width = percent + '%';
+        }
+
+        if (progressText && status) {
+            progressText.textContent = status;
         }
     }
 
@@ -611,13 +656,13 @@ class AIStoryGenerator {
         const self = this;
 
         // AI故事生成器按钮点击事件
-        $("#enhanced-toolbar .ai-story-generator.button").on("click", function(event) {
+        $("#enhanced-toolbar .ai-story-generator.button").on("click", function (event) {
             self.showDialog();
             event.preventDefault();
         });
 
         // AI设置按钮点击事件
-        $("#enhanced-toolbar .ai-settings.button").on("click", function(event) {
+        $("#enhanced-toolbar .ai-settings.button").on("click", function (event) {
             self.showSettingsDialog();
             event.preventDefault();
         });

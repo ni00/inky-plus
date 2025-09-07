@@ -41,7 +41,7 @@ const AIService = {
 15. 多样性: 确保故事至少有 2 个不同的结局，结局的好坏取决于玩家的选择和最终的变量状态。
 16. 唯一入口和唯一出口:  -> DONE：仅结束当前的执行流程；-> END：彻底终结整个故事 ； -> start 起始结点显式指向；
 17. 缩进建议 (Indentation): 缩进可使用 Tab 或空格，但请保持同一文件内风格一致，避免混用导致层级误判。
-
+18. 每一个用 —> 指向的节点，你都应该实现相应的节点内容。
 
 # 输出格式
 你的输出必须是纯文本格式的完整 .ink 代码。
@@ -71,8 +71,6 @@ VAR sanity = 10
     -> start
 
 === escape ===
--> escape_room
-= escape_room
 你成功逃出了房间。
 {sanity > 5:
     你感到一阵轻松，重获自由。
@@ -108,7 +106,7 @@ VAR sanity = 10
     },
 
     // 真实的AI生成
-    async generateStory(config, onProgress, aiConfig) {
+    async generateStory(config, onProgress, aiConfig, abortSignal) {
         const prompt = this.createStoryPrompt(config, aiConfig);
 
         try {
@@ -117,9 +115,20 @@ VAR sanity = 10
 
             let progress = 0;
             const progressInterval = setInterval(() => {
+                // 检查是否被取消
+                if (abortSignal && abortSignal.aborted) {
+                    clearInterval(progressInterval);
+                    return;
+                }
+                
                 progress += Math.random() * 10;
                 if (progress > 80) progress = 80; // 保留20%用于完成
-                if (onProgress) onProgress(progress);
+                if (onProgress) {
+                    const status = progress < 20 ? '连接AI服务...' : 
+                                  progress < 50 ? '分析故事设定...' : 
+                                  progress < 80 ? '生成故事内容...' : '完善细节...';
+                    onProgress(progress, status);
+                }
             }, 300);
 
             // 调用AI API生成故事
@@ -128,10 +137,17 @@ VAR sanity = 10
                 prompt: prompt,
                 temperature: aiConfig.temperature,
                 maxTokens: aiConfig.maxTokens,
+                abortSignal: abortSignal // 传递取消信号
             });
 
             clearInterval(progressInterval);
-            if (onProgress) onProgress(100);
+            
+            // 检查是否在完成前被取消
+            if (abortSignal && abortSignal.aborted) {
+                throw new Error('生成已被用户取消');
+            }
+            
+            if (onProgress) onProgress(100, '生成完成');
 
             // 验证生成的代码是否为有效的Ink格式
             if (!this.isValidInkCode(text)) {
@@ -141,6 +157,12 @@ VAR sanity = 10
             return text;
 
         } catch (error) {
+            // 如果是取消操作，抛出特定的错误
+            if (abortSignal && abortSignal.aborted) {
+                const abortError = new Error('生成已被用户取消');
+                abortError.name = 'AbortError';
+                throw abortError;
+            }
             throw new Error(`AI生成失败: ${error.message}`);
         }
     },
