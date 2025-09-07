@@ -708,3 +708,269 @@
     min-height: 60px;
   }
 }
+
+/* Ink Syntax Fix Dialog Styles */
+.ink-fix-dialog {
+  text-align: left;
+  padding: 10px 0;
+}
+
+.ink-fix-dialog .error-list {
+  max-height: 200px;
+  overflow-y: auto;
+  margin: 15px 0;
+  padding: 10px;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+}
+
+.ink-fix-dialog .error-item {
+  margin-bottom: 10px;
+  padding: 8px;
+  background: #fff;
+  border-left: 3px solid #dc3545;
+  border-radius: 4px;
+}
+
+.ink-fix-dialog .error-item:last-child {
+  margin-bottom: 0;
+}
+
+.ink-fix-dialog .warning-note {
+  margin-top: 15px;
+  padding: 10px;
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.ink-fix-dialog .warning-note small {
+  color: #856404;
+}
+
+/* Fix Result Dialog Styles */
+.fix-result-dialog {
+  text-align: left;
+  padding: 10px 0;
+}
+
+.fix-result-dialog .code-comparison {
+  margin: 15px 0;
+}
+
+.fix-result-dialog .code-section {
+  margin-bottom: 15px;
+}
+
+.fix-result-dialog .code-section h4 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  color: #495057;
+  font-weight: 600;
+}
+
+.fix-result-dialog .code-preview {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 6px;
+  padding: 12px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #495057;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  max-height: 200px;
+  overflow-y: auto;
+  margin: 0;
+}
+
+.fix-result-dialog .action-note {
+  margin-top: 15px;
+  padding: 10px;
+  background: #d1ecf1;
+  border: 1px solid #bee5eb;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.fix-result-dialog .action-note small {
+  color: #0c5460;
+}
+
+/* Dark theme support for fix dialogs */
+.dark .ink-fix-dialog .error-list {
+  background: #2d2d2d;
+  border-color: #444;
+}
+
+.dark .ink-fix-dialog .error-item {
+  background: #3a3a3a;
+  color: #e0e0e0;
+  border-left-color: #dc3545;
+}
+
+.dark .ink-fix-dialog .warning-note {
+  background: #3d3d00;
+  border-color: #666600;
+}
+
+.dark .ink-fix-dialog .warning-note small {
+  color: #ffeb3b;
+}
+
+.dark .fix-result-dialog .code-section h4 {
+  color: #e0e0e0;
+}
+
+.dark .fix-result-dialog .code-preview {
+  background: #2d2d2d;
+  border-color: #444;
+  color: #e0e0e0;
+}
+
+.dark .fix-result-dialog .action-note {
+  background: #1a3a40;
+  border-color: #2d5a60;
+}
+
+.dark .fix-result-dialog .action-note small {
+  color: #17a2b8;
+}
+
+/* Popup specific styles */
+.ink-fix-popup {
+  max-height: 80vh !important;
+  overflow: hidden !important;
+}
+
+.ink-fix-popup .swal2-html-container {
+  max-height: calc(80vh - 140px) !important;
+  overflow-y: auto !important;
+  padding-right: 10px;
+}
+
+.fix-result-popup {
+  max-height: 85vh !important;
+  overflow: hidden !important;
+}
+
+.fix-result-popup .swal2-html-container {
+  max-height: calc(85vh - 140px) !important;
+  overflow-y: auto !important;
+  padding-right: 10px;
+}
+
+/* Success button style */
+.btn-success {
+  background: #28a745 !important;
+  border: 1px solid #28a745 !important;
+  color: white !important;
+  font-size: 14px !important;
+  padding: 8px 20px !important;
+  border-radius: 6px !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
+}
+
+.btn-success:hover {
+  background: #218838 !important;
+  border-color: #218838 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
+}
+
+.btn-success:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(40, 167, 69, 0.2);
+}
+
+/* Danger button style */
+.btn-danger {
+  background: #dc3545 !important;
+  border: 1px solid #dc3545 !important;
+  color: white !important;
+  font-size: 14px !important;
+  padding: 8px 20px !important;
+  border-radius: 6px !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
+}
+
+.btn-danger:hover {
+  background: #c82333 !important;
+  border-color: #c82333 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
+}
+
+.btn-danger:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(220, 53, 69, 0.2);
+}
+
+/* Dark theme button support */
+.dark .btn-success {
+  background: #198754 !important;
+  border-color: #198754 !important;
+}
+
+.dark .btn-success:hover {
+  background: #157347 !important;
+  border-color: #157347 !important;
+}
+
+.dark .btn-danger {
+  background: #dc3545 !important;
+  border-color: #dc3545 !important;
+}
+
+.dark .btn-danger:hover {
+  background: #bb2d3b !important;
+  border-color: #bb2d3b !important;
+}
+
+/* Responsive design for fix dialogs */
+@media (max-width: 768px) {
+  .ink-fix-popup,
+  .fix-result-popup {
+    width: 95vw !important;
+    max-height: 90vh !important;
+  }
+
+  .ink-fix-popup .swal2-html-container,
+  .fix-result-popup .swal2-html-container {
+    max-height: calc(90vh - 180px) !important;
+  }
+
+  .ink-fix-dialog .error-list {
+    max-height: 150px;
+  }
+
+  .fix-result-dialog .code-preview {
+    max-height: 150px;
+    font-size: 11px;
+  }
+}
+
+@media (max-height: 600px) {
+  .ink-fix-popup,
+  .fix-result-popup {
+    max-height: 95vh !important;
+  }
+
+  .ink-fix-popup .swal2-html-container,
+  .fix-result-popup .swal2-html-container {
+    max-height: calc(95vh - 180px) !important;
+  }
+
+  .ink-fix-dialog .error-list {
+    max-height: 120px;
+  }
+
+  .fix-result-dialog .code-preview {
+    max-height: 120px;
+  }
+}

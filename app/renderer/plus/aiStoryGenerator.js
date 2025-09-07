@@ -2,6 +2,7 @@
 const $ = window.jQuery = require('../jquery-2.2.3.min.js');
 const { AIService } = require('./aiService.js');
 const EditorView = require('../editorView.js').EditorView;
+const LiveCompiler = require('../liveCompiler.js').LiveCompiler;
 const Swal = require('sweetalert2');
 
 class AIStoryGenerator {
@@ -232,7 +233,7 @@ class AIStoryGenerator {
             apiKey: '',
             baseURL: null,
             model: 'gpt-4',
-            temperature: 0.7,
+            temperature: 0.5,
             maxTokens: 6000
         };
 
@@ -651,6 +652,235 @@ class AIStoryGenerator {
         }
     }
 
+    // 显示Ink语法修复对话框
+    async showInkFixDialog() {
+        // 获取当前编辑器内容
+        const currentContent = EditorView.getValue();
+        if (!currentContent || currentContent.trim().length === 0) {
+            await Swal.fire({
+                icon: 'warning',
+                title: '编辑器为空',
+                text: '请先在编辑器中输入一些Ink代码',
+                confirmButtonText: '确定'
+            });
+            return;
+        }
+
+        // 获取当前错误
+        const errors = LiveCompiler.getIssues();
+        if (!errors || errors.length === 0) {
+            await Swal.fire({
+                icon: 'info',
+                title: '没有发现错误',
+                text: '当前代码没有检测到语法错误',
+                confirmButtonText: '确定'
+            });
+            return;
+        }
+
+        // 获取AI配置
+        const aiConfig = this.getAISettings();
+        if (!aiConfig.apiKey) {
+            await Swal.fire({
+                icon: 'warning',
+                title: '请先配置AI设置',
+                text: '点击右上角的设置按钮配置API密钥',
+                confirmButtonText: '去设置'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    this.showSettingsDialog();
+                }
+            });
+            return;
+        }
+
+        // 显示错误预览和确认对话框
+        const errorList = errors.map((error, index) =>
+            `<div class="error-item">
+                <strong>错误 ${index + 1}:</strong> ${error.message}
+                ${error.lineNumber ? `<br><small>第 ${error.lineNumber} 行</small>` : ''}
+            </div>`
+        ).join('');
+
+        const result = await Swal.fire({
+            title: 'AI语法修复',
+            html: `
+                <div class="ink-fix-dialog">
+                    <p>检测到 <strong>${errors.length}</strong> 个错误，是否使用AI进行修复？</p>
+                    <div class="error-list">
+                        ${errorList}
+                    </div>
+                    <div class="warning-note">
+                        <small>⚠️ 修复后的代码将替换当前编辑器内容，建议先保存当前版本</small>
+                    </div>
+                </div>
+            `,
+            width: '600px',
+            showCancelButton: true,
+            confirmButtonText: '开始修复',
+            cancelButtonText: '取消',
+            customClass: {
+                popup: 'ink-fix-popup',
+                confirmButton: 'btn-primary',
+                cancelButton: 'btn-secondary'
+            }
+        });
+
+        if (result.isConfirmed) {
+            await this.performInkFix(currentContent, errors, aiConfig);
+        }
+    }
+
+    // 执行Ink语法修复
+    async performInkFix(content, errors, aiConfig) {
+        // 创建取消控制器
+        this.abortController = new AbortController();
+        let isAborted = false;
+
+        // 显示修复进度
+        const progressDialog = Swal.fire({
+            title: '正在修复语法错误...',
+            html: `
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="fix-progress-fill"></div>
+                    </div>
+                    <div class="progress-text" id="fix-progress-text">准备中...</div>
+                </div>
+            `,
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            showCancelButton: true,
+            showConfirmButton: false,
+            cancelButtonText: '停止修复',
+            customClass: {
+                popup: 'ai-progress-popup',
+                cancelButton: 'btn-danger'
+            }
+        });
+
+        // 处理取消按钮点击
+        progressDialog.then((result) => {
+            if (result.dismiss === Swal.DismissReason.cancel) {
+                isAborted = true;
+                this.abortController.abort();
+            }
+        });
+
+        try {
+            // 模拟进度更新
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                if (isAborted) {
+                    clearInterval(progressInterval);
+                    return;
+                }
+                progress += Math.random() * 15;
+                if (progress > 80) progress = 80;
+                this.updateFixProgress(progress, progress < 30 ? '分析错误...' :
+                    progress < 60 ? '生成修复方案...' : '完善代码...');
+            }, 300);
+
+            const fixedContent = await AIService.fixInkWithAI(content, errors, aiConfig, this.abortController.signal);
+
+            clearInterval(progressInterval);
+
+            if (!isAborted) {
+                this.updateFixProgress(100, '修复完成');
+
+                // 关闭进度对话框
+                Swal.close();
+
+                // 显示修复结果预览
+                await this.showFixResult(content, fixedContent);
+            }
+
+        } catch (error) {
+            Swal.close();
+
+            if (error.name === 'AbortError' || isAborted) {
+                await Swal.fire({
+                    icon: 'info',
+                    title: '修复已停止',
+                    text: '语法修复已被用户取消',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            } else {
+                await Swal.fire({
+                    icon: 'error',
+                    title: '修复失败',
+                    text: error.message
+                });
+                console.error("AI修复错误:", error);
+            }
+        }
+    }
+
+    // 更新修复进度
+    updateFixProgress(percent, status = '') {
+        const progressFill = document.getElementById('fix-progress-fill');
+        const progressText = document.getElementById('fix-progress-text');
+
+        if (progressFill) {
+            progressFill.style.width = percent + '%';
+        }
+
+        if (progressText && status) {
+            progressText.textContent = status;
+        }
+    }
+
+    // 显示修复结果
+    async showFixResult(originalContent, fixedContent) {
+        const result = await Swal.fire({
+            title: '修复完成',
+            html: `
+                <div class="fix-result-dialog">
+                    <p>AI已完成语法修复，请预览修复结果：</p>
+                    <div class="code-comparison">
+                        <div class="code-section">
+                            <h4>修复后的代码 (前200字符预览)</h4>
+                            <pre class="code-preview">${this.escapeHtml(fixedContent.substring(0, 200))}${fixedContent.length > 200 ? '...' : ''}</pre>
+                        </div>
+                    </div>
+                    <div class="action-note">
+                        <small>点击"应用修复"将替换编辑器中的所有内容</small>
+                    </div>
+                </div>
+            `,
+            width: '700px',
+            showCancelButton: true,
+            confirmButtonText: '应用修复',
+            cancelButtonText: '取消',
+            customClass: {
+                popup: 'fix-result-popup',
+                confirmButton: 'btn-success',
+                cancelButton: 'btn-secondary'
+            }
+        });
+
+        if (result.isConfirmed) {
+            // 应用修复
+            EditorView.setValue(fixedContent);
+
+            await Swal.fire({
+                icon: 'success',
+                title: '修复已应用',
+                text: '代码已更新，请检查修复结果',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }
+    }
+
+    // HTML转义工具函数
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
     // 绑定事件
     bindEvents() {
         const self = this;
@@ -664,6 +894,12 @@ class AIStoryGenerator {
         // AI设置按钮点击事件
         $("#enhanced-toolbar .ai-settings.button").on("click", function (event) {
             self.showSettingsDialog();
+            event.preventDefault();
+        });
+
+        // Ink语法修复按钮点击事件
+        $("#enhanced-toolbar .ink-syntax-fixer.button").on("click", function (event) {
+            self.showInkFixDialog();
             event.preventDefault();
         });
     }

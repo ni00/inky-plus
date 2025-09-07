@@ -173,5 +173,76 @@ VAR sanity = 10
         return code.includes('->') && (code.includes('===') || code.includes('-> END'));
     },
 
+    // 创建Ink语法修复的提示词
+    createInkFixPrompt(content, errors) {
+        // 构建带有行号的错误信息
+        const errorsWithLineContext = [];
+        const lines = content.split('\n');
+        
+        errors.forEach((error, index) => {
+            // 尝试从错误信息中提取行号
+            const lineMatch = error.message.match(/line\s*(\d+)/i) || 
+                             (error.lineNumber ? { 1: error.lineNumber.toString() } : null);
+            
+            if (lineMatch && error.lineNumber > 0) {
+                const lineNumber = error.lineNumber;
+                if (lineNumber <= lines.length) {
+                    const errorLineIndex = lineNumber - 1;
+                    const startLine = Math.max(0, errorLineIndex - 1);
+                    const endLine = Math.min(lines.length - 1, errorLineIndex + 1);
+                    
+                    let context = `错误 ${index + 1} (第${lineNumber}行): ${error.message}\n`;
+                    context += "上下文:\n";
+                    for (let i = startLine; i <= endLine; i++) {
+                        const prefix = i === errorLineIndex ? ">>> " : "    ";
+                        context += `${prefix}${i + 1}: ${lines[i]}\n`;
+                    }
+                    errorsWithLineContext.push(context);
+                } else {
+                    errorsWithLineContext.push(`错误 ${index + 1}: ${error.message}`);
+                }
+            } else {
+                errorsWithLineContext.push(`错误 ${index + 1}: ${error.message}`);
+            }
+        });
+
+        return `你是 Inkle Ink 语言专家。下面是存在错误的 Ink 源码与错误列表。请只输出修复后的完整 Ink 源码，不要添加解释性文字或代码块围栏。
+
+# 错误
+${errorsWithLineContext.join('\n')}
+
+# 源码
+${content}`;
+    },
+
+    // AI修复Ink语法错误
+    async fixInkWithAI(content, errors, aiConfig, abortSignal) {
+        const prompt = this.createInkFixPrompt(content, errors);
+
+        try {
+            // 创建AI模型实例
+            const model = this.createModel(aiConfig);
+
+            // 调用AI API修复语法
+            const { text } = await generateText({
+                model: model,
+                prompt: prompt,
+                temperature: 0.2, // 使用较低的温度以获得更准确的修复
+                maxTokens: Math.max(aiConfig.maxTokens, content.length + 5000), // 确保有足够的token
+                abortSignal: abortSignal
+            });
+
+            return text.trim();
+
+        } catch (error) {
+            if (abortSignal && abortSignal.aborted) {
+                const abortError = new Error('修复已被用户取消');
+                abortError.name = 'AbortError';
+                throw abortError;
+            }
+            throw new Error(`AI修复失败: ${error.message}`);
+        }
+    },
+
 };
 module.exports = { AIService };
