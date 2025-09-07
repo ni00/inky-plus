@@ -51,8 +51,8 @@ jobs:
         run: |
           npx --yes @electron/packager app "Inky Plus" --platform=win32  --arch=x64 --icon=./resources/Icon1024.png.ico --prune --asar.unpackDir="main-process/ink" --ignore="inklecate_mac" --win32metadata.ProductName="Inky Plus" --win32metadata.CompanyName="inkle Ltd" --win32metadata.FileDescription="Inky Plus" --win32metadata.OriginalFilename="Inky Plus" --win32metadata.InternalName="Inky Plus"
           mkdir -p ReleaseUpload
-          7z a -tzip Inky-Plus-win32-x64.zip "Inky Plus-win32-x64"
-          mv Inky-Plus-win32-x64.zip ReleaseUpload/Inky-Plus-win32-x64.zip
+          tar -czf Inky-Plus-win32-x64.tar.gz "Inky Plus-win32-x64"
+          mv Inky-Plus-win32-x64.tar.gz ReleaseUpload/Inky-Plus-win32-x64.tar.gz
 
       
       - name: Build electron app (Ubuntu)

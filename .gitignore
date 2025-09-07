@@ -1,15 +1,89 @@
-node_modules
-*.sublime-workspace
-Inky-darwin-x64
-Inky-darwin-arm64
-Inky-darwin-universal
-Inky-win32-x64
-Inky-win32-ia32
-Inky-linux-x64
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build outputs - Original names
+Inky-darwin-x64/
+Inky-darwin-arm64/
+Inky-darwin-universal/
+Inky-win32-x64/
+Inky-win32-ia32/
+Inky-linux-x64/
+Inky-linux-arm64/
 Inky_windows.zip
-ReleaseUpload
+Inky_mac.zip
+Inky_linux.zip
+
+# Build outputs - Inky Plus names
+Inky-Plus-darwin-x64/
+Inky-Plus-darwin-arm64/
+Inky-Plus-darwin-universal/
+Inky-Plus-win32-x64/
+Inky-Plus-win32-ia32/
+Inky-Plus-linux-x64/
+Inky-Plus-linux-arm64/
+"Inky Plus-win32-x64"/
+"Inky Plus-linux-x64"/
+Inky-Plus_windows.zip
+Inky-Plus_mac.zip
+Inky-Plus_linux.zip
+Inky-Plus-win32-x64.tar.gz
+
+# Release directory
+ReleaseUpload/
+
+# Generated documentation
 app/renderer/documentation/
+
+# IDE and Editor files
+.vscode/
 .idea/
-*.AppImage
-AppImage
+*.swp
+*.swo
+*~
+*.sublime-workspace
+*.sublime-project
+
+# OS generated files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# AppImage files
+*.AppImage
+AppImage/
+appimagetool-x86_64.AppImage
+
+# Windows executables and installers
+*.exe
+*.msi
+*.dmg
+
+# Logs
+logs/
+*.log
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+
+# Temporary files
+.tmp/
+temp/
+tmp/
+
+# Build artifacts
+dist/
+build/
+out/
