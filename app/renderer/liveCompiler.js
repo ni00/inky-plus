@@ -2,6 +2,7 @@ const ipc = require("electron").ipcRenderer;
 const _ = require("lodash");
 const randomstring = require("randomstring");
 const i18n = require('./i18n.js');
+const InkProject = require('./inkProject.js');
 
 var namespace = null;
 var sessionIdx = 0;
@@ -76,7 +77,9 @@ function sessionIsCurrent(id) {
 function updateCompilerIsBusy(isBusy) {
     if( isBusy != compilerBusy ) {
         compilerBusy = isBusy;
-        events.compilerBusyChanged(compilerBusy);
+        if (InkProject.events && InkProject.events.compilerBusyChanged) {
+            InkProject.events.compilerBusyChanged(compilerBusy);
+        }
     }
 }
 

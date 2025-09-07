@@ -4,7 +4,8 @@ const { exec } = require('child_process');
 const packager = require('@electron/packager');
 const appdmg = process.platform == "darwin" ? require('appdmg') : null;
 
-const allPlatforms = ["mac", "win32", "win64", "linux"];
+//const allPlatforms = ["mac", "win32", "win64", "linux"];
+const allPlatforms = ["win32", "win64", "linux"];
 
 const args = process.argv.slice(2);
 
@@ -31,7 +32,7 @@ let platforms = args.filter(arg => {
     return true;
 });
 
-platforms = platforms.length ? platforms : ["mac", "win32", "win64", "linux"];
+platforms = platforms.length ? platforms : ["win32", "win64", "linux"];//["mac", "win32", "win64", "linux"];
 
 
 function runCommand(command) {

@@ -17,7 +17,8 @@ var events = {
     change:         () => {},
     jumpToInclude:  () => {},
     jumpToSymbol:   () => {},
-    changedLine:    () => {}
+    changedLine:    () => {},
+    navigate:       () => {}
 };
 
 editor.setShowPrintMargin(false);
