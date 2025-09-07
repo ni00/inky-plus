@@ -26,6 +26,7 @@ const InkProject = require("./inkProject.js").InkProject;
 const NavHistory = require("./navHistory.js").NavHistory;
 const GotoAnything = require("./goto.js").GotoAnything;
 const i18n = require("./i18n.js");
+const { aiStoryGenerator } = require("./plus/aiStoryGenerator.js");
 
 InkProject.setEvents({
     "newProject": (project) => {
@@ -281,8 +282,13 @@ ToolbarView.setEvents({
         if( process.platform == "win32" ) {
             ipc.send("set-native-window-title", title);
         }
+    },
+    compilerBusyChanged: (busy) => {
+        ToolbarView.setBusySpinnerVisible(busy);
     }
 });
+
+// AI故事生成器模块已独立到 aiStoryGenerator.js
 
 NavView.setEvents({
     clickFileId: (fileId) => {

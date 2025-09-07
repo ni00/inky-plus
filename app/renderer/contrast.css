@@ -167,31 +167,4 @@
 
 .window.contrast .sidebar .nav-wrapper::-webkit-scrollbar-thumb {
     background: #323232;
-}/*
- Enhanced Toolbar Contrast Theme */
-.window.contrast #enhanced-toolbar {
-  background: #F0F0F0;
-  border-bottom: 2px solid #000;
-}
-
-.window.contrast #enhanced-toolbar .button:hover {
-  background: #E0E0E0;
-  border: 1px solid #666;
-}
-
-.window.contrast #enhanced-toolbar .button.selected {
-  background: #D0D0D0;
-  border: 2px solid #000;
-}
-
-.window.contrast #enhanced-toolbar .button .icon {
-  color: #333;
-}
-
-.window.contrast #enhanced-toolbar .button:hover .icon {
-  color: #000;
-}
-
-.window.contrast #enhanced-toolbar .button.selected .icon {
-  color: #000;
 }
