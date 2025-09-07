@@ -34,20 +34,11 @@ class AIStoryGenerator {
                     <div class="button ink-syntax-fixer i18n" title="Ink Syntax AI Fixer">
                         <span class="icon icon-tools"></span>
                     </div>
-                    <div class="button export-compiled i18n" title="Export Compiled Story">
-                        <span class="icon icon-export"></span>
-                    </div>
-                    <div class="button save-load-preview i18n" title="Save/Load Preview State">
-                        <span class="icon icon-floppy"></span>
-                    </div>
                 </div>
 
                 <div class="buttons right">
-                    <div class="button narrative-optimizer i18n" title="Narrative Optimizer">
-                        <span class="icon icon-target"></span>
-                    </div>
-                    <div class="button jump-to-node i18n" title="Jump to Preview Node">
-                        <span class="icon icon-link"></span>
+                    <div class="button export-compiled i18n" title="Export Compiled Story">
+                        <span class="icon icon-export"></span>
                     </div>
                 </div>
             </div>
