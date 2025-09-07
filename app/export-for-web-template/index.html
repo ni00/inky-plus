@@ -12,15 +12,39 @@
 </head>
 
 <body>
+    <div id="save-overlay" class="modal-overlay hidden">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2>存档列表</h2>
+                <button class="close-button">×</button>
+            </div>
+            <div class="slot-list" id="save-slot-list">
+                <!-- 存档列表将由 JavaScript 动态生成 -->
+            </div>
+        </div>
+    </div>
 
+    <div id="load-overlay" class="modal-overlay hidden">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2>读档列表</h2>
+                <button class="close-button">×</button>
+            </div>
+            <div class="slot-list" id="load-slot-list">
+                <!-- 读档列表将由 JavaScript 动态生成 -->
+            </div>
+        </div>
+    </div>
+    
+    <img alt="" id="bg_img" class="bg" />
     <div class="outerContainer">
         <h3 class="written-in-ink"><a href="https://www.inklestudios.com/ink">WRITTEN IN INK</a></h3>
 
         <div id="controls" class="buttons">
-          <a id="rewind" title="Restart story from beginning">restart</a>
-          <a id="save" title="Save progress">save</a>
-          <a id="reload" title="Reload from save point">load</a>
-          <a id="theme-switch" title="Switch theme">theme</a>
+          <a id="rewind" title="重新开始">重新开始</a>
+          <a id="save" title="保存进度">保存进度</a>
+          <a id="reload" title="读取进度">读取进度</a>
+          <a id="theme-switch" title="切换主题">切换主题</a>
         </div>
 
         <div id="story" class="container">

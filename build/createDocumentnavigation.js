@@ -44,6 +44,9 @@ function initializeNavigation() {
 
                 //generating the ids for the documentation links
                 id = headline.toLowerCase();
+                console.log("before remove: " + id + "|")
+                id = removeChineseCharacters(id);
+                console.log("after remove: " + id + "|")
                 var activeCharacter;
                 for (var character of characters) {
                     activeCharacter = character.split('x');
@@ -88,4 +91,10 @@ function numberOfOccurrences(searchIn, searchFor, allowOverlapping) {
     }
     return n;
 }
+
+// 生成文档时，古早的 markdown-html 已经无法处理中文，所以我们生成 id 时，把中文去除掉，才能使得 id 匹配
+function removeChineseCharacters(str) {
+    return str.replace(/[\u4e00-\u9fa5，。！？；：“”‘’]/g, ''); // 匹配中文字符和常见中文标点符号   
+}
+
 initializeNavigation();

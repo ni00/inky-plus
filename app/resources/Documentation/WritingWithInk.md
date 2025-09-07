@@ -1,5 +1,7 @@
 # Writing with ink
 
+（译注：以下中文基于 GPT 翻译，可能存在错误，请以官方文档为准，点此查看原文：[WritingWithInk.md](https://github.com/inkle/inky/blob/master/app/resources/Documentation/WritingWithInk.md)）
+
 <details>
   <summary>Table of Contents</summary>
 
@@ -41,117 +43,117 @@
    * [Part 6: International character support in identifiers](#part-6-international-character-support-in-identifiers)
 </details>
 
-## Introduction
+## Introduction 简介
 
-**ink** is a scripting language built around the idea of marking up pure-text with flow in order to produce interactive scripts.
+**ink** 是一种脚本语言，核心理念是通过在纯文本中标记流程，从而生成交互式脚本。
 
-At its most basic, it can be used to write a Choose Your Own-style story, or a branching dialogue tree. But its real strength is in writing dialogues with lots of options and lots of recombination of the flow.
+在最基础的层面上，它可用于创作类似“选择你自己的冒险”风格的故事，或构建分支式对话树。但 **ink** 真正的优势在于，它能轻松应对包含众多选项与丰富组合的对话场景。
 
-**ink** offers several features to enable non-technical writers to branch often, and play out the consequences of those branches, in both minor and major ways, without fuss.
+**ink** 提供了多种特性，帮助非技术背景的创作者轻松地为剧情频繁分支，并在细微或重大的层面上展现这些分支的后果，而无需繁琐的操作。
 
-The script aims to be clean and logically ordered, so branching dialogue can be tested "by eye". The flow is described in a declarative fashion where possible.
+这一脚本语言的设计目标是保持整洁与逻辑有序，以便通过直观地检视就能轻松测试分支对话。在可能的情况下，**ink** 会以声明式的方式来描述流程。
 
-It's also designed with redrafting in mind; so editing a flow should be fast.
+此外，**ink** 还在设计时充分考虑了重新起草（重写）的需求，使得修改流程变得快速而高效。
 
-# Part One: The Basics
+# Part One: The Basics 第一部分：基础知识
 
-## 1) Content
+## 1) Content 内容
 
-### The simplest ink script
+### The simplest ink script 最简单的 ink 脚本
 
-The most basic ink script is just text in a .ink file.
+最基本的 ink 脚本只是一个 `.ink` 文件中的文本内容：
 
-	Hello, world!
+	你好，世界！  
 
-On running, this will output the content, and then stop.
+运行后，它会输出这段文字，然后停止。
 
-Text on separate lines produces new paragraphs. The script:
+将文本写在单独的行中会产生新的段落。如下脚本所示：
 
-	Hello, world!
-	Hello?
-	Hello, are you there?
+	你好，世界！  
+	你好？  
+	你好，你在吗？  
 
-produces output that looks the same.
+它的输出和上面相同，看起来也是三行文本，每行一个段落。
 
+### Comments 注释
 
-### Comments
+默认情况下，文件中所有文本都会出现在输出中，除非使用特定标记加以区分。
 
-By default, all text in your file will appear in the output content, unless specially marked up.
+最简单的标记是注释。**ink** 支持两种类型的注释。
 
-The simplest mark-up is a comment. **ink** supports two kinds of comment. There's the kind used for someone reading the code, which the compiler ignores:
+一种是给阅读代码的人看的，编译器会忽略它：
 
-	"What do you make of this?" she asked.
+	“你怎么看这个？”她问道。  
 
-	// Something unprintable...
+	// 这里是一些不用于输出的内容
 
-	"I couldn't possibly comment," I replied.
+	“我无法发表评论，”我回答道。  
 
 	/*
-		... or an unlimited block of text
+		...或者是一个不限长度的注释块
 	*/
 
-and there's the kind used for reminding the author what they need to do, that the compiler prints out during compilation:
+另一种注释是给作者自己用的，用来提醒需要完成的工作。这种注释会在编译时打印出来：
 
+	TODO: 把这一部分完善！
 
-	TODO: Write this section properly!
+### Tags 标签
 
-### Tags
+游戏运行时，文本内容会原样呈现给玩家。但有时标记一行文本以携带额外信息会很有用，比如告诉游戏引擎如何处理这行内容。
 
-Text content from the game will appear 'as is' when the engine runs. However, it can sometimes be useful to mark up a line of content with extra information to tell the game what to do with that content.
+**ink** 使用简单的“#”标记系统为文本行添加标签：
 
-**ink** provides a simple system for tagging lines of content, with hashtags.
+	一行普通的游戏文本。# 将其设置为蓝色
 
-	A line of normal game-text. # colour it blue
+这些标签不会出现在主文本流中，但游戏可以在后台读取并根据需要使用。更多信息请参考 [运行你的 Ink](https://github.com/inkle/ink/blob/master/Documentation/RunningYourInk.md)。
 
-These don't show up in the main text flow, but can be read off by the game and used as you see fit. See [Running Your Ink](RunningYourInk.md#marking-up-your-ink-content-with-tags) for more information.
+## 2) Choices 选项
 
+玩家的输入通过文字选项（choices）来实现。文本选项使用 `*` 字符表示。
 
-## 2) Choices
+如果没有其他流程指令，当玩家选择一项选项后，叙事将继续向下执行下一行文本。
 
-Input is offered to the player via text choices. A text choice is indicated by an `*` character.
+	你好，世界！  
+	* 	你好呀！  
+		真高兴听到你的回复
 
-If no other flow instructions are given, once made, the choice will flow into the next line of text.
+上述脚本的游戏表现为：
 
-	Hello world!
-	*	Hello back!
-		Nice to hear from you!
+	你好，世界  
 
-This produces the following game:
-
-	Hello world
-	1: Hello back!
-
-	> 1
-	Hello back!
-	Nice to hear from you.
-
-By default, the text of a choice appears again, in the output.
-
-### Suppressing choice text
-
-Some games separate the text of a choice from its outcome. In **ink**, if the choice text is given in square brackets, the text of the choice will not be printed into response.
-
-	Hello world!
-	*	[Hello back!]
-		Nice to hear from you!
-
-produces
-
-	Hello world
-	1: Hello back!
+	1：你好呀！  
 
 	> 1
-	Nice to hear from you.
+	你好呀！  
+	真高兴听到你的回复。 
 
-#### Advanced: mixing choice and output text
+默认情况下，玩家选择的选项文本会再次出现在最终输出中。
 
-The square brackets in fact divide up the option content. What's before is printed in both choice and output; what's inside only in choice; and what's after, only in output. Effectively, they provide alternative ways for a line to end.
+### Suppressing choice text 隐藏选项文本
+
+在某些游戏中，选项文本和其对应的后续输出需要分离。在 **ink** 中，如果将选项文本用方括号 `[]` 包裹起来，选项文本将不会在后续输出中重复出现。
+
+	你好，世界！  
+	* 	[你好呀！]  
+		真高兴听到你的回复！  
+
+输出为：
+
+	你好，世界  
+	1：你好呀！  
+	> 1  
+	真高兴听到你的回复。  
+
+#### Advanced: mixing choice and output text 高级技巧：混合选项与输出文本
+
+事实上，方括号会将选项内容分割成多个部分。方括号前的内容会在选项和选择后输出中同时出现；方括号内的内容只会在选项中出现；方括号后的内容则只会在选择结果的输出中出现。这相当于为文本的结尾提供了多种输出路径。
+（译注：这个例子不方便翻译为中文，原文如下）
 
 	Hello world!
 	*	Hello [back!] right back to you!
 		Nice to hear from you!
 
-produces:
+输出为：
 
 	Hello world
 	1: Hello back!
@@ -159,112 +161,111 @@ produces:
 	Hello right back to you!
 	Nice to hear from you.
 
-This is most useful when writing dialogue choices:
+此技巧在书写对话选项时尤其有用：
 
-	"What's that?" my master asked.
-	*	"I am somewhat tired[."]," I repeated.
-		"Really," he responded. "How deleterious."
+	“怎么了？” 我的主人问道。 
+	* 	“我有点累了[。”],” 我重复道。  
+		“是吗，” 他答道。“真是让人难受啊。”  
 
-produces:
+输出为：
 
-	"What's that?" my master asked.
-	1. "I am somewhat tired."
+	“怎么了？” 我的主人问道。 
+	1. “我有点累了。”
 	> 1
-	"I am somewhat tired," I repeated.
-	"Really," he responded. "How deleterious."
+	“我有点累了,” 我重复道。  
+	“是吗，” 他答道。“真是让人难受啊。”  
 
-### Multiple Choices
+### Multiple Choices 多个选项
 
-To make choices really choices, we need to provide alternatives. We can do this simply by listing them:
+要体现真正的选择性，我们需要提供多个可选项。只需将多条选项依次列出即可：
 
-	"What's that?" my master asked.
-	*	"I am somewhat tired[."]," I repeated.
-		"Really," he responded. "How deleterious."
-	*	"Nothing, Monsieur!"[] I replied.
-		"Very good, then."
-	*  "I said, this journey is appalling[."] and I want no more of it."
-		"Ah," he replied, not unkindly. "I see you are feeling frustrated. Tomorrow, things will improve."
+	“怎么了？” 我的主人问道。 
+	* 	“我有点累了[。”],” 我重复道。  
+		“是吗，” 他答道。“真是让人难受啊。”  
+	* 	“没什么，先生！”[] 我回答道。  
+		“那很好。”  
+	*  	“我说，这趟旅程糟透了[。”]，我再也不想继续下去了。”  
+		“啊，” 他语气温和地说道，“我明白你很沮丧。明天一切都会好起来的。”
 
-This produces the following game:
+上述脚本的游戏表现为：
 
-	"What's that?" my master asked.
+	“怎么了？” 我的主人问道。 
 
-	1: "I am somewhat tired."
-	2: "Nothing, Monsieur!"
-	3: "I said, this journey is appalling."
+	1: “我有点累了。”
+	2: “没什么，先生！”
+	3: “我说，这趟旅程糟透了。”
 
 	> 3
-	"I said, this journey is appalling and I want no more of it."
-	"Ah," he replied, not unkindly. "I see you are feeling frustrated. Tomorrow, things will improve."
+	“我说，这趟旅程糟透了，我再也不想继续下去了。”  
+	“啊，” 他语气温和地说道，“我明白你很沮丧。明天一切都会好起来的。”
 
-The above syntax is enough to write a single set of choices. In a real game, we'll want to move the flow from one point to another based on what the player chooses. To do that, we need to introduce a bit more structure.
+上面的语法足以创建单次的选择集合。在实际游戏中，我们往往希望根据玩家选择的不同，将故事流程导向不同的节点。这就需要更复杂的流程结构，我们将在后面进一步讨论。
 
-## 3) Knots
+## 3) Knots 节点
 
-### Pieces of content are called knots
+### Pieces of content are called knots 内容单元称为节点
 
-To allow the game to branch we need to mark up sections of content with names (as an old-fashioned gamebook does with its 'Paragraph 18', and the like.)
+为了让游戏能够分支，我们需要给内容区块命名（类似于传统的游戏书有“第18段”这样的标记）。这些独立的内容区块称为 “节点（knots）”，它们是 **ink** 内容的基本结构单元。
 
-These sections are called "knots" and they're the fundamental structural unit of ink content.
+### Writing a knot 定义一个节点
 
-### Writing a knot
-
-The start of a knot is indicated by two or more equals signs, as follows.
+节点的开头以两个或更多个 `=` 号来表示，例如：
 
 	=== top_knot ===
 
-(The equals signs on the end are optional; and the name needs to be a single word with no spaces.)
+（行尾的 `===` 是可选的；节点名称必须是一个不含空格的单词。）
 
-The start of a knot is a header; the content that follows will be inside that knot.
+节点起始行是一个头部标记，紧随其后的内容都属于该节点。
 
 	=== back_in_london ===
 
-	We arrived into London at 9.45pm exactly.
+	我们在晚上9点45分准时抵达伦敦。
 
-#### Advanced: a knottier "hello world"
+#### Advanced: a knottier "hello world" 进阶用法：一个稍显复杂的 hello world
 
-When you start an ink file, content outside of knots will be run automatically. But knots won't. So if you start using knots to hold your content, you'll need to tell the game where to go. We do this with a divert arrow `->`, which is covered properly in the next section.
+当你启动一个 ink 文件时，所有位于节点之外的内容会自动运行；但节点内的内容不会自动运行。因此，如果你开始使用节点来组织内容，你需要告诉游戏从哪个节点开始执行。我们通过使用转向箭头 `->` 来指定，这将在下一节详细介绍。
 
-The simplest knotty script is:
+最简单的使用节点的脚本是：
 
 	-> top_knot
 
 	=== top_knot ===
-	Hello world!
+	你好，世界！
 
-However, **ink** doesn't like loose ends, and produces a warning on compilation and/or run-time when it thinks this has happened. The script above produces this on compilation:
+然而，**ink** 不喜欢流程无故中断。在编译和/或运行时，如果引擎判断流程无处可去，它会给出警告。上述脚本在编译时会产生如下警告：
 
 	WARNING: Apparent loose end exists where the flow runs out. Do you need a '-> END' statement, choice or divert? on line 3 of tests/test.ink
 
-and this on running:
+在运行时也会报错：
 
 	Runtime error in tests/test.ink line 3: ran out of content. Do you need a '-> DONE' or '-> END'?
 
-The following plays and compiles without error:
+以下版本的代码可以正常运行和编译无误：
 
 	=== top_knot ===
-	Hello world!
+	你好，世界！
 	-> END
 
-`-> END` is a marker for both the writer and the compiler; it means "the story flow should now stop".
+`-> END` 对编写者和编译器而言都是一个明确的结束标记，表示“故事流程到此为止”。
 
-## 4) Diverts
+## 4) Diverts 跳转
 
-### Knots divert to knots
+### Knots divert to knots 节点间的跳转
 
-You can tell the story to move from one knot to another using `->`, a "divert arrow". Diverts happen immediately without any user input.
+你可以使用 `->`（称为“跳转箭头”）让故事从一个节点（knot）跳转到另一个节点。跳转是立刻发生的，不需要玩家输入。
 
 	=== back_in_london ===
 
-	We arrived into London at 9.45pm exactly.
+	我们在晚上9点45分准时抵达伦敦。
 	-> hurry_home
 
 	=== hurry_home ===
-	We hurried home to Savile Row as fast as we could.
+	我们尽可能快地赶回萨维尔街的家。
 
-#### Diverts are invisible
+#### Diverts are invisible 跳转是无形的
 
-Diverts are intended to be seamless and can even happen mid-sentence:
+跳转是无缝的，甚至可以在句子中间进行：
+（译注：这个例子不方便翻译为中文，原文如下）
 
 	=== hurry_home ===
 	We hurried home to Savile Row -> as_fast_as_we_could
@@ -272,13 +273,14 @@ Diverts are intended to be seamless and can even happen mid-sentence:
 	=== as_fast_as_we_could ===
 	as fast as we could.
 
-produces the same line as above:
+上述脚本的输出与以下效果相同：
 
 	We hurried home to Savile Row as fast as we could.
 
-#### Glue
+#### Glue 粘合
 
-The default behaviour inserts line-breaks before every new line of content. In some cases, however, content must insist on not having a line-break, and it can do so using `<>`, or "glue".
+默认情况下，每当遇到新行内容，**ink** 会在输出中插入换行符。但在某些情况下，我们需要紧密衔接文本，而不希望换行。这时可以使用 `<>`（“粘合”符号）来实现。
+（译注：这个例子不方便翻译为中文，原文如下）
 
 	=== hurry_home ===
 	We hurried home <>
@@ -291,88 +293,87 @@ The default behaviour inserts line-breaks before every new line of content. In s
 	=== as_fast_as_we_could ===
 	<> as fast as we could.
 
-also produces:
+该脚本的输出同样为：
 
 	We hurried home to Savile Row as fast as we could.
 
-You can't use too much glue: multiple glues next to each other have no additional effect. (And there's no way to "negate" a glue; once a line is sticky, it'll stick.)
+你不能过度使用“粘合”符号：多个连续的粘合符号不会产生额外效果。（也无法“抵消”粘合，一旦一行被“粘”上，就会一直粘合。）
 
 
-## 5) Branching The Flow
+## 5) Branching The Flow 分支流程
 
-### Basic branching
+### Basic branching 基本分支
 
-Combining knots, options and diverts gives us the basic structure of a choose-your-own game.
+将节点、选项和跳转（diverts）结合起来，可以实现最基本的多路径故事结构。
 
-	=== paragraph_1 ===
-	You stand by the wall of Analand, sword in hand.
-	* [Open the gate] -> paragraph_2
-	* [Smash down the gate] -> paragraph_3
-	* [Turn back and go home] -> paragraph_4
+	=== paragraph_1 ===  
+	你站在阿纳兰德的城墙旁，手握长剑。  
+	* 	[打开城门] -> paragraph_2  
+	* 	[砸开城门] -> paragraph_3  
+	* [转身回家] -> paragraph_4  
 
-	=== paragraph_2 ===
-	You open the gate, and step out onto the path.
+	=== paragraph_2 ===  
+	你打开了城门，踏上了小路。
 
 	...
 
-### Branching and joining
+### Branching and joining 分支与合流
 
-Using diverts, the writer can branch the flow, and join it back up again, without showing the player that the flow has rejoined.
+通过使用跳转（diverts），作者可以让故事流程分支，然后在不让玩家察觉的情况下让分支重新汇合。这意味着多个不同的路径可以最终回到同一个叙事点上。
 
 	=== back_in_london ===
 
-	We arrived into London at 9.45pm exactly.
+	我们在晚上9点45分准时抵达伦敦。
 
-	*	"There is not a moment to lose!"[] I declared.
+	*	“一刻都不能耽误！”[] 我说道。  
 		-> hurry_outside
 
-	*	"Monsieur, let us savour this moment!"[] I declared.
-		My master clouted me firmly around the head and dragged me out of the door.
+	*	“先生，让我们好好享受这一刻吧！”[] 我说道。  
+		我的主人狠狠地敲了我的头一下，把我拖出了门。  
 		-> dragged_outside
 
-	*	[We hurried home] -> hurry_outside
+	*	[我们赶紧回家] -> hurry_outside
 
 
 	=== hurry_outside ===
-	We hurried home to Savile Row -> as_fast_as_we_could
+	我们尽可能快地赶回萨维尔街的家 -> as_fast_as_we_could
 
 
 	=== dragged_outside ===
-	He insisted that we hurried home to Savile Row
+	他坚持要我们尽快赶回萨维尔街的家  
 	-> as_fast_as_we_could
 
 
 	=== as_fast_as_we_could ===
-	<> as fast as we could.
+	<> ，尽可能快地。
 
+### The story flow 故事流程
 
-### The story flow
+节点与跳转的组合构建出了游戏的基础故事流程。这个流程是“平的”（flat），即没有调用栈（call stack），跳转后不会再“返回”原来的位置。
 
-Knots and diverts combine to create the basic story flow of the game. This flow is "flat" - there's no call-stack, and diverts aren't "returned" from.
+在大多数 **ink** 脚本中，故事从文件开头的内容开始，然后在各节点间“跳来跳去”，像一团意大利面一样盘绕，最后（希望）到达 `-> END` 告终。
 
-In most ink scripts, the story flow starts at the top, bounces around in a spaghetti-like mess, and eventually, hopefully, reaches a `-> END`.
+这种极为松散的结构让创作者可以随心所欲地写作，在必要时随意分支和合流，而无需过分担心整体结构的完备性。引入新的分支或变向并不需要任何模板化的步骤，也无需手动追踪状态。
 
-The very loose structure means writers can get on and write, branching and rejoining without worrying about the structure that they're creating as they go. There's no boiler-plate to creating new branches or diversions, and no need to track any state.
+#### Advanced: Loops 进阶用法：循环
 
-#### Advanced: Loops
+完全可以使用跳转来创建循环内容。**ink** 提供了多种特性来利用这一点，包括动态变化文本的方式，以及控制选项重复选择频率的方法。
 
-You absolutely can use diverts to create looped content, and **ink** has several features to exploit this, including ways to make the content vary itself, and ways to control how often options can be chosen.
+更多信息请参考有关动态文本变化以及[条件分支选项](#conditional-choices)的相关章节。
 
-See the sections on Varying Text and [Conditional Choices](#conditional-choices) for more information.
-
-Oh, and the following is legal and not a great idea:
+哦，顺带一提，下面这种写法虽然合法，但并不是个好主意：
 
 	=== round ===
 	and
 	-> round
 
-## 6) Includes and Stitches
+## 6) Includes and Stitches 包含与分段
 
-### Knots can be subdivided
+### Knots can be subdivided 节点可以进一步细分
 
-As stories get longer, they become more confusing to keep organised without some additional structure.
+随着故事规模增大，如果没有额外的结构支持，保持条理就会变得困难。
 
-Knots can include sub-sections called "stitches". These are marked using a single equals sign.
+节点（knots）内部可以进一步细分为子章节（stitches）。子章节以单个等号作为标记：
 
 	=== the_orient_express ===
 	= in_first_class
@@ -384,1028 +385,1016 @@ Knots can include sub-sections called "stitches". These are marked using a singl
 	= missed_the_train
 		...
 
-One could use a knot for a scene, for instance, and stitches for the events within the scene.
+例如，你可以将一个节点视为一个场景，而将其内部的子章节用来表示该场景中的不同事件。
 
-### Stitches have unique names
+### Stitches have unique names 子章节有独立的名字
 
-A stitch can be diverted to using its "address".
+你可以通过“地址”的方式跳转到子章节。地址的格式为：`节点名.子章节名`
 
-	*	[Travel in third class]
+	*	[乘坐三等车厢]
 		-> the_orient_express.in_third_class
 
-	*	[Travel in the guard's van]
+	*	[乘坐列车员车厢]
 		-> the_orient_express.in_the_guards_van
 
-### The first stitch is the default
+### The first stitch is the default 第一个子章节是默认入口
 
-Diverting to a knot which contains stitches will divert to the first stitch in the knot. So:
+如果你跳转到一个含有多个子章节的节点（但未指定具体子章节），则会自动跳转到该节点内的第一个子章节。因此：
 
-	*	[Travel in first class]
-		"First class, Monsieur. Where else?"
+	*	[乘坐头等车厢]
+		“头等车厢，先生。还能去哪呢？”  
 		-> the_orient_express
 
-is the same as:
+与下面的写法效果相同：
 
-	*	[Travel in first class]
-		"First class, Monsieur. Where else?"
+	*	[乘坐头等车厢]
+		“头等车厢，先生。还能去哪呢？”  
 		-> the_orient_express.in_first_class
 
-(...unless we move the order of the stitches around inside the knot!)
+（除非你在节点内部改变子章节的顺序！）
 
-You can also include content at the top of a knot outside of any stitch. However, you need to remember to divert out of it - the engine *won't* automatically enter the first stitch once it's worked its way through the header content.
+你也可以在节点顶部（在所有子章节之前）添加内容。然而，需要记住的是，在这些内容结束后，故事并不会自动进入首个子章节，你必须手动跳转（divert）进入相应子章节。
 
 	=== the_orient_express ===
 
-	We boarded the train, but where?
-	*	[First class] -> in_first_class
-	*	[Second class] -> in_second_class
+	我们登上了火车，但是在哪个车厢？  
+	* 	[头等车厢] -> in_first_class  
+	* 	[二等车厢] -> in_second_class  
 
 	= in_first_class
 		...
 	= in_second_class
 		...
 
+### Local diverts 本地跳转
 
-### Local diverts
-
-From inside a knot, you don't need to use the full address for a stitch.
+在同一个节点内，你不需要使用完整的地址来跳转到子章节：
 
 	-> the_orient_express
 
 	=== the_orient_express ===
 	= in_first_class
-		I settled my master.
-		*	[Move to third class]
+		我安顿好了我的主人。  
+		*	[移动到三等车厢]
 			-> in_third_class
 
 	= in_third_class
-		I put myself in third.
+		我将自己安顿在了三等车厢。  
 
-This means stitches and knots can't share names, but several knots can contain the same stitch name. (So both the Orient Express and the SS Mongolia can have first class.)
+这意味着子章节名在同一节点内是唯一的，但不同节点之间可以使用相同的子章节名。（例如，the_orient_express 和 SS_Mongolia 都可以有一个 in_first_class 子章节。）
 
-The compiler will warn you if ambiguous names are used.
+如果存在名称冲突，编译器会发出警告。
 
-### Script files can be combined
+### Script files can be combined 脚本文件可以合并
 
-You can also split your content across multiple files, using an include statement.
+你还可以通过使用 `INCLUDE` 语句，将内容分散在多个文件中进行组织：
 
 	INCLUDE newspaper.ink
 	INCLUDE cities/vienna.ink
 	INCLUDE journeys/orient_express.ink
 
-Include statements should always go at the top of a file, and not inside knots.
+`INCLUDE` 语句应该始终放在文件顶部，而不应位于节点内部。
 
-There are no rules about what file a knot must be in to be diverted to. (In other words, separating files has no effect on the game's namespacing).
+文件分离不会对游戏内的名称空间产生影响，也就是说，你可以自由地在多个文件中创建节点和子章节，并在任意文件中对其进行跳转。
 
+## 7) Varying Choices 选择的多样性
 
-## 7) Varying Choices
+### Choices can only be used once 选项只能使用一次
 
-### Choices can only be used once
-
-By default, every choice in the game can only be chosen once. If you don't have loops in your story, you'll never notice this behaviour. But if you do use loops, you'll quickly notice your options disappearing...
+默认情况下，游戏中的每个选项只能被选择一次。如果你的故事中没有循环结构，你可能不会注意到这一点；但一旦使用循环，你会很快发现选项会在重复循环中逐渐消失……
 
 	=== find_help ===
 
-		You search desperately for a friendly face in the crowd.
-		*	The woman in the hat[?] pushes you roughly aside. -> find_help
-		*	The man with the briefcase[?] looks disgusted as you stumble past him. -> find_help
+		你在拥挤的人群中拼命寻找一张友善的面孔。  
+		*	戴帽子的女人[？] 粗暴地把你推到一边。 -> find_help
+		*	拿公文包的男人[？] 在你跌跌撞撞地从他身边经过时，露出厌恶的表情。 -> find_help
 
-produces:
+输出为：
 
-	You search desperately for a friendly face in the crowd.
+	你在拥挤的人群中拼命寻找一张友善的面孔。
 
-	1: The woman in the hat?
-	2: The man with the briefcase?
+	1: 戴帽子的女人？  
+	2: 拿公文包的男人？  
 
-	> 1
-	The woman in the hat pushes you roughly aside.
-	You search desperately for a friendly face in the crowd.
+	> 1  
+	戴帽子的女人粗暴地把你推到一边。  
+	你在拥挤的人群中拼命寻找一张友善的面孔。  
 
-	1: The man with the briefcase?
+	1: 拿公文包的男人？  
 
 	>
 
-... and on the next loop you'll have no options left.
+当再次循环时，你将没有任何选项可选。
 
-#### Fallback choices
+#### Fallback choices 后备选项
 
-The above example stops where it does, because the next choice ends up in an "out of content" run-time error.
+上面的例子会在此时停止，因为下次循环时会发生“内容耗尽”的运行时错误。
 
 	> 1
-	The man with the briefcase looks disgusted as you stumble past him.
-	You search desperately for a friendly face in the crowd.
+	拿公文包的男人在你跌跌撞撞地从他身边经过时，露出厌恶的表情。  
+	你在拥挤的人群中拼命寻找一张友善的面孔。
 
 	Runtime error in tests/test.ink line 6: ran out of content. Do you need a '-> DONE' or '-> END'?
 
-We can resolve this with a 'fallback choice'. Fallback choices are never displayed to the player, but are 'chosen' by the game if no other options exist.
+我们可以通过添加一个“后备选项”来解决这个问题。当没有其他选项可供玩家选择时，游戏会自动选择后备选项。后备选项不会显示给玩家，只在无其他可选时生效。
 
-A fallback choice is simply a "choice without choice text":
+一个后备选项可以是一个没有任何选项文本的选择：
 
 	*	-> out_of_options
 
-And, in a slight abuse of syntax, we can make a default choice with content in it, using an "choice then arrow":
+或者使用一种稍有语法“滥用”的方式，提供一个有内容但无文本的默认选项：
 
 	* 	->
-		Mulder never could explain how he got out of that burning box car. -> season_2
+		穆德从未能解释清楚他是如何从那辆燃烧的货车里逃出来的。 -> season_2
 
-#### Example of a fallback choice
+#### Example of a fallback choice 后备选项示例
 
-Adding this into the previous example gives us:
+将这一机制添加到之前的示例中：
 
 	=== find_help ===
 
-		You search desperately for a friendly face in the crowd.
-		*	The woman in the hat[?] pushes you roughly aside. -> find_help
-		*	The man with the briefcase[?] looks disgusted as you stumble past him. -> find_help
-		*	->
-			But it is too late: you collapse onto the station platform. This is the end.
-			-> END
+	你在拥挤的人群中拼命寻找一张友善的面孔。  
+	* 	戴帽子的女人[？] 粗暴地把你推到一边。 -> find_help  
+	* 	拿公文包的男人[？] 在你跌跌撞撞地从他身边经过时，露出厌恶的表情。 -> find_help  
+	* 	->  
+		但一切都太晚了：你倒在了车站的站台上。这就是结局。  
+		-> END  
 
-and produces:
+输出为：
 
-	You search desperately for a friendly face in the crowd.
+	你在拥挤的人群中拼命寻找一张友善的面孔。
 
-	1: The woman in the hat?
-	2: The man with the briefcase?
-
-	> 1
-	The woman in the hat pushes you roughly aside.
-	You search desperately for a friendly face in the crowd.
-
-	1: The man with the briefcase?
+	1: 戴帽子的女人？  
+	2: 拿公文包的男人？  
 
 	> 1
-	The man with the briefcase looks disgusted as you stumble past him.
-	You search desperately for a friendly face in the crowd.
-	But it is too late: you collapse onto the station platform. This is the end.
+	戴帽子的女人粗暴地把你推到一边。  
+	你在拥挤的人群中拼命寻找一张友善的面孔。  
+
+	1: 拿公文包的男人？  
+
+	> 1
+	拿公文包的男人在你跌跌撞撞地从他身边经过时，露出厌恶的表情。  
+	你在拥挤的人群中拼命寻找一张友善的面孔。
+	但一切都太晚了：你倒在了车站的站台上。这就是结局。  
 
 
-### Sticky choices
+### Sticky choices 粘性选项
 
-The 'once-only' behaviour is not always what we want, of course, so we have a second kind of choice: the "sticky" choice. A sticky choice is simply one that doesn't get used up, and is marked by a `+` bullet.
+“只可用一次”并非总是我们所需要的，因此还有另一种选项类型：粘性选项（sticky choices）。粘性选项不会在选择后消失，用 `+` 来标记：
 
 	=== homers_couch ===
-		+	[Eat another donut]
-			You eat another donut. -> homers_couch
-		*	[Get off the couch]
-			You struggle up off the couch to go and compose epic poetry.
+		+	[再吃一个甜甜圈]
+			你又吃了一个甜甜圈。 -> homers_couch  
+		* 	[起身离开沙发]  
+			你挣扎着从沙发上站起来，准备去创作史诗诗歌。 
 			-> END
 
-Fallback choices can be sticky too.
+后备选项也可以是粘性的：
 
 	=== conversation_loop
-		*	[Talk about the weather] -> chat_weather
-		*	[Talk about the children] -> chat_children
-		+	-> sit_in_silence_again
+		* 	[谈论天气] -> chat_weather  
+		* 	[谈论孩子] -> chat_children  
+		+ 	-> 再次静静地坐着  
 
-### Conditional Choices
+### Conditional Choices 条件化选项
 
-You can also turn choices on and off by hand. **ink** has quite a lot of logic available, but the simplest tests is "has the player seen a particular piece of content".
+你也可以通过逻辑来控制选项的显示与否。**ink** 提供了丰富的逻辑功能，这里先介绍最简单的用法——检测玩家是否已经看过某段内容。
 
-Every knot/stitch in the game has a unique address (so it can be diverted to), and we use the same address to test if that piece of content has been seen.
+游戏中每个节点（knot）和子章节（stitch）都有独特的地址，对该地址的检测可判断玩家是否已阅读过对应内容：
 
-	*	{ not visit_paris } 	[Go to Paris] -> visit_paris
-	+ 	{ visit_paris 	 } 		[Return to Paris] -> visit_paris
+	*	{ not visit_paris } 	[去巴黎] -> visit_paris
+	+ 	{ visit_paris 	  } 	[回到巴黎] -> visit_paris
 
-	*	{ visit_paris.met_estelle } [ Telephone Mme Estelle ] -> phone_estelle
+	*	{ visit_paris.met_estelle } [给埃斯特尔夫人打电话] -> phone_estelle
 
-Note that the test `knot_name` is true if *any* stitch inside that knot has been seen.
+注意：`knot_name` 在条件中为真，表示玩家看过该节点下的任何子章节内容。
 
-Note also that conditionals don't override the once-only behaviour of options, so you'll still need sticky options for repeatable choices.
+同样要注意，条件不会覆盖选项“一次性”行为，如果你希望重复出现的条件选项，需要使用粘性选项。
 
-#### Advanced: multiple conditions
+#### Advanced: multiple conditions 进阶：多重条件
 
-You can use several logical tests on an option; if you do, *all* the tests must all be passed for the option to appear.
+你可以在一个选项上使用多个条件；所有条件都必须通过测试，选项才会出现：
 
-	*	{ not visit_paris } 	[Go to Paris] -> visit_paris
+	*	{ not visit_paris } [去巴黎] -> visit_paris
 	+ 	{ visit_paris } { not bored_of_paris }
-		[Return to Paris] -> visit_paris
-
-#### Logical operators: AND and OR
-
-The above "multiple conditions" are really just conditions with an the usual programming AND operator. Ink supports `and` (also written as `&&`) and `or` (also written as `||`) in the usual way, as well as brackets.
-
-	*	{ not (visit_paris or visit_rome) && (visit_london || visit_new_york) } [ Wait. Go where? I'm confused. ] -> visit_someplace
-
-For non-programmers `X and Y` means both X and Y must be true. `X or Y` means either or both. We don't have a `xor`.
-
-You can also use the standard `!` for `not`, though it'll sometimes confuse the compiler which thinks `{!text}` is a once-only list. We recommend using `not` because negated boolean tests are never that exciting.
-
-#### Advanced: knot/stitch labels are actually read counts
-
-The test:
-
-	*	{seen_clue} [Accuse Mr Jefferson]
-
-is actually testing an *integer* and not a true/false flag. A knot or stitch used this way is actually an integer variable containing the number of times the content at the address has been seen by the player.
-
-If it's non-zero, it'll return true in a test like the one above, but you can also be more specific as well:
-
-	* {seen_clue > 3} [Flat-out arrest Mr Jefferson]
+		[回到巴黎] -> visit_paris
 
 
-#### Advanced: more logic
+#### Logical operators: AND and OR 逻辑运算符：AND 和 OR
 
-**ink** supports a lot more logic and conditionality than covered here - see the section on [variables and logic](#part-3-variables-and-logic).
+上述示例的多重条件相当于编程中的 AND 逻辑。**ink** 支持 `and`（也可写为 `&&`）和 `or`（也可写为 `||`），还支持使用括号进行逻辑分组。
 
+	*	{ not (visit_paris or visit_rome) && (visit_london || visit_new_york) } [ 等等。去哪儿？我有点困惑。 ] -> visit_someplace
 
-## 8) Variable Text
+对于非程序员而言，`X and Y` 表示 X 和 Y 都要为真；`X or Y` 表示 X 和 Y 中至少有一个为真。**ink** 没有提供 `xor`。
 
-### Text can vary
+你也可以使用标准的 `!` 来表示 `not`，但有时会让编译器误以为 `{!text}` 是一次性列表，因此建议使用单词 `not` 来避免歧义。
 
-So far, all the content we've seen has been static, fixed pieces of text. But content can also vary at the moment of being printed.
+#### Advanced: knot/stitch labels are actually read counts 进阶：节点和子章节名称其实是阅读次数
 
-### Sequences, cycles and other alternatives
+条件检测如：
 
-The simplest variations of text are provided by alternatives, which are selected from depending on some kind of rule. **ink** supports several types. Alternatives are written inside `{`...`}` curly brackets, with elements separated by `|` symbols (vertical divider lines).
+	*	{seen_clue} [指控杰斐逊先生]
 
-These are only useful if a piece of content is visited more than once!
+实际上测试的是一个整数，而非真/假布尔值。被引用的节点或子章节地址在逻辑中代表该内容被阅读过的次数（一个整数）。只要阅读次数不为零，`{seen_clue}` 在条件中就相当于 true。
 
-#### Types of alternatives
+你也可以更精确地判断：
 
-**Sequences** (the default):
+	* 	{seen_clue > 3} [直接逮捕杰斐逊先生]  
 
-A sequence (or a "stopping block") is a set of alternatives that tracks how many times its been seen, and each time, shows the next element along. When it runs out of new content it continues the show the final element.
+#### Advanced: more logic 进阶：更多逻辑
 
-	The radio hissed into life. {"Three!"|"Two!"|"One!"|There was the white noise racket of an explosion.|But it was just static.}
+**ink** 支持的逻辑和条件远不止这些，更多内容请参考 [变量和逻辑](#part-3-variables-and-logic) 的相关章节。
 
-	{I bought a coffee with my five-pound note.|I bought a second coffee for my friend.|I didn't have enough money to buy any more coffee.}
+## 8) Variable Text 可变文本
 
-**Cycles** (marked with a `&`):
+### Text can vary 文本可以变化
 
-Cycles are like sequences, but they loop their content.
+到目前为止，我们看到的内容都是静态固定的文本。但在 **ink** 中，文本内容在显示时也可以发生变化。
 
-	It was {&Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday} today.
+### Sequences, cycles and other alternatives 序列、循环及其他变体
 
+最简单的文本变化方式是通过备选文本（alternatives）实现的，根据一定规则从中选择一个变体进行展示。**ink** 支持多种类型的变体。备选文本用 `{` 和 `}` 括起来，内部使用 `|` 分隔不同的选项。
 
-**Once-only** (marked with a `!`):
+只有当某段内容被多次访问时，这些变体才会显现出作用！
 
-Once-only alternatives are like sequences, but when they run out of new content to display, they display nothing. (You can think of a once-only alternative as a sequence with a blank last entry.)
+#### Types of alternatives 备选文本的类型
 
-	He told me a joke. {!I laughed politely.|I smiled.|I grimaced.|I promised myself to not react again.}
+**序列** (默认)：
 
-**Shuffles** (marked with a `~`):
+序列（或“停止块”）是一组备选内容，它会记录被访问的次数，并依次显示下一个元素。当没有新的内容时，它会持续显示最后一个元素。  
 
-Shuffles produce randomised output.
+	收音机突然嘶嘶作响。{"三！"|"二！"|"一！"|接着是一阵白噪声般的爆炸声。|不过只是静电声。} 
 
-	I tossed the coin. {~Heads|Tails}.
+	{我用五英镑买了一杯咖啡。|我为朋友买了第二杯咖啡。|我没钱再买更多的咖啡了。}  
 
-#### Features of Alternatives
+**循环** （以 `&` 标记）：
 
-Alternatives can contain blank elements.
+循环与序列类似，但它会循环显示内容。  
 
-	I took a step forward. {!||||Then the lights went out. -> eek}
+	今天是{&星期一|星期二|星期三|星期四|星期五|星期六|星期日}。 
 
-Alternatives can be nested.
+**一次性** （以 `!` 标记）：
+
+一次性选项与序列类似，但当没有新内容可显示时，它会显示为空。（你可以将一次性选项视为最后一项为空白的序列。）  
+
+	他给我讲了个笑话。{!我礼貌地笑了笑。|我微笑了一下。|我做了个怪脸。|我暗暗发誓不再有任何反应。}  
+
+**随机排列** （以 `~` 标记）： 
+
+随机排列会生成随机输出。  
+
+	我抛了硬币。{~正面|反面}。 
+
+#### Features of Alternatives 备选文本的特性
+
+备选文本可以包含空元素。
+
+    我向前迈了一步。{!||||然后灯灭了。 -> eek}
+
+备选文本可以嵌套。
+（译注：这个例子不方便翻译为中文，原文如下）
 
 	The Ratbear {&{wastes no time and |}swipes|scratches} {&at you|into your {&leg|arm|cheek}}.
 
-Alternatives can include divert statements.
+备选文本可以包含跳转语句。
 
-	I {waited.|waited some more.|snoozed.|woke up and waited more.|gave up and left. -> leave_post_office}
+	    我{等着。|又等了一会儿。|打了个盹。|醒来后继续等。|放弃了然后离开。 -> leave_post_office}
 
-They can also be used inside choice text:
+备选文本也可以用在选项文本中：
 
-	+ 	"Hello, {&Master|Monsieur Fogg|you|brown-eyes}!"[] I declared.
+	+ 	"你好，{&主人|福格先生|你|棕眼睛的朋友}！"[] 我说道。
 
-(...with one caveat; you can't start an option's text with a `{`, as it'll look like a conditional.)
+（……不过有一个限制：你不能以 `{` 开头作为选项的文本，否则它会被视为一个条件。）
 
-(...but the caveat has a caveat, if you escape a whitespace `\ ` before your `{` ink will recognise it as text.)
+（……但是这个限制还有一个例外，如果你在 `{` 前使用一个转义空格 `\ `，Ink 会将其识别为文本。）
 
-	+\	{&They headed towards the Sandlands|They set off for the desert|The party followed the old road South}
+    +\ {&他们朝着沙地出发了|他们前往了沙漠|一行人沿着古道向南走去}
 
 #### Examples
 
-Alternatives can be used inside loops to create the appearance of intelligent, state-tracking gameplay without particular effort.
+备选文本可以用在循环中，创造出一种智能且具有状态跟踪的游戏玩法效果，而无需特别努力。
 
-Here's a one-knot version of whack-a-mole. Note we use once-only options, and a fallback, to ensure the mole doesn't move around, and the game will always end.
+以下是一个只有一个节点的打地鼠游戏版本。请注意，我们使用了仅一次的选项和一个后备选项，以确保地鼠不会到处乱跑，并且游戏最终会结束。
 
 	=== whack_a_mole ===
-		{I heft the hammer.|{~Missed!|Nothing!|No good. Where is he?|Ah-ha! Got him! -> END}}
-		The {&mole|{&nasty|blasted|foul} {&creature|rodent}} is {in here somewhere|hiding somewhere|still at large|laughing at me|still unwhacked|doomed}. <>
-		{!I'll show him!|But this time he won't escape!}
-		* 	[{&Hit|Smash|Try} top-left] 	-> whack_a_mole
-		*  [{&Whallop|Splat|Whack} top-right] -> whack_a_mole
-		*  [{&Blast|Hammer} middle] -> whack_a_mole
-		*  [{&Clobber|Bosh} bottom-left] 	-> whack_a_mole
-		*  [{&Nail|Thump} bottom-right] 	-> whack_a_mole
-		*   ->
-        	    Then you collapse from hunger. The mole has defeated you!
-	            -> END
+		{我抡起锤子。|{~打偏了！|什么都没打到！|不行。它在哪？|啊哈！打中了！ -> END}}
+		这只{&地鼠|{&讨厌的|该死的|恶心的} {&生物|啮齿类}}{&藏在某处|还在躲着|依然逍遥法外|正在嘲笑我|还没有被敲到|注定被消灭}。<>
+		{！我要让它好看！|但这次它逃不掉了！}
+		*  [{&敲打|猛击|试试} 左上] -> whack_a_mole
+		*  [{&猛击|拍打|敲击} 右上] -> whack_a_mole
+		*  [{&用力锤|猛锤} 中间] -> whack_a_mole
+		*  [{&拍下|猛打} 左下] -> whack_a_mole
+		*  [{&重击|狠敲} 右下] -> whack_a_mole
+		*  ->
+			然后你因为饥饿而倒下了。地鼠打败了你！
+			-> END
 
+运行这个游戏会产生以下效果：
 
-produces the following 'game':
+	我抡起锤子。
+	这只地鼠藏在某处。我要让它好看！
 
-	I heft the hammer.
-	The mole is in here somewhere. I'll show him!
-
-	1: Hit top-left
-	2: Whallop top-right
-	3: Blast middle
-	4: Clobber bottom-left
-	5: Nail bottom-right
+	1: 敲打 左上
+	2: 猛击 右上
+	3: 用力锤 中间
+	4: 拍下 左下
+	5: 重击 右下
 
 	> 1
-	Missed!
-	The nasty creature is hiding somewhere. But this time he won't escape!
+	打偏了！
+	这只讨厌的生物正在躲着。但这次它逃不掉了！
 
-	1: Splat top-right
-	2: Hammer middle
-	3: Bosh bottom-left
-	4: Thump bottom-right
+	1: 拍打 右上
+	2: 猛锤 中间
+	3: 猛打 左下
+	4: 狠敲 右下
 
 	> 4
-	Nothing!
-	The mole is still at large.
-	1: Whack top-right
-	2: Blast middle
-	3: Clobber bottom-left
+	什么都没打到！
+	这只地鼠依然逍遥法外。
+
+	1: 敲击 右上
+	2: 用力锤 中间
+	3: 拍下 左下
 
 	> 2
-	Where is he?
-	The blasted rodent is laughing at me.
-	1: Whallop top-right
-	2: Bosh bottom-left
+	它在哪？
+	这只该死的啮齿类正在嘲笑我。
+
+	1: 猛击 右上
+	2: 猛打 左下
 
 	> 1
-	Ah-ha! Got him!
+	啊哈！打中了！
 
 
-And here's a bit of lifestyle advice. Note the sticky choice - the lure of the television will never fade:
+以下是一个生活方式建议的例子。请注意这里的“黏性选项”——电视的诱惑永远不会消失：
 
 	=== turn_on_television ===
-	I turned on the television {for the first time|for the second time|again|once more}, but there was {nothing good on, so I turned it off again|still nothing worth watching|even less to hold my interest than before|nothing but rubbish|a program about sharks and I don't like sharks|nothing on}.
-	+	[Try it again]	 		-> turn_on_television
-	*	[Go outside instead]	-> go_outside_instead
+	我打开了电视{第一次|第二次|又一次|再一次}，但发现{没什么好看的，于是关掉了|仍然没有值得看的东西|比之前更无聊|只是一堆垃圾|是关于鲨鱼的节目，而我不喜欢鲨鱼|什么都没放}。
+	+ [再试一次] -> turn_on_television
+	* [改为出门] -> go_outside_instead
 
-    === go_outside_instead ===
-    -> END
-
-
-
-#### Sneak Preview: Multiline alternatives
-**ink** has another format for making alternatives of varying content blocks, too. See the section on [multiline blocks](#multiline-blocks) for details.
+	=== go_outside_instead ===
+	-> END
 
 
 
-### Conditional Text
+#### Sneak Preview: Multiline alternatives 偷跑预览：多行备选文本  
+**ink** 还提供了一种格式，可以为不同内容块创建备选文本。详情请参见[多行块](#multiline-blocks)部分。
 
-Text can also vary depending on logical tests, just as options can.
 
-	{met_blofeld: "I saw him. Only for a moment." }
+### Conditional Text 条件文本
+
+文本也可以根据逻辑判断进行变化，就像选项一样。
+
+	{met_blofeld: "我见过他。只有一会儿。"}
 
 and
 
-	"His real name was {met_blofeld.learned_his_name: Franz|a secret}."
+	"他的真名是 {met_blofeld.learned_his_name: 弗朗茨|一个秘密}。"
 
-These can appear as separate lines, or within a section of content. They can even be nested, so:
+这些文本可以作为单独的行出现，也可以嵌入到内容部分中。它们甚至可以嵌套，例如：
 
-	{met_blofeld: "I saw him. Only for a moment. His real name was {met_blofeld.learned_his_name: Franz|kept a secret}." | "I missed him. Was he particularly evil?" }
+	{met_blofeld: "我见过他。只有一会儿。他的真名是 {met_blofeld.learned_his_name: 弗朗茨|一个秘密}。" | "我错过了他。他特别邪恶吗？"}
 
-can produce either:
+可以生成以下任一内容：
 
-	"I saw him. Only for a moment. His real name was Franz."
+	"我见过他。只有一会儿。他的真名是弗朗茨。"
 
-or:
+或：
 
-	"I saw him. Only for a moment. His real name was kept a secret."
+	"我见过他。只有一会儿。他的真名是一个秘密。"
 
-or:
+或：
 
-	"I missed him. Was he particularly evil?"
+	"我错过了他。他特别邪恶吗？"
 
-## 9) Game Queries and Functions
+## 9) Game Queries and Functions 游戏查询和函数  
 
-**ink** provides a few useful 'game level' queries about game state, for use in conditional logic. They're not quite parts of the language, but they're always available, and they can't be edited by the author. In a sense, they're the "standard library functions" of the language.
+**ink** 提供了一些关于游戏状态的“游戏层级”查询，用于条件逻辑。这些查询并不是语言本身的一部分，但它们始终可用，并且无法被作者修改。从某种意义上来说，它们是语言的“标准库函数”。  
 
-The convention is to name these in capital letters.
+这些查询通常以全大写命名。
 
 ### CHOICE_COUNT()
 
-`CHOICE_COUNT` returns the number of options created so far in the current chunk. So for instance.
+`CHOICE_COUNT` 返回当前区块中到目前为止创建的选项数量。例如：
 
-	*	{false} Option A
-	* 	{true} Option B
-	*  {CHOICE_COUNT() == 1} Option C
+	* 	{false} 选项 A
+	* 	{true} 选项 B
+	* 	{CHOICE_COUNT() == 1} 选项 C
 
-produces two options, B and C. This can be useful for controlling how many options a player gets on a turn.
+会生成两个选项：B 和 C。这对于控制玩家在一回合中可以获得的选项数量非常有用。
 
 ### TURNS()
 
-This returns the number of game turns since the game began.
+该函数返回自游戏开始以来的游戏回合数。
 
 ### TURNS_SINCE(-> knot)
 
-`TURNS_SINCE` returns the number of moves (formally, player inputs) since a particular knot/stitch was last visited.
+`TURNS_SINCE` 返回自某个结点/段落（knot/stitch）上次被访问以来的回合数（严格来说是玩家输入次数）。  
 
-A value of 0 means "was seen as part of the current chunk". A value of -1 means "has never been seen". Any other positive value means it has been seen that many turns ago.
+- 返回值为 0 表示“在当前区块中已被访问”。  
+- 返回值为 -1 表示“从未被访问过”。  
+- 任何其他正值表示它在该回合数之前被访问过。  
 
-	*	{TURNS_SINCE(-> sleeping.intro) > 10} You are feeling tired... -> sleeping
-	* 	{TURNS_SINCE(-> laugh) == 0}  You try to stop laughing.
+	* {TURNS_SINCE(-> sleeping.intro) > 10} 你感到有些疲倦…… -> sleeping
+	* {TURNS_SINCE(-> laugh) == 0} 你试图停止笑声。
 
-Note that the parameter passed to `TURNS_SINCE` is a "divert target", not simply the knot address itself (because the knot address is a number - the read count - not a location in the story...)
+注意，传递给 `TURNS_SINCE` 的参数是一个“转向目标”，而不是简单的结点地址本身（因为结点地址是一个数字——阅读次数，而不是故事中的位置……）
 
-TODO: (requirement of passing `-c` to the compiler)
+TODO: （需要向编译器传递 -c 参数）
 
-#### Sneak preview: using TURNS_SINCE in a function
+#### Sneak preview: using TURNS_SINCE in a function 偷跑预览：在函数中使用 TURNS_SINCE
 
-The `TURNS_SINCE(->x) == 0` test is so useful it's often worth wrapping it up as an ink function.
+`TURNS_SINCE(->x) == 0` 的测试非常有用，因此通常值得将其封装为一个 ink 函数。
 
 	=== function came_from(-> x)
 		~ return TURNS_SINCE(x) == 0
 
-The section on [functions](#5-functions) outlines the syntax here a bit more clearly but the above allows you to say things like:
+函数章节更清楚地概述了这里的语法，但上述函数允许你编写如下内容：
 
-	* {came_from(->  nice_welcome)} 'I'm happy to be here!'
-	* {came_from(->  nasty_welcome)} 'Let's keep this quick.'
+	* {came_from(->  nice_welcome)} '我很高兴来到这里！'
+	* {came_from(->  nasty_welcome)} '让我们快点结束吧。'
 
-... and have the game react to content the player saw *just now*.
+……从而让游戏对玩家“刚刚”看到的内容做出反应。
 
 ### SEED_RANDOM()
 
-For testing purposes, it's often useful to fix the random number generator so ink will produce the same outcomes every time you play. You can do this by "seeding" the random number system.
+出于测试目的，固定随机数生成器通常非常有用，这样 ink 在每次运行时都会产生相同的结果。你可以通过“设置种子”来初始化随机数系统。
 
-	~ SEED_RANDOM(235)
+~ SEED_RANDOM(235)
 
-The number you pass to the seed function is arbitrary, but providing different seeds will result in different sequences of outcomes.
+传递给种子函数的数字是任意的，但使用不同的种子将会生成不同的结果序列。
 
-#### Advanced: more queries
+#### Advanced: more queries 高级：更多查询  
 
-You can make your own external functions, though the syntax is a bit different: see the section on [functions](#5-functions) below.
+你可以创建自己的外部函数，不过其语法略有不同：请参阅下面的[函数](#5-functions)章节。
 
+# Part 2: Weave 编织
 
-# Part 2: Weave
+到目前为止，我们一直在用最简单的方式构建分支故事，通过“选项”链接到“页面”。
 
-So far, we've been building branched stories in the simplest way, with "options" that link to "pages".
+但这种方式要求我们为故事中的每个目标单独命名，这可能会降低编写效率，并让小分支的创建变得繁琐。
 
-But this requires us to uniquely name every destination in the story, which can slow down writing and discourage minor branching.
+**ink** 提供了一种更强大的语法，旨在简化具有始终向前推进方向的故事流程（正如大多数故事所具有的，而大多数计算机程序却没有）。
 
-**ink** has a much more powerful syntax available, designed for simplifying story flows which have an always-forwards direction (as most stories do, and most computer programs don't).
+这种格式被称为“编织（weave）”，它是基于基础内容/选项语法构建的，并引入了两个新特性：聚合标记 `-`，以及选项和聚合的嵌套。
 
-This format is called "weave", and its built out of the basic content/option syntax with two new features: the gather mark, `-`, and the nesting of choices and gathers.
+## 1) Gathers 聚合
 
-## 1) Gathers
+### Gather points gather the flow back together 聚合点将流程汇集到一起
 
-### Gather points gather the flow back together
+让我们回到本文档开头的第一个多选示例。
 
-Let's go back to the first multi-choice example at the top of this document.
+	“那是什么？”我的主人问道。
 
-	"What's that?" my master asked.
-		*	"I am somewhat tired[."]," I repeated.
-			"Really," he responded. "How deleterious."
-		*	"Nothing, Monsieur!"[] I replied.
-		*  "I said, this journey is appalling[."] and I want no more of it."
-			"Ah," he replied, not unkindly. "I see you are feeling frustrated. Tomorrow, things will improve."
+	* 	“我有点累了[。”]”，我重复道。  
+		“是吗，”他回应道，“真让人难受。”  
+	* 	“没什么，先生！”[] 我回答道。  
+	* 	“我说，这趟旅程糟透了[。”]，我再也不想继续了。”  
+		“啊，”他语气温和地说道，“我明白你感到沮丧了。明天会好起来的。”
 
-In a real game, all three of these options might well lead to the same conclusion - Monsieur Fogg leaves the room. We can do this using a gather, without the need to create any new knots, or add any diverts.
+在实际的游戏中，这三个选项可能最终都会导致相同的结论——福格先生离开房间。我们可以通过一个聚合点来实现这一点，而不需要创建新的结点或添加任何跳转。
 
-	"What's that?" my master asked.
-		*	"I am somewhat tired[."]," I repeated.
-			"Really," he responded. "How deleterious."
-		*	"Nothing, Monsieur!"[] I replied.
-			"Very good, then."
-		*  "I said, this journey is appalling[."] and I want no more of it."
-		"Ah," he replied, not unkindly. "I see you are feeling frustrated. Tomorrow, things will improve."
+	“那是什么？”我的主人问道。
 
-	-	With that Monsieur Fogg left the room.
+	* 	“我有点累了[。”]”，我重复道。  
+		“是吗，”他回应道，“真让人难受。”  
+	* 	“没什么，先生！”[] 我回答道。  
+		“很好，那就这样吧。”  
+	* 	“我说，这趟旅程糟透了[。”]，我再也不想继续了。”  
+		“啊，”他语气温和地说道，“我明白你感到沮丧了。明天会好起来的。”  
 
-This produces the following playthrough:
+然后通过聚合点结束：  
 
-	"What's that?" my master asked.
+	- 	随后，福格先生离开了房间。
 
-	1: "I am somewhat tired."
-	2: "Nothing, Monsieur!"
-	3: "I said, this journey is appalling."
+这将产生以下游戏流程：
 
-	> 1
-	"I am somewhat tired," I repeated.
-	"Really," he responded. "How deleterious."
-	With that Monsieur Fogg left the room.
+	“那是什么？”我的主人问道。
 
-### Options and gathers form chains of content
+	1: “我有点累了。”  
+	2: “没什么，先生！”  
+	3: “我说，这趟旅程糟透了。”
 
-We can string these gather-and-branch sections together to make branchy sequences that always run forwards.
+	> 1  
+	“我有点累了[。”]”，我重复道。  
+	“是吗，”他回应道，“真让人难受。”  
+	随后，福格先生离开了房间。
+
+### Options and gathers form chains of content 选项和聚合点构成内容链条
+
+我们可以将这些聚合和分支的部分串联起来，创建始终向前推进的分支序列。
 
 	=== escape ===
-	I ran through the forest, the dogs snapping at my heels.
+	我穿过森林奔跑，猎狗紧追在后。
 
-		* 	I checked the jewels[] were still in my pocket, and the feel of them brought a spring to my step. <>
+		* 	我检查了口袋中的珠宝[]，触摸到它们让我步伐更加轻快。 <>
 
-		*  I did not pause for breath[] but kept on running. <>
+		* 	我没有停下喘气[]，而是继续奔跑。 <>
 
-		*	I cheered with joy. <>
+		* 	我欢呼着，满心喜悦。 <>
 
-	- 	The road could not be much further! Mackie would have the engine running, and then I'd be safe.
+	- 	道路应该不远了！麦基会发动引擎，然后我就安全了。
 
-		*	I reached the road and looked about[]. And would you believe it?
-		* 	I should interrupt to say Mackie is normally very reliable[]. He's never once let me down. Or rather, never once, previously to that night.
+		* 	我跑到路边环顾四周[]。你能相信吗？  
+		* 	我应该插一句，麦基通常非常可靠[]。他从未让我失望过，或者更确切地说，从未让我失望过……直到那个晚上。
 
-	-	The road was empty. Mackie was nowhere to be seen.
+	- 	路上空无一人。麦基无影无踪。
 
-This is the most basic kind of weave. The rest of this section details  additional features that allow weaves to nest, contain side-tracks and diversions, divert within themselves, and above all, reference earlier choices to influence later ones.
+这是最基础的一种编织（weave）形式。本节的其余部分将详细说明更多功能，包括如何让编织嵌套、包含支线和偏离内容、自我跳转，以及最重要的，如何引用早期的选项来影响后续内容。
 
-#### The weave philosophy
+#### The weave philosophy 编织的理念
 
-Weaves are more than just a convenient encapsulation of branching flow; they're also a way to author more robust content. The `escape` example above has already four possible routes through, and a more complex sequence might have lots and lots more. Using normal diverts, one has to check the links by chasing the diverts from point to point and it's easy for errors to creep in.
+编织（weave）不仅仅是分支流程的一种便利封装，它也是一种创作更健壮内容的方式。上面的 `escape` 示例已经包含四种可能的路径，而更复杂的序列可能会有更多更多的路径。使用常规的跳转（diverts），需要通过逐点检查跳转链接，这很容易导致错误。
 
-With a weave, the flow is guaranteed to start at the top and "fall" to the bottom. Flow errors are impossible in a basic weave structure, and the output text can be easily skim read. That means there's no need to actually test all the branches in game to be sure they work as intended.
+使用编织，流程保证从顶部开始并“流向”底部。在基础编织结构中，流程错误是不可能发生的，并且输出的文本可以轻松快速地阅读。这意味着无需在游戏中实际测试所有分支，也能确保它们按预期工作。
 
-Weaves also allow for easy redrafting of choice-points; in particular, it's easy to break a sentence up and insert additional choices for variety or pacing reasons, without having to re-engineer any flow.
+编织还允许轻松地对选项点进行重新设计；特别是，可以很方便地分割句子并插入额外的选项，以增加多样性或调整节奏，而无需重新设计任何流程。
+
+## 2) Nested Flow 嵌套流程
+
+上面展示的编织结构相对简单，属于“扁平化”结构。无论玩家做出什么选择，他们从头到尾所需的回合数都是相同的。然而，有时某些选择可能需要更多的深度或复杂性。
+
+为此，我们允许编织进行嵌套。
+
+需要注意的是，嵌套编织功能非常强大且紧凑，但需要一些时间来适应和掌握！
+
+### Options can be nested 选项可以嵌套
+
+考虑以下场景：
+
+	- 	"那么，波洛？是谋杀还是自杀？"
+	* 	"谋杀！"
+	* 	"自杀！"
+	- 	克里斯蒂夫人放下了手中的手稿片刻。其余写作小组成员目瞪口呆地坐在那里。
+
+首先出现的选项是“谋杀！”或“自杀！”。如果波洛宣布是自杀，那么无需进一步操作；但如果是谋杀，则需要后续的问题——他怀疑是谁？
+
+我们可以通过一组嵌套的子选项来添加新选项。通过使用两个星号（**）而不是一个星号（*），我们告诉脚本这些新选项是“属于”另一个选项的。
 
 
-## 2) Nested Flow
+	- 	"那么，波洛？是谋杀还是自杀？"
+		* 	"谋杀！"
+			"是谁干的？"
+			* *		"侦探督察贾普！"
+			* *		"海斯廷斯上尉！"
+			* *		"我自己！"
+		* 	"自杀！"
+	- 	克里斯蒂夫人放下了手中的手稿片刻。其余写作小组成员目瞪口呆地坐在那里。
 
-The weaves shown above are quite simple, "flat" structures. Whatever the player does, they take the same number of turns to get from top to bottom. However, sometimes certain choices warrant a bit more depth or complexity.
+（注意，为了清晰起见，最好对嵌套的行进行缩进，但编译器对此并不在意。）
 
-For that, we allow weaves to nest.
+如果我们希望为另一条路线添加新的子选项，也可以采用类似的方法：
 
-This section comes with a warning. Nested weaves are very powerful and very compact, but they can take a bit of getting used to!
+	- 	"那么，波洛？是谋杀还是自杀？"
+		* 	"谋杀！"
+			"是谁干的？"
+			* * 	"侦探督察贾普！"
+			* * 	"海斯廷斯上尉！"
+			* * 	"我自己！"
+		* 	"自杀！"
+			"真的，波洛？你确定吗？"
+			* * 	"非常确定。"
+			* * 	"这显而易见。"
+	- 	克里斯蒂夫夫人放下了手中的手稿片刻。其余写作小组成员目瞪口呆地坐在那里。
 
-### Options can be nested
+现在，最初的指控选项将引导到特定的后续问题——无论如何，流程最终都会在聚合点回合，迎来克里斯蒂夫人的客串登场。
 
-Consider the following scene:
+但如果我们想要更长的子场景呢？
 
-	- 	"Well, Poirot? Murder or suicide?"
-	*	"Murder!"
-	* 	"Suicide!"
-	-	Ms. Christie lowered her manuscript a moment. The rest of the writing group sat, open-mouthed.
+### Gather points can be nested too 聚合点也可以嵌套
 
-The first choice presented is "Murder!" or "Suicide!". If Poirot declares a suicide, there's no more to do, but in the case of murder, there's a follow-up question needed - who does he suspect?
+有时候，问题并不是增加选项的数量，而是需要在故事中添加多个额外的情节节点。我们可以通过嵌套聚合点和选项来实现这一点。
 
-We can add new options via a set of nested sub-choices. We tell the script that these new choices are "part of" another choice by using two asterisks, instead of just one.
+	- 	"那么，波洛？是谋杀还是自杀？"
+    	* 	"谋杀！"
+        	"是谁干的？"
+        	* * 	"侦探督察贾普！"
+        	* * 	"海斯廷斯上尉！"
+        	* * 	"我自己！"
+        	- - 	"你一定是在开玩笑！"
+        	* * 	"我的朋友，我是认真的。"
+        	* * 	"如果是这样的话……"
+    	* "自杀！"
+    	    "真的，波洛？你确定吗？"
+    	    * * 	"非常确定。"
+    	    * * 	"这显而易见。"
+	-	克里斯蒂夫人放下了手中的手稿片刻。其余写作小组成员目瞪口呆地坐在那里。
+
+如果玩家选择了“谋杀”选项，他们将在自己的分支中连续面对两个选择——这是一个完整的“扁平化”编织，仅为他们设计。
+
+#### Advanced: What gathers do 高级：聚合点的作用
 
 
-	- 	"Well, Poirot? Murder or suicide?"
-		*	"Murder!"
-		 	"And who did it?"
-			* * 	"Detective-Inspector Japp!"
-			* * 	"Captain Hastings!"
-			* * 	"Myself!"
-		* 	"Suicide!"
-		-	Mrs. Christie lowered her manuscript a moment. The rest of the writing group sat, open-mouthed.
+聚合点（Gathers）的概念希望是直观的，但它们的行为稍微难以用语言描述：一般来说，在某个选项被选择后，故事会找到下一个不在更低层级的聚合点，并跳转到那里。
 
-(Note that it's good style to also indent the lines to show the nesting, but the compiler doesn't mind.)
-
-And should we want to add new sub-options to the other route, we do that in similar fashion.
-
-	- 	"Well, Poirot? Murder or suicide?"
-		*	"Murder!"
-		 	"And who did it?"
-			* * 	"Detective-Inspector Japp!"
-			* * 	"Captain Hastings!"
-			* * 	"Myself!"
-		* 	"Suicide!"
-			"Really, Poirot? Are you quite sure?"
-			* * 	"Quite sure."
-			* *		"It is perfectly obvious."
-		-	Mrs. Christie lowered her manuscript a moment. The rest of the writing group sat, open-mouthed.
-
-Now, that initial choice of accusation will lead to specific follow-up questions - but either way, the flow will come back together at the gather point, for Mrs. Christie's cameo appearance.
-
-But what if we want a more extended sub-scene?
-
-### Gather points can be nested too
-
-Sometimes, it's not a question of expanding the number of options, but having more than one additional beat of story. We can do this by nesting gather points as well as options.
-
-	- 	"Well, Poirot? Murder or suicide?"
-			*	"Murder!"
-			 	"And who did it?"
-				* * 	"Detective-Inspector Japp!"
-				* * 	"Captain Hastings!"
-				* * 	"Myself!"
-				- - 	"You must be joking!"
-				* * 	"Mon ami, I am deadly serious."
-				* *		"If only..."
-			* 	"Suicide!"
-				"Really, Poirot? Are you quite sure?"
-				* * 	"Quite sure."
-				* *		"It is perfectly obvious."
-			-	Mrs. Christie lowered her manuscript a moment. The rest of the writing group sat, open-mouthed.
-
-If the player chooses the "murder" option, they'll have two choices in a row on their sub-branch - a whole flat weave, just for them.
-
-#### Advanced: What gathers do
-
-Gathers are hopefully intuitive, but their behaviour is a little harder to put into words: in general, after an option has been taken, the story finds the next gather down that isn't on a lower level, and diverts to it.
-
-The basic idea is this: options separate the paths of the story, and gathers bring them back together. (Hence the name, "weave"!)
-
+基本思想是这样的：选项将故事路径分开，而聚合点将它们重新汇集在一起。（这也是“编织（weave）”这个名称的由来！）
 
 ### You can nest as many levels are you like
 
-Above, we used two levels of nesting; the main flow, and the sub-flow. But there's no limit to how many levels deep you can go.
+在上面的例子中，我们使用了两层嵌套：主流程和子流程。但实际上，你可以嵌套任意多层级，没有限制。
 
-	-	"Tell us a tale, Captain!"
-		*	"Very well, you sea-dogs. Here's a tale..."
-			* * 	"It was a dark and stormy night..."
-					* * * 	"...and the crew were restless..."
-							* * * *  "... and they said to their Captain..."
-									* * * * *		"...Tell us a tale Captain!"
-		*	"No, it's past your bed-time."
- 	-	To a man, the crew began to yawn.
+	- "给我们讲个故事吧，船长！"
+		* "好吧，你们这些海狗。这是一个故事……"
+			* * "这是一个黑暗而暴风雨的夜晚……"
+				* * * "……船员们都坐立不安……"
+					* * * * "……他们对船长说……"
+						* * * * * "……讲个故事吧，船长！"
+		* "不行，太晚了，该睡觉了。"
+	- 所有的船员都开始打哈欠。
 
-After a while, this sub-nesting gets hard to read and manipulate, so it's good style to divert away to a new stitch if a side-choice goes unwieldy.
+随着嵌套层级的增加，子嵌套内容会变得难以阅读和操作。因此，如果某个分支选项变得过于复杂，最好将其跳转到一个新的段落（stitch），以保持代码的清晰性。
 
-But, in theory at least, you could write your entire story as a single weave.
+不过，至少在理论上，你可以将整个故事写成一个单一的编织结构。
 
-### Example: a conversation with nested nodes
+### Example: a conversation with nested nodes 示例：带嵌套节点的对话
 
-Here's a longer example:
+以下是一个更长的示例：
 
-	- I looked at Monsieur Fogg
-	*	... and I could contain myself no longer.
-		'What is the purpose of our journey, Monsieur?'
-		'A wager,' he replied.
-		* * 	'A wager!'[] I returned.
-				He nodded.
-				* * * 	'But surely that is foolishness!'
-				* * *  'A most serious matter then!'
-				- - - 	He nodded again.
-				* * *	'But can we win?'
-						'That is what we will endeavour to find out,' he answered.
-				* * *	'A modest wager, I trust?'
-						'Twenty thousand pounds,' he replied, quite flatly.
-				* * * 	I asked nothing further of him then[.], and after a final, polite cough, he offered nothing more to me. <>
-		* * 	'Ah[.'],' I replied, uncertain what I thought.
-		- - 	After that, <>
-	*	... but I said nothing[] and <>
-	- we passed the day in silence.
+	- 我看向福格先生。
+	* ... 然后我再也无法忍耐。
+		“我们的旅程目的是什么，先生？”
+		“是一个赌注。”他回答。
+		* * “一个赌注！”[] 我回应道。
+				他点了点头。
+				* * * “但这未免太荒唐了吧！”
+				* * * “那么这一定是件非常严肃的事情！”
+				- - - 他又点了点头。
+				* * * “但我们能赢吗？”
+						“这正是我们要努力去发现的。”他回答。
+				* * * “我相信这是个小赌注吧？”
+						“两万英镑。”他平淡地说道。
+				* * * 我没有再问他任何问题[.]，最后他礼貌地清了清嗓子，也没有再说什么。 <>
+		* * “啊[.]。”我回答道，不确定自己在想什么。
+		- - 然后，<>
+	* ... 但我什么也没说[]，然后 <>
+	- 我们一整天都沉默不语。
 	- -> END
 
-with a couple of possible playthroughs. A short one:
+有几种可能的游戏流程。一个较短的示例：
 
-	I looked at Monsieur Fogg
+	我看向福格先生。
 
-	1: ... and I could contain myself no longer.
-	2: ... but I said nothing
+	1: ... 然后我再也无法忍耐。
+	2: ... 但我什么也没说。
 
 	> 2
-	... but I said nothing and we passed the day in silence.
+	... 但我什么也没说，然后我们一整天都沉默不语。
 
-and a longer one:
+以及一个较长的示例：
 
-	I looked at Monsieur Fogg
+	我看向福格先生。
 
-	1: ... and I could contain myself no longer.
-	2: ... but I said nothing
+	1: ... 然后我再也无法忍耐。
+	2: ... 但我什么也没说。
 
 	> 1
-	... and I could contain myself no longer.
-	'What is the purpose of our journey, Monsieur?'
-	'A wager,' he replied.
+	... 然后我再也无法忍耐。
+	“我们的旅程目的是什么，先生？”
+	“是一个赌注。”他回答。
 
-	1: 'A wager!'
-	2: 'Ah.'
+	1: “一个赌注！”
+	2: “啊。”
 
 	> 1
-	'A wager!' I returned.
-	He nodded.
+	“一个赌注！”我回应道。
+	他点了点头。
 
-	1: 'But surely that is foolishness!'
-	2: 'A most serious matter then!'
-
-	> 2
-	'A most serious matter then!'
-	He nodded again.
-
-	1: 'But can we win?'
-	2: 'A modest wager, I trust?'
-	3: I asked nothing further of him then.
+	1: “但这未免太荒唐了吧！”
+	2: “那么这一定是件非常严肃的事情！”
 
 	> 2
-	'A modest wager, I trust?'
-	'Twenty thousand pounds,' he replied, quite flatly.
-	After that, we passed the day in silence.
+	“那么这一定是件非常严肃的事情！”
+	他又点了点头。
 
-Hopefully, this demonstrates the philosophy laid out above: that weaves offer a compact way to offer a lot of branching, a lot of choices, but with the guarantee of getting from beginning to end!
+	1: “但我们能赢吗？”
+	2: “我相信这是个小赌注吧？”
+	3: 我没有再问他任何问题。
+
+	> 2
+	“我相信这是个小赌注吧？”
+	“两万英镑。”他平淡地说道。
+	然后，我们一整天都沉默不语。
+
+希望这个例子很好地展示了上述理念：编织（weave）提供了一种紧凑的方式，能够创建丰富的分支和大量的选择，但始终能保证从开头到结尾的连贯性！
 
 
-## 3) Tracking a Weave
+## 3) Tracking a Weave 跟踪编织
 
-Sometimes, the weave structure is sufficient. But when it's not, we need a bit more control.
+有时候，编织结构本身已经足够，但当情况复杂时，我们需要更多的控制。
 
-### Weaves are largely unaddressed
+### Weaves are largely unaddressed 编织大多是无标记的
 
-By default, lines of content in a weave don't have an address or label, which means they can't be diverted to, and they can't be tested for. In the most basic weave structure, choices vary the path the player takes through the weave and what they see, but once the weave is finished those choices and that path are forgotten.
+默认情况下，编织中的内容行没有地址或标签，这意味着它们不能被跳转到，也无法进行测试。在最基本的编织结构中，选项只是决定玩家在编织中所经历的路径和所看到的内容，但一旦编织结束，这些选择和路径就会被遗忘。
 
-But should we want to remember what the player has seen, we can - we add in labels where they're needed using the `(label_name)` syntax.
+然而，如果我们希望记住玩家所经历的内容，可以通过添加标签来实现。使用 `(label_name)` 语法，我们可以在需要的地方添加标签。
 
-### Gathers and options can be labelled
+### Gathers and options can be labelled 聚合点和选项可以添加标签
 
-Gather points at any nested level can be labelled using brackets.
+嵌套层级中的任何聚合点都可以使用括号添加标签。
 
 	-  (top)
 
-Once labelled, gather points can be diverted to, or tested for in conditionals, just like knots and stitches. This means you can use previous decisions to alter later outcomes inside the weave, while still keeping all the advantages of a clear, reliable forward-flow.
+一旦添加了标签，聚合点就可以像结点（knots）和段落（stitches）一样被跳转到，或用于条件测试。这意味着你可以在编织中利用先前的选择来改变后续的结果，同时仍然保留清晰可靠的前向流程优势。
 
-Options can also be labelled, just like gather points, using brackets. Label brackets come before conditions in the line.
+选项也可以像聚合点一样使用括号添加标签。标签括号位于该行的条件之前。
 
-These addresses can be used in conditional tests, which can be useful for creating options unlocked by other options.
+这些地址可以用于条件测试，这在创建由其他选项解锁的选项时非常有用。
 
 	=== meet_guard ===
-	The guard frowns at you.
+	卫兵皱着眉头看着你。
 
-	* 	(greet) [Greet him]
-		'Greetings.'
-	*	(get_out) 'Get out of my way[.'],' you tell the guard.
+	* (greet) [向他打招呼]  
+		“你好。”  
+	* (get_out) “滚开[.]，”你对卫兵说道。
 
-	- 	'Hmm,' replies the guard.
+	- “嗯，”卫兵答道。
 
-	*	{greet} 	'Having a nice day?' // only if you greeted him
+	* {greet} “今天过得怎么样？” // 只有在你向他打招呼时可见
 
-	* 	'Hmm?'[] you reply.
+	* “嗯？”[] 你回答。
 
-	*	{get_out} [Shove him aside] 	 // only if you threatened him
-		You shove him sharply. He stares in reply, and draws his sword!
-		-> fight_guard 			// this route diverts out of the weave
+	* {get_out} [把他推开] // 只有在你威胁他时可见  
+		你狠狠地把他推开。他盯着你看，拔出了剑！  
+		-> fight_guard // 这一选项跳出编织结构
 
-	-	'Mff,' the guard replies, and then offers you a paper bag. 'Toffee?'
+	- “唔，”卫兵回答，然后递给你一个纸袋。“太妃糖？”  
 
 
-### Scope
+### Scope 作用域
 
-Inside the same block of weave, you can simply use the label name; from outside the block you need a path, either to a different stitch within the same knot:
+在同一个编织块中，你可以直接使用标签名称；而从块外引用时，需要使用路径。路径可以指向同一结点中的不同段落（stitch）：
 
 	=== knot ===
 	= stitch_one
-		- (gatherpoint) Some content.
+		- (gatherpoint) 一些内容。
 	= stitch_two
-		*	{stitch_one.gatherpoint} Option
+		*	{stitch_one.gatherpoint} 选项
 
-or pointing into another knot:
+或者指向另一个结点（knot）中的内容：
 
 	=== knot_one ===
 	-	(gather_one)
-		* {knot_two.stitch_two.gather_two} Option
+		* {knot_two.stitch_two.gather_two} 选项
 
 	=== knot_two ===
 	= stitch_two
 		- (gather_two)
-			*	{knot_one.gather_one} Option
+			*	{knot_one.gather_one} 选项
 
 
-#### Advanced: all options can be labelled
+#### Advanced: all options can be labelled 高级：所有选项都可以添加标签
 
-In truth, all content in ink is a weave, even if there are no gathers in sight. That means you can label *any* option in the game with a bracket label, and then reference it using the addressing syntax. In particular, this means you can test *which* option a player took to reach a particular outcome.
+事实上，Ink 中的所有内容都是编织（weave），即使看不到任何聚合点。这意味着你可以用括号标签为游戏中的*任何*选项添加标签，并使用地址语法引用它们。尤其是，这允许你测试玩家选择了*哪个*选项以到达特定的结果。
 
 	=== fight_guard ===
 	...
 	= throw_something
-	*	(rock) [Throw rock at guard] -> throw
-	* 	(sand) [Throw sand at guard] -> throw
+	* (rock) [向卫兵扔石头] -> throw
+	* (sand) [向卫兵扔沙子] -> throw
 
 	= throw
-	You hurl {throw_something.rock:a rock|a handful of sand} at the guard.
+	你朝卫兵扔了{throw_something.rock:一块石头|一把沙子}。
 
 
-#### Advanced: Loops in a weave
+#### Advanced: Loops in a weave 高级：编织中的循环
 
-Labelling allows us to create loops inside weaves. Here's a standard pattern for asking questions of an NPC.
+通过添加标签，我们可以在编织中创建循环。以下是一个常见的模式，用于向 NPC 提问。
 
 	- (opts)
-		*	'Can I get a uniform from somewhere?'[] you ask the cheerful guard.
-			'Sure. In the locker.' He grins. 'Don't think it'll fit you, though.'
-		*	'Tell me about the security system.'
-			'It's ancient,' the guard assures you. 'Old as coal.'
-		*	'Are there dogs?'
-			'Hundreds,' the guard answers, with a toothy grin. 'Hungry devils, too.'
-		// We require the player to ask at least one question
-		*	{loop} [Enough talking]
+		* '我可以从哪里弄到一套制服？'[] 你问那位开朗的卫兵。
+			“当然可以。在储物柜里。”他咧嘴一笑。“不过，我想它不太适合你。”
+		* '告诉我关于安保系统的事情。'
+			“它很老旧了，”卫兵向你保证道。“老得像煤一样。”
+		* '有狗吗？'
+			“成百上千只，”卫兵回答，露出一口牙齿的笑容。“而且都很饿。”
+
+		// 我们要求玩家至少问一个问题
+		* {loop} [够了，不想再聊了]
 			-> done
 	- (loop)
-		// loop a few times before the guard gets bored
+		// 循环几次，直到卫兵觉得无聊
 		{ -> opts | -> opts | }
-		He scratches his head.
-		'Well, can't stand around talking all day,' he declares.
+		他挠了挠头。
+		“嗯，不能整天站着聊天，”他宣布道。
 	- (done)
-		You thank the guard, and move away.
+		你向卫兵道谢，然后离开。
 
+#### Advanced: diverting to options 高级：跳转到选项
 
-
-
-
-#### Advanced: diverting to options
-
-Options can also be diverted to: but the divert goes to the output of having chosen that choice, *as though the choice had been chosen*. So the content printed will ignore square bracketed text, and if the option is once-only, it will be marked as used up.
+选项也可以跳转到：但跳转会直接进入选择该选项后的输出内容，就像该选项已经被选择过一样。因此，打印的内容会忽略方括号内的文本，并且如果选项是一次性的，它会被标记为已用。
 
 	- (opts)
-	*	[Pull a face]
-		You pull a face, and the soldier comes at you! -> shove
+	* [扮鬼脸]
+		你扮了个鬼脸，士兵冲向你！ -> shove
 
-	*	(shove) [Shove the guard aside] You shove the guard to one side, but he comes back swinging.
+	* (shove) [把卫兵推开] 你将卫兵推到一旁，但他又挥着拳头回来了。
 
-	*	{shove} [Grapple and fight] -> fight_the_guard
+	* {shove} [与他扭打] -> fight_the_guard
 
-	- 	-> opts
+	- -> opts
 
-produces:
+生成的流程为：
 
-	1: Pull a face
-	2: Shove the guard aside
+	1: 扮鬼脸
+	2: 把卫兵推开
 
 	> 1
-	You pull a face, and the soldier comes at you! You shove the guard to one side, but he comes back swinging.
+	你扮了个鬼脸，士兵冲向你！你将卫兵推到一旁，但他又挥着拳头回来了。
 
-	1: Grapple and fight
+	1: 与他扭打
 
 	>
 
-#### Advanced: Gathers directly after an option
+#### Advanced: Gathers directly after an option 高级：选项后直接添加聚合点
 
-The following is valid, and frequently useful.
+以下内容是有效的，而且经常很有用：
 
-	*	"Are you quite well, Monsieur?"[] I asked.
-		- - (quitewell) "Quite well," he replied.
-	*	"How did you do at the crossword, Monsieur?"[] I asked.
+	* “你还好吗，先生？”[] 我问道。
+		- - (quitewell) “我很好。”他答道。
+	* “先生，你的纵横字谜做得怎么样？”[] 我问道。
 		-> quitewell
-	*	I said nothing[] and neither did my Master.
-	-	We feel into companionable silence once more.
+	* 我什么也没说[]，我的主人也保持了沉默。
+	- 我们再次陷入了默契的沉默中。
 
-Note the level 2 gather point directly below the first option: there's nothing to gather here, really, but it gives us a handy place to divert the second option to.
-
-
+注意第一个选项正下方的二级聚合点：这里实际上没有要聚合的内容，但它为我们提供了一个方便的跳转位置，以便将第二个选项跳转到这里。
 
 
 
+# Part 3: Variables and Logic 第 3 部分：变量和逻辑
 
-# Part 3: Variables and Logic
+到目前为止，我们已经使用基于玩家所见内容的测试创建了条件文本和条件选项。
 
-So far we've made conditional text, and conditional choices, using tests based on what content the player has seen so far.
+**ink** 同样支持变量，包括临时变量和全局变量，可用于存储数字、文本数据，甚至是故事流程命令。在逻辑功能上，**ink** 是完整的，并且包含了一些额外的结构，以帮助更好地组织分支故事中通常复杂的逻辑。
 
-**ink** also supports variables, both temporary and global, storing numerical and content data, or even story flow commands. It is fully-featured in terms of logic, and contains a few additional structures to help keep the often complex logic of a branching story better organised.
+## 1) Global Variables 全局变量
 
+最强大、也可以说对故事最有用的一种变量，是用于存储游戏状态中某些独特属性的变量——例如主角口袋中的金钱数量，或者主角的心情状态。
 
-## 1) Global Variables
+这种变量被称为“全局变量”，因为它可以在故事中的任何地方访问、设置和读取。（传统编程通常会避免这种用法，因为它可能导致一个程序的某部分干扰另一个无关的部分。但故事是由因果关系驱动的：在拉斯维加斯发生的事情，很少会留在拉斯维加斯。）
 
-The most powerful kind of variable, and arguably the most useful for a story, is a variable to store some unique property about the state of the game - anything from the amount of money in the protagonist's pocket, to a value representing the protagonist's state of mind.
+### Defining Global Variables 定义全局变量
 
-This kind of variable is called "global" because it can be accessed from anywhere in the story - both set, and read from. (Traditionally, programming tries to avoid this kind of thing, as it allows one part of a program to mess with another, unrelated part. But a story is a story, and stories are all about consequences: what happens in Vegas rarely stays there.)
+全局变量可以通过 `VAR` 语句在任何地方定义。定义时需要为变量赋予一个初始值，以确定它的类型——整数、浮点数（小数）、内容，或故事地址。
 
-### Defining Global Variables
+    VAR knowledge_of_the_cure = false
+    VAR players_name = "Emilia"
+    VAR number_of_infected_people = 521
+    VAR current_epilogue = -> they_all_die_of_the_plague
 
-Global variables can be defined anywhere, via a `VAR` statement. They should be given an initial value, which defines what type of variable they are - integer, floating point (decimal), content, or a story address.
+### Using Global Variables 使用全局变量
 
-	VAR knowledge_of_the_cure = false
-	VAR players_name = "Emilia"
-	VAR number_of_infected_people = 521
-	VAR current_epilogue = -> they_all_die_of_the_plague
+我们可以测试全局变量，以控制选项并提供条件文本，方式类似于之前所见的例子。
 
-### Using Global Variables
+    === the_train ===
+        火车晃动并发出咔哒声。{ mood > 0:然而，我感到心情还算不错，不太在意这些颠簸|这简直让我无法忍受}。
+        * { not knows_about_wager } “可是，先生，我们为什么要旅行？”[] 我问道。
+        * { knows_about_wager } 我思索着我们这场奇怪的冒险[]. 这会有可能吗？
 
-We can test global variables to control options, and provide conditional text, in a similar way to what we have previously seen.
+#### Advanced: storing diverts as variables 高级：将跳转存储为变量
 
-	=== the_train ===
-		The train jolted and rattled. { mood > 0:I was feeling positive enough, however, and did not mind the odd bump|It was more than I could bear}.
-		*	{ not knows_about_wager } 'But, Monsieur, why are we travelling?'[] I asked.
-		* 	{ knows_about_wager} I contemplated our strange adventure[]. Would it be possible?
+“跳转”（divert）语句本身是一种值，可以被存储、修改并跳转到。
 
-#### Advanced: storing diverts as variables
+    VAR current_epilogue = -> everybody_dies
 
-A "divert" statement is actually a type of value in itself, and can be stored, altered, and diverted to.
-
-	VAR 	current_epilogue = -> everybody_dies
-
-	=== continue_or_quit ===
-	Give up now, or keep trying to save your Kingdom?
-	*  [Keep trying!] 	-> more_hopeless_introspection
-	*  [Give up] 		-> current_epilogue
+    === continue_or_quit ===
+    现在放弃，还是继续努力拯救你的王国？
+    * [继续努力！] -> more_hopeless_introspection
+    * [放弃] -> current_epilogue
 
 
-#### Advanced: Global variables are externally visible
+#### Advanced: Global variables are externally visible 高级：全局变量是外部可见的
 
-Global variables can be accessed, and altered, from the runtime as well from the story, so provide a good way to communicate between the wider game and the story.
+全局变量不仅可以在故事中访问和修改，也可以从运行时中访问和修改，因此它们是连接游戏主程序和故事的良好桥梁。
 
-The **ink** layer is often be a good place to store gameplay-variables; there's no save/load issues to consider, and the story itself can react to the current values.
-
-
-
-### Printing variables
-
-The value of a variable can be printed as content using an inline syntax similar to sequences, and conditional text:
-
-	VAR friendly_name_of_player = "Jackie"
-	VAR age = 23
-
-	My name is Jean Passepartout, but my friend's call me {friendly_name_of_player}. I'm {age} years old.
-
-This can be useful in debugging. For more complex printing based on logic and variables, see the section on functions.
-
-### Evaluating strings
-
-It might be noticed that above we refered to variables as being able to contain "content", rather than "strings". That was deliberate, because a string defined in ink can contain ink - although it will always evaluate to a string. (Yikes!)
-
-	VAR a_colour = ""
-
-	~ a_colour = "{~red|blue|green|yellow}"
-
-	{a_colour}
-
-... produces one of red, blue, green or yellow.
-
-Note that once a piece of content like this is evaluated, its value is "sticky". (The quantum state collapses.) So the following:
-
-	The goon hits you, and sparks fly before you eyes, {a_colour} and {a_colour}.
-
-... won't produce a very interesting effect. (If you really want this to work, use a text function to print the colour!)
-
-This is also why
-
-	VAR a_colour = "{~red|blue|green|yellow}"
-
-is explicitly disallowed; it would be evaluated on the construction of the story, which probably isn't what you want.
+**ink** 层通常是存储游戏变量的好地方；不需要考虑保存/加载的问题，同时故事本身可以对当前值做出反应。
 
 
-## 2) Logic
+### Printing variables 打印变量
 
-Obviously, our global variables are not intended to be constants, so we need a syntax for altering them.
+变量的值可以通过类似于序列和条件文本的内联语法打印为内容：
 
-Since by default, any text in an **ink** script is printed out directly to the screen, we use a markup symbol to indicate that a line of content is intended meant to be doing some numerical work, we use the `~` mark.
+    VAR friendly_name_of_player = "Jackie"
+    VAR age = 23
 
-The following statements all assign values to variables:
+    我的名字是让·帕斯帕图（Jean Passepartout），但我的朋友都叫我 {friendly_name_of_player}。我今年 {age} 岁。
 
+这在调试时非常有用。有关基于逻辑和变量的更复杂打印，请参阅函数部分。
+
+### Evaluating strings 评估字符串
+
+你可能注意到，上文提到变量可以包含“内容”，而不是“字符串”。这是有意为之，因为在 **ink** 中定义的字符串可以包含 ink 代码——尽管最终它们始终会被评估为字符串。（令人惊叹！）
+
+    VAR a_colour = ""
+
+    ~ a_colour = "{~red|blue|green|yellow}"
+
+    {a_colour}
+
+... 将生成 red、blue、green 或 yellow 之一。
+
+注意，一旦像这样的内容被评估，其值是“粘性的”。（即量子状态已坍缩。）例如：
+
+    暴徒打了你一拳，火花在你眼前飞舞，{a_colour} 和 {a_colour}。
+
+... 不会产生特别有趣的效果。（如果你真的希望这有效，使用一个文本函数来打印颜色！）
+
+这也是为什么：
+
+    VAR a_colour = "{~red|blue|green|yellow}"
+
+是明确禁止的；它会在故事构建时被评估，而这可能不是你想要的结果。
+
+
+## 2) Logic 逻辑
+
+显然，全局变量并不是用来作为常量的，因此我们需要一种语法来修改它们。
+
+由于默认情况下，**ink** 脚本中的任何文本都会直接打印到屏幕上，我们需要一个标记符号来表示某行内容是用于执行数值操作的。我们使用 `~` 标记来实现这一点。
+
+以下语句都会为变量赋值：
 
 	=== set_some_variables ===
 		~ knows_about_wager = true
 		~ x = (x * x) - (y * y) + c
 		~ y = 2 * x * y
 
-and the following will test conditions:
+以下内容会测试条件：
 
 	{ x == 1.2 }
 	{ x / 2 > 4 }
 	{ y - 1 <= x * x }
 
-### Mathematics
+### Mathematics 数学运算
 
-**ink** supports the four basic mathematical operations (`+`, `-`, `*` and `/`), as well as `%` (or `mod`), which returns the remainder after integer division. There's also POW for to-the-power-of:
+**ink** 支持四种基本的数学运算符（`+`、`-`、`*` 和 `/`），以及 `%`（或 `mod`），它返回整数除法后的余数。此外，还有 `POW` 函数用于计算幂：
 
-	{POW(3, 2)} is 9.
-	{POW(16, 0.5)} is 4.
+    {POW(3, 2)} 是 9。
+    {POW(16, 0.5)} 是 4。
 
-
-If more complex operations are required, one can write functions (using recursion if necessary), or call out to external, game-code functions (for anything more advanced).
+如果需要更复杂的运算，可以编写函数（必要时使用递归），或者调用外部游戏代码函数（用于更高级的运算）。
 
 
 #### RANDOM(min, max)
 
-Ink can generate random integers if required using the RANDOM function. RANDOM is authored to be like a dice (yes, pendants, we said *a dice*), so the min and max values are both inclusive.
+如果需要，**ink** 可以使用 `RANDOM` 函数生成随机整数。`RANDOM` 的设计类似于掷骰子（是的，我们说的是 *一个骰子*），因此最小值和最大值都包含在结果范围内。
 
-	~ temp dice_roll = RANDOM(1, 6)
+    ~ temp dice_roll = RANDOM(1, 6)
+    ~ temp lazy_grading_for_test_paper = RANDOM(30, 75)
+    ~ temp number_of_heads_the_serpent_has = RANDOM(3, 8)
 
-	~ temp lazy_grading_for_test_paper = RANDOM(30, 75)
+随机数生成器可以通过种子进行初始化以便测试，详见上文的“游戏查询和函数”部分。
 
-	~ temp number_of_heads_the_serpent_has = RANDOM(3, 8)
+#### Advanced: numerical types are implicit 高级：数值类型是隐式的
 
-The random number generator can be seeded for testing purposes, see the section of Game Queries and Functions section above.
+操作的结果——尤其是除法——的类型基于输入类型。整数除法返回整数结果，而浮点数除法返回浮点数结果。
 
-#### Advanced: numerical types are implicit
+    ~ x = 2 / 3
+    ~ y = 7 / 3
+    ~ z = 1.2 / 0.5
 
-Results of operations - in particular, for division - are typed based on the type of the input. So integer division returns integer, but floating point division returns floating point results.
-
-	~ x = 2 / 3
-	~ y = 7 / 3
-	~ z = 1.2 / 0.5
-
-assigns `x` to be 0, `y` to be 2 and `z` to be 2.4.
+其中，`x` 为 0，`y` 为 2，`z` 为 2.4。
 
 #### Advanced: INT(), FLOOR() and FLOAT()
 
-In cases where you don't want implicit types, or you want to round off a variable, you can cast it directly.
+如果你不想使用隐式类型，或者想将变量舍入，可以直接对其进行类型转换。
 
-	{INT(3.2)} is 3.
-	{FLOOR(4.8)} is 4.
-	{INT(-4.8)} is -4.
-	{FLOOR(-4.8)} is -5.
+    {INT(3.2)} 是 3。
+    {FLOOR(4.8)} 是 4。
+    {INT(-4.8)} 是 -4。
+    {FLOOR(-4.8)} 是 -5。
 
-	{FLOAT(4)} is, um, still 4.
+    {FLOAT(4)} 仍然是 4。
 
+### String queries 字符串查询
 
+对于一个文本引擎来说，**ink** 对字符串处理的支持出奇地有限：假设任何你需要的字符串转换都会由游戏代码（或外部函数）处理。但我们支持三种基本查询——等于、不等于和子字符串（我们称之为 `?`，原因将在后续章节中解释）。
 
-### String queries
+以下表达式都会返回 true：
 
-Oddly for a text-engine, **ink** doesn't have much in the way of string-handling: it's assumed that any string conversion you need to do will be handled by the game code (and perhaps by external functions.) But we support three basic queries - equality, inequality, and substring (which we call ? for reasons that will become clear in a later chapter).
-
-The following all return true:
 
 	{ "Yes, please." == "Yes, please." }
 	{ "No, thank you." != "Yes, please." }
 	{ "Yes, please" ? "ease" }
 
 
-## 3) Conditional blocks (if/else)
+## 3) Conditional blocks (if/else) 条件块
 
-We've seen conditionals used to control options and story content; **ink** also provides an equivalent of the normal if/else-if/else structure.
+我们已经见过条件被用来控制选项和故事内容；**ink** 还提供了一个等价于普通 if/else-if/else 结构的功能。
 
-### A simple 'if'
+### A simple 'if' 简单的 'if'
 
-The if syntax takes its cue from the other conditionals used so far, with the `{`...`}` syntax indicating that something is being tested.
+if 语法基于之前的条件格式，使用 `{`...`}` 语法来指示某些内容正在被测试。
 
 	{ x > 0:
 		~ y = x - 1
 	}
 
-Else conditions can be provided:
+可以提供 else 条件：
 
 	{ x > 0:
 		~ y = x - 1
@@ -1413,9 +1402,9 @@ Else conditions can be provided:
 		~ y = x + 1
 	}
 
-### Extended if/else if/else blocks
+### Extended if/else if/else blocks 扩展的 if/else-if/else 块
 
-The above syntax is actually a specific case of a more general structure, something like a "switch" statement of another language:
+上述语法实际上是更通用结构的一种特例，类似于其他语言中的 "switch" 语句：
 
 	{
 		- x > 0:
@@ -1424,7 +1413,7 @@ The above syntax is actually a specific case of a more general structure, someth
 			~ y = x + 1
 	}
 
-And using this form we can include 'else-if' conditions:
+通过这种形式，我们可以添加 "else-if" 条件：
 
 	{
 		- x == 0:
@@ -1435,11 +1424,11 @@ And using this form we can include 'else-if' conditions:
 			~ y = x + 1
 	}
 
-(Note, as with everything else, the white-space is purely for readability and has no syntactic meaning.)
+（注意，与其他部分一样，空格仅用于提高可读性，对语法没有意义。）
 
 ### Switch blocks
 
-And there's also an actual switch statement:
+**ink** 还提供了真正的 switch 语句：
 
 	{ x:
 	- 0: 	zero
@@ -1448,9 +1437,9 @@ And there's also an actual switch statement:
 	- else: lots
 	}
 
-#### Example: context-relevant content
+#### Example: context-relevant content 示例：上下文相关的内容
 
-Note these tests don't have to be variable-based and can use read-counts, just as other conditionals can, and the following construction is quite frequent, as a way of saying "do some content which is relevant to the current game state":
+需要注意的是，这些条件不必基于变量，也可以使用读取计数，与其他条件类似。以下结构很常见，用于根据当前游戏状态生成相关内容：
 
 	=== dream ===
 		{
@@ -1467,93 +1456,90 @@ Note these tests don't have to be variable-based and can use read-counts, just a
 				-> dream_about_marmalade
 		}
 
-The syntax has the advantage of being easy to extend, and prioritise.
+这种语法的优势在于易于扩展和优先级控制。
 
+### Conditional blocks are not limited to logic 条件块不仅限于逻辑
 
+条件块不仅可以用于逻辑控制，还可以用于控制故事内容：
 
-### Conditional blocks are not limited to logic
+    我盯着福格先生。
+    { know_about_wager:
+        <> “但你肯定不是认真的吧？”我质问道。
+    - else:
+        <> “但总得有个原因吧，”我说道。
+    }
+    他没有回应，只是专注地看着报纸，仿佛昆虫学家在研究他最新的标本。
 
-Conditional blocks can be used to control story content as well as logic:
+你甚至可以在条件块中加入选项：
 
-	I stared at Monsieur Fogg.
-	{ know_about_wager:
-		<> "But surely you are not serious?" I demanded.
-	- else:
-		<> "But there must be a reason for this trip," I observed.
-	}
-	He said nothing in reply, merely considering his newspaper with as much thoroughness as entomologist considering his latest pinned addition.
+    { door_open:
+        * 我大步走出车厢[]，仿佛听到我的主人小声嘟囔了一句。 -> go_outside
+    - else:
+        * 我请求允许离开[]，福格先生看起来有些吃惊。 -> open_door
+        * 我站起身去开门[]，福格先生对此小小的反叛毫不在意。 -> open_door
+    }
 
-You can even put options inside conditional blocks:
+但请注意，上述例子中缺少编织语法和嵌套并非偶然：为了避免混淆嵌套类型，你不能在条件块中包含聚合点。
 
-	{ door_open:
-		* 	I strode out of the compartment[] and I fancied I heard my master quietly tutting to himself. 			-> go_outside
-	- else:
-		*	I asked permission to leave[] and Monsieur Fogg looked surprised. 	-> open_door
-		* 	I stood and went to open the door[]. Monsieur Fogg seemed untroubled by this small rebellion. -> open_door
-	}
+### Multiline blocks 多行块
 
-...but note that the lack of weave-syntax and nesting in the above example isn't accidental: to avoid confusing the various kinds of nesting at work, you aren't allowed to include gather points inside conditional blocks.
+还有另一类多行块，基于之前的替代系统扩展。以下示例都是有效的，并且效果如预期：
 
-### Multiline blocks
+    // 顺序：依次显示替代内容，最后停留在最后一项
+    { stopping:
+        - 我走进赌场。
+        - 我又走进赌场。
+        - 我再次走进赌场。
+    }
 
-There's one other class of multiline block, which expands on the alternatives system from above. The following are all valid and do what you might expect:
+    // 随机：随机显示一项内容
+    在桌上，我抽了一张牌。<>
+    { shuffle:
+        - 红心 A。
+        - 黑桃 K。
+        - 方块 2。
+          “这次你输了！”荷官笑着说。
+    }
 
- 	// Sequence: go through the alternatives, and stick on last
-	{ stopping:
-		-	I entered the casino.
-		-  I entered the casino again.
-		-  Once more, I went inside.
-	}
+    // 循环：依次显示每一项，然后循环
+    { cycle:
+        - 我屏住了呼吸。
+        - 我不耐烦地等待。
+        - 我停下脚步。
+    }
 
-	// Shuffle: show one at random
-	At the table, I drew a card. <>
-	{ shuffle:
-		- 	Ace of Hearts.
-		- 	King of Spades.
-		- 	2 of Diamonds.
-			'You lose this time!' crowed the croupier.
-	}
+    // 一次性：依次显示每一项，直到所有内容都被展示完
+    { once:
+        - 我的运气会好吗？
+        - 我能赢这一局吗？
+    }
 
-	// Cycle: show each in turn, and then cycle
-	{ cycle:
-		- I held my breath.
-		- I waited impatiently.
-		- I paused.
-	}
+#### Advanced: modified shuffles 高级：修改的随机显示
 
-	// Once: show each, once, in turn, until all have been shown
-	{ once:
-		- Would my luck hold?
-		- Could I win the hand?
-	}
+上面的随机块实际上是一个“随机循环”，会打乱内容顺序，依次播放，然后重新打乱再播放。
 
-#### Advanced: modified shuffles
+还有两种其他版本的随机显示：
 
-The shuffle block above is really a "shuffled cycle"; in that it'll shuffle the content, play through it, then reshuffle and go again.
+`shuffle once` 会打乱内容顺序，播放一次后停止。
 
-There are two other versions of shuffle:
+    { shuffle once:
+    - 太阳很热。
+    - 这是一个炎热的日子。
+    }
 
-`shuffle once` which will shuffle the content, play through it, and then do nothing.
+`shuffle stopping` 会打乱内容（除了最后一项），播放后停留在最后一项。
 
-	{ shuffle once:
-	-	The sun was hot.
-	- 	It was a hot day.
-	}
+    { shuffle stopping:
+    - 一辆银色宝马呼啸而过。
+    - 一辆明黄色野马漂移转弯。
+    - 这里似乎有很多车。
+    }
 
-`shuffle stopping` will shuffle all the content (except the last entry), and once its been played, it'll stick on the last entry.
+## 4) Temporary Variables 临时变量
 
-	{ shuffle stopping:
-	- 	A silver BMW roars past.
-	-	A bright yellow Mustang takes the turn.
-	- 	There are like, cars, here.
-	}
+### Temporary variables are for scratch calculations 临时变量用于快速计算
 
-
-## 4) Temporary Variables
-
-### Temporary variables are for scratch calculations
-
-Sometimes, a global variable is unwieldy. **ink** provides temporary variables for quick calculations of things.
+有时，全局变量显得不太方便。**ink** 提供了临时变量来进行快速的计算。
 
 	=== near_north_pole ===
 		~ temp number_of_warm_things = 0
@@ -1567,35 +1553,37 @@ Sometimes, a global variable is unwieldy. **ink** provides temporary variables f
 			~ number_of_warm_things++
 		}
 		{ number_of_warm_things > 2:
-			Despite the snow, I felt incorrigibly snug.
+			尽管下着雪，我还是感到异常温暖。
 		- else:
-			That night I was colder than I have ever been.
+			那晚我比任何时候都要冷。
 		}
 
-The value in a temporary variable is thrown away after the story leaves the stitch in which it was defined.
+临时变量的值在故事离开定义该变量的节（stitch）后会被丢弃。
 
-### Knots and stitches can take parameters
+### Knots and stitches can take parameters 节点和节可以接受参数
 
-A particularly useful form of temporary variable is a parameter. Any knot or stitch can be given a value as a parameter.
-
-	*	[Accuse Hasting]
-			-> accuse("Hastings")
-	*	[Accuse Mrs Black]
-			-> accuse("Claudia")
-	*	[Accuse myself]
-			-> accuse("myself")
-
-	=== accuse(who) ===
-		"I accuse {who}!" Poirot declared.
-		"Really?" Japp replied. "{who == "myself":You did it?|{who}?}"
-		"And why not?" Poirot shot back.
+一个特别有用的临时变量形式是参数。任何节点（knot）或节（stitch）都可以接受一个作为参数的值。
 
 
-... and you'll need to use parameters if you want to pass a temporary value from one stitch to another!
+    * [指控哈斯廷]
+        -> accuse("Hastings")
+    * [指控黑夫人]
+        -> accuse("Claudia")
+    * [指控我自己]
+        -> accuse("myself")
 
-#### Example: a recursive knot definition
+    === accuse(who) ===
+        "我指控 {who}!" 波洛宣布。
+        "真的吗?" 贾普回应道。"{who == "myself":你干的?|{who}?}"
+        "那为什么不呢?" 波洛反问道。
 
-Temporary variables are safe to use in recursion (unlike globals), so the following will work.
+
+
+... 如果你希望将临时值从一个节传递到另一个节时，必须使用参数！
+
+#### Example: a recursive knot definition 示例：递归节点定义
+
+临时变量在递归中是安全使用的（与全局变量不同），因此以下代码可以正常工作。
 
 	-> add_one_to_one_hundred(0, 1)
 
@@ -1608,62 +1596,60 @@ Temporary variables are safe to use in recursion (unlike globals), so the follow
 		}
 
 	=== finished(total) ===
-		"The result is {total}!" you announce.
-		Gauss stares at you in horror.
+       "结果是 {total}!" 你宣布道。
+        高斯惊恐地盯着你。
 		-> END
 
 
-(In fact, this kind of definition is useful enough that **ink** provides a special kind of knot, called, imaginatively enough, a `function`, which comes with certain restrictions and can return a value. See the section below.)
+（事实上，这种定义非常有用，以至于 **ink** 提供了一种特殊的节点，叫做 `function`，它有某些限制并且可以返回一个值。请参阅下面的部分。）
 
 
-#### Advanced: sending divert targets as parameters
+#### Advanced: sending divert targets as parameters 高级：将跳转目标作为参数传递
 
-Knot/stitch addresses are a type of value, indicated by a `->` character, and can be stored and passed around. The following is therefore legal, and often useful:
+节点/节地址本身也是一种值，由 `->` 符号表示，因此可以存储并传递。以下是合法的，并且经常有用的：
 
-	=== sleeping_in_hut ===
-		You lie down and close your eyes.
-		-> generic_sleep (-> waking_in_the_hut)
+    === sleeping_in_hut ===
+        你躺下并闭上了眼睛。
+        -> generic_sleep (-> waking_in_the_hut)
 
-	===	 generic_sleep (-> waking)
-		You sleep perchance to dream etc. etc.
-		-> waking
+    === generic_sleep (-> waking)
+        你沉沉睡去，梦中或许能见到些许神奇。
+        -> waking
 
-	=== waking_in_the_hut
-		You get back to your feet, ready to continue your journey.
+    === waking_in_the_hut
+        你重新站起身来，准备继续旅程。
 
-...but note the `->` in the `generic_sleep` definition: that's the one case in **ink** where a parameter needs to be typed: because it's too easy to otherwise accidentally do the following:
+... 但请注意 `->` 在 `generic_sleep` 定义中的使用：这是 **ink** 中唯一一个需要指定类型的参数，因为如果不加以注意，很容易写成以下内容：
 
-	=== sleeping_in_hut ===
-		You lie down and close your eyes.
-		-> generic_sleep (waking_in_the_hut)
+    === sleeping_in_hut ===
+        你躺下并闭上了眼睛。
+        -> generic_sleep (waking_in_the_hut)
 
-... which sends the read count of `waking_in_the_hut` into the sleeping knot, and then attempts to divert to it.
-
-
+... 这样会把 `waking_in_the_hut` 的读取计数传递给 `sleeping` 节点，并尝试跳转到它。
 
 
 
-## 5) Functions
+## 5) Functions 函数
 
-The use of parameters on knots means they are almost functions in the usual sense, but they lack one key concept - that of the call stack, and the use of return values.
+节点的参数使它们几乎可以看作是函数，但缺少一个关键概念——调用栈和返回值的使用。
 
-**ink** includes functions: they are knots, with the following limitations and features:
+**ink** 提供了函数功能：函数是节点，但具有以下限制和特性：
 
-A function:
-- cannot contain stitches
-- cannot use diverts or offer choices
-- can call other functions
-- can include printed content
-- can return a value of any type
-- can recurse safely
+一个函数：
+- 不能包含节（stitches）  
+- 不能使用跳转（diverts）或提供选项  
+- 可以调用其他函数  
+- 可以包含打印的内容  
+- 可以返回任何类型的值  
+- 可以安全地递归  
 
-(Some of these may seem quite limiting, but for more story-oriented call-stack-style features, see the section on [Tunnels](#1-tunnels).)
+（这些限制看起来可能有点苛刻，但对于更面向故事的调用栈功能，请参阅 [隧道](#1-tunnels) 部分。）
 
-Return values are provided via the `~ return` statement.
+返回值通过 `~ return` 语句提供。
 
-### Defining and calling functions
+### Defining and calling functions 定义和调用函数
 
-To define a function, simply declare a knot to be one:
+要定义一个函数，只需声明一个节点为函数：
 
 	=== function say_yes_to_everything ===
 		~ return true
@@ -1671,20 +1657,20 @@ To define a function, simply declare a knot to be one:
 	=== function lerp(a, b, k) ===
 		~ return ((b - a) * k) + a
 
-Functions are called by name, and with brackets, even if they have no parameters:
+调用函数时，使用名称和括号，即使它没有参数：
 
 	~ x = lerp(2, 8, 0.3)
 
-	*	{say_yes_to_everything()} 'Yes.'
+	*	{say_yes_to_everything()} '是的。'
 
-As in any other language, a function, once done, returns the flow to wherever it was called from - and despite not being allowed to divert the flow, functions can still call other functions.
+与其他语言一样，函数完成后会将流程返回到调用它的位置。尽管函数不能跳转流程，但它们仍然可以调用其他函数。
 
 	=== function say_no_to_nothing ===
 		~ return say_yes_to_everything()
 
-### Functions don't have to return anything
+### Functions don't have to return anything 函数不必返回值
 
-A function does not need to have a return value, and can simply do something that is worth packaging up:
+函数不需要返回值，它可以简单地执行某个操作，便于打包复用：
 
 	=== function harm(x) ===
 		{ stamina < x:
@@ -1693,35 +1679,35 @@ A function does not need to have a return value, and can simply do something tha
 			~ stamina = stamina - x
 		}
 
-...though remember a function cannot divert, so while the above prevents a negative Stamina value, it won't kill a player who hits zero.
+... 但请记住，函数不能跳转，因此尽管上述代码防止了耐力值为负数，它不会在玩家耐力值为零时导致死亡。
 
-### Functions can be called inline
+### Functions can be called inline 函数可以内联调用
 
-Functions can be called on `~` content lines, but can also be called during a piece of content. In this context, the return value, if there is one, is printed (as well as anything else the function wants to print.) If there is no return value, nothing is printed.
+函数可以在 `~` 内容行上调用，也可以在内容中调用。在这种情况下，如果函数有返回值，则会打印出来（以及函数想打印的任何其他内容）。如果没有返回值，则不会打印任何内容。
 
-Content is, by default, 'glued in', so the following:
+默认情况下，内容是“粘连”在一起的，因此以下示例：
 
-	Monsieur Fogg was looking {describe_health(health)}.
+    福格先生看起来 {describe_health(health)}。
 
-	=== function describe_health(x) ===
-	{
-	- x == 100:
-		~ return "spritely"
-	- x > 75:
-		~ return "chipper"
-	- x > 45:
-		~ return "somewhat flagging"
-	- else:
-		~ return "despondent"
-	}
+    === function describe_health(x) ===
+    {
+    - x == 100:
+        ~ return "精神抖擞"
+    - x > 75:
+        ~ return "神采奕奕"
+    - x > 45:
+        ~ return "有些疲惫"
+    - else:
+        ~ return "无精打采"
+    }
 
-produces:
+将生成：
 
-	Monsieur Fogg was looking despondent.
+    福格先生看起来无精打采。
 
-#### Examples
+#### Examples 示例
 
-For instance, you might include:
+例如，你可以包含以下函数：
 
 	=== function max(a,b) ===
 		{ a < b:
@@ -1731,142 +1717,139 @@ For instance, you might include:
 		}
 
 	=== function exp(x, e) ===
-		// returns x to the power e where e is an integer
+		// 返回 x 的 e 次幂，其中 e 为整数
 		{ e <= 0:
 			~ return 1
 		- else:
 			~ return x * exp(x, e - 1)
 		}
 
-Then:
+然后：
 
-	The maximum of 2^5 and 3^3 is {max(exp(2,5), exp(3,3))}.
+    2^5 和 3^3 中的最大值是 {max(exp(2,5), exp(3,3))}。
 
-produces:
+生成：
 
-	The maximum of 2^5 and 3^3 is 32.
+    2^5 和 3^3 中的最大值是 32。
 
 
-#### Example: turning numbers into words
+#### Example: turning numbers into words 将数字转换为单词
 
 The following example is long, but appears in pretty much every inkle game to date. (Recall that a hyphenated line inside multiline curly braces indicates either "a condition to test" or, if the curly brace began with a variable, "a value to compare against".)
 
-    === function print_num(x) ===
+   === function print_num(x) ===
     {
         - x >= 1000:
-            {print_num(x / 1000)} thousand { x mod 1000 > 0:{print_num(x mod 1000)}}
+            {print_num(x / 1000)} 千 { x mod 1000 > 0:{print_num(x mod 1000)}}
         - x >= 100:
-            {print_num(x / 100)} hundred { x mod 100 > 0:and {print_num(x mod 100)}}
+            {print_num(x / 100)} 百 { x mod 100 > 0:和 {print_num(x mod 100)}}
         - x == 0:
-            zero
+            零
         - else:
             { x >= 20:
                 { x / 10:
-                    - 2: twenty
-                    - 3: thirty
-                    - 4: forty
-                    - 5: fifty
-                    - 6: sixty
-                    - 7: seventy
-                    - 8: eighty
-                    - 9: ninety
+                    - 2: 二十
+                    - 3: 三十
+                    - 4: 四十
+                    - 5: 五十
+                    - 6: 六十
+                    - 7: 七十
+                    - 8: 八十
+                    - 9: 九十
                 }
                 { x mod 10 > 0:<>-<>}
             }
             { x < 10 || x > 20:
                 { x mod 10:
-                    - 1: one
-                    - 2: two
-                    - 3: three
-                    - 4: four
-                    - 5: five
-                    - 6: six
-                    - 7: seven
-                    - 8: eight
-                    - 9: nine
+                    - 1: 一
+                    - 2: 二
+                    - 3: 三
+                    - 4: 四
+                    - 5: 五
+                    - 6: 六
+                    - 7: 七
+                    - 8: 八
+                    - 9: 九
                 }
             - else:
                 { x:
-                    - 10: ten
-                    - 11: eleven
-                    - 12: twelve
-                    - 13: thirteen
-                    - 14: fourteen
-                    - 15: fifteen
-                    - 16: sixteen
-                    - 17: seventeen
-                    - 18: eighteen
-                    - 19: nineteen
+                    - 10: 十
+                    - 11: 十一
+                    - 12: 十二
+                    - 13: 十三
+                    - 14: 十四
+                    - 15: 十五
+                    - 16: 十六
+                    - 17: 十七
+                    - 18: 十八
+                    - 19: 十九
                 }
             }
     }
 
-which enables us to write things like:
+这样我们可以写出：
 
-	~ price = 15
+    ~ price = 15
 
-	I pulled out {print_num(price)} coins from my pocket and slowly counted them.
-	"Oh, never mind," the trader replied. "I'll take half." And she took {print_num(price / 2)}, and pushed the rest back over to me.
+    我从口袋里掏出了 {print_num(price)} 枚硬币，慢慢数了起来。
+    “算了，”商人说道，“我收一半。”她拿走了 {print_num(price / 2)} 枚，把剩下的推回给我。
 
 
+### Parameters can be passed by reference 参数可以通过引用传递
 
-### Parameters can be passed by reference
+函数的参数也可以通过“引用”传递，这意味着函数可以直接修改被传递的变量，而不是创建一个具有该值的临时变量。
 
-Function parameters can also be passed 'by reference', meaning that the function can actually alter the the variable being passed in, instead of creating a temporary variable with that value.
-
-For instance, most **inkle** stories include the following:
+例如，大多数 **inkle** 故事中会包含以下内容：
 
 	=== function alter(ref x, k) ===
 		~ x = x + k
 
-Lines such as:
+以下行：
 
 	~ gold = gold + 7
 	~ health = health - 4
 
-then become:
+就可以简化为：
 
 	~ alter(gold, 7)
 	~ alter(health, -4)
 
-which are slightly easier to read, and (more usefully) can be done inline for maximum compactness.
+这样更易于阅读，且可以内联调用，实现更紧凑的代码：
 
-	*	I ate a biscuit[] and felt refreshed. {alter(health, 2)}
-	* 	I gave a biscuit to Monsieur Fogg[] and he wolfed it down most undecorously. {alter(foggs_health, 1)}
-	-	<> Then we continued on our way.
+    * 我吃了一个饼干[]，感觉精神了些。{alter(health, 2)}
+    * 我把一个饼干递给福格先生[]，他狼吞虎咽地吃了下去。{alter(foggs_health, 1)}
+    - <> 然后我们继续上路。
 
-Wrapping up simple operations in function can also provide a simple place to put debugging information, if required.
-
-
+将简单操作封装到函数中，还可以在需要时为调试信息提供一个简单的位置。
 
 
-##  6) Constants
+##  6) Constants 常量
 
 
-### Global Constants
+### Global Constants 全局常量
 
-Interactive stories often rely on state machines, tracking what stage some higher level process has reached. There are lots of ways to do this, but the most conveninent is to use constants.
+互动故事通常依赖状态机来跟踪某个更高层次过程的进度。实现这一点有很多方式，但最方便的方式是使用常量。
 
-Sometimes, it's convenient to define constants to be strings, so you can print them out, for gameplay or debugging purposes.
+有时，定义常量为字符串是很方便的，这样你就可以将它们打印出来，用于游戏玩法或调试目的。
 
-	CONST HASTINGS = "Hastings"
-	CONST POIROT = "Poirot"
-	CONST JAPP = "Japp"
+    CONST HASTINGS = "哈斯廷斯"
+    CONST POIROT = "波洛"
+    CONST JAPP = "贾普"
 
-	VAR current_chief_suspect = HASTINGS
+    VAR current_chief_suspect = HASTINGS
 
-	=== review_evidence ===
-		{ found_japps_bloodied_glove:
-			~ current_chief_suspect = POIROT
-		}
-		Current Suspect: {current_chief_suspect}
+    === review_evidence ===
+        { found_japps_bloodied_glove:
+            ~ current_chief_suspect = POIROT
+        }
+        当前嫌疑人: {current_chief_suspect}
 
-Sometimes giving them values is useful:
+有时，给常量赋值也很有用：
 
 	CONST PI = 3.14
 	CONST VALUE_OF_TEN_POUND_NOTE = 10
 
-And sometimes the numbers are useful in other ways:
+有时这些数字在其他地方也会很有用：
 
 	CONST LOBBY = 1
 	CONST STAIRCASE = 2
@@ -1879,37 +1862,36 @@ And sometimes the numbers are useful in other ways:
 
 	=== report_progress ===
 	{  secret_agent_location == suitcase_location:
-		The secret agent grabs the suitcase!
+		秘密特工抓住了手提箱！
 		~ suitcase_location = HELD_BY_AGENT
 
 	-  secret_agent_location < suitcase_location:
-		The secret agent moves forward.
+		秘密特工向前移动。
 		~ secret_agent_location++
 	}
 
-Constants are simply a way to allow you to give story states easy-to-understand names.
+常量仅仅是为了让你为故事状态赋予易于理解的名称。
 
-## 7) Advanced: Game-side logic
+## 7) Advanced: Game-side logic 高级：游戏端逻辑
 
-There are two core ways to provide game hooks in the **ink** engine. External function declarations in ink allow you to directly call C# functions in the game, and variable observers are callbacks that are fired in the game when ink variables are modified. Both of these are described in [Running your ink](RunningYourInk.md).
+在 **ink** 引擎中，有两种核心方式来提供游戏钩子。外部函数声明允许你直接调用游戏中的 C# 函数，而变量观察者是在游戏中修改 **ink** 变量时触发的回调。两者的详细描述可以参考 [运行你的 ink](RunningYourInk.md)。
 
-# Part 4: Advanced Flow Control
+# Part 4: Advanced Flow Control 高级流程控制
 
+## 1) Tunnels 隧道
 
-## 1) Tunnels
+**ink** 故事的默认结构是一个“平坦”的选择树，分支并重新合并，可能会有循环，但故事始终“处于某个位置”。
 
-The default structure for **ink** stories is a "flat" tree of choices, branching and joining back together, perhaps looping, but with the story always being "at a certain place".
+然而，这种平坦的结构使得某些操作变得困难。例如，设想一个游戏，其中以下交互可以发生：
 
-But this flat structure makes certain things difficult: for example, imagine a game in which the following interaction can happen:
+    === crossing_the_date_line ===
+    * "蒙索尔!"[] 我突然惊恐地宣告。"我刚意识到，我们已经跨越了国际日期变更线！"
+    - 蒙索尔·福格几乎没有抬起眉毛。"我已经调整好了。"
+    * 我擦了擦额头上的汗[]。松了一口气！
+    * 我点点头，心平气和[]。当然他已经调整好了！
+    * 我低声诅咒[]。又一次，我被贬低了！
 
-	=== crossing_the_date_line ===
-	*	"Monsieur!"[] I declared with sudden horror. "I have just realised. We have crossed the international date line!"
-	-	Monsieur Fogg barely lifted an eyebrow. "I have adjusted for it."
-	*	I mopped the sweat from my brow[]. A relief!
-	* 	I nodded, becalmed[]. Of course he had!
-	*  I cursed, under my breath[]. Once again, I had been belittled!
-
-...but it can happen at several different places in the story. We don't want to have to write copies of the content for each different place, but when the content is finished it needs to know where to return to. We can do this using parameters:
+...但这一事件可以发生在故事中的多个位置。我们不希望为每个不同的地方编写内容的副本，但一旦内容完成，它需要知道接下来应该返回哪里。我们可以通过使用参数来实现：
 
 	=== crossing_the_date_line(-> return_to) ===
 	...
@@ -1918,7 +1900,7 @@ But this flat structure makes certain things difficult: for example, imagine a g
 	...
 
 	=== outside_honolulu ===
-	We arrived at the large island of Honolulu.
+	我们来到了大岛檀香山。
 	- (postscript)
 		-> crossing_the_date_line(-> done)
 	- (done)
@@ -1927,83 +1909,84 @@ But this flat structure makes certain things difficult: for example, imagine a g
 	...
 
 	=== outside_pitcairn_island ===
-	The boat sailed along the water towards the tiny island.
+	船只沿着水面驶向小岛。
 	- (postscript)
 		-> crossing_the_date_line(-> done)
 	- (done)
 		-> END
 
-Both of these locations now call and execute the same segment of storyflow, but once finished they return to where they need to go next.
+这两个位置现在都调用并执行相同的故事段落，但一旦完成，它们会返回到需要前往的地方。
 
-But what if the section of story being called is more complex - what if it spreads across several knots? Using the above, we'd have to keep passing the 'return-to' parameter from knot to knot, to ensure we always knew where to return.
+但是，如果被调用的故事部分更复杂——例如，跨越了多个节点——该怎么办？使用上面的方式，我们需要不断将 `return-to` 参数从节点传递到节点，以确保始终知道该返回哪里。
 
-So instead, **ink** integrates this into the language with a new kind of divert, that functions rather like a subroutine, and is called a 'tunnel'.
+因此，**ink** 引入了一种新的分支方式，称为“隧道”，它类似于子例程，可以直接调用并管理返回流程。
 
-### Tunnels run sub-stories
+### Tunnels run sub-stories 隧道执行子故事
 
-The tunnel syntax looks like a divert, with another divert on the end:
+隧道的语法看起来像一个分支，末尾还有另一个分支：
 
 	-> crossing_the_date_line ->
 
-This means "do the crossing_the_date_line story, then continue from here".
+这意味着“执行 crossing_the_date_line 故事，然后从这里继续”。
 
-Inside the tunnel itself, the syntax is simplified from the parameterised example: all we do is end the tunnel using the `->->` statement which means, essentially, "go on".
+在隧道本身，语法比参数化的例子更简化：我们只需要使用 `->->` 来结束隧道，它意味着“继续”。
 
 	=== crossing_the_date_line ===
-	// this is a tunnel!
+	// 这是一个隧道！
 	...
 	- 	->->
 
-Note that tunnel knots aren't declared as such, so the compiler won't check that tunnels really do end in `->->` statements, except at run-time. So you will need to write carefully to ensure that all the flows into a tunnel really do come out again.
+注意，隧道节点并没有特别声明为隧道，因此编译器不会在运行时检查隧道是否确实以 `->->` 语句结束。所以，你需要小心地编写代码，确保所有进入隧道的流程都能正确退出。
 
-Tunnels can also be chained together, or finish on a normal divert:
+隧道也可以进行链式调用，或者在结束时进行常规的分支：
 
 	...
-	// this runs the tunnel, then diverts to 'done'
+	// 执行隧道后，再转到 'done'
 	-> crossing_the_date_line -> done
 	...
 
 	...
-	//this runs one tunnel, then another, then diverts to 'done'
+	// 执行一个隧道，再执行另一个隧道，然后转到 'done'
 	-> crossing_the_date_line -> check_foggs_health -> done
 	...
 
-Tunnels can be nested, so the following is valid:
+隧道也可以进行嵌套，因此以下示例是合法的：
 
 	=== plains ===
 	= night_time
-		The dark grass is soft under your feet.
+		黑色的草地柔软地铺在你的脚下。
 		+	[Sleep]
 			-> sleep_here -> wake_here -> day_time
 	= day_time
-		It is time to move on.
+		是时候继续前进了。
 
 	=== wake_here ===
-		You wake as the sun rises.
-		+	[Eat something]
+		你在阳光下醒来。
+		+	[吃点东西]
 			-> eat_something ->
-		+	[Make a move]
+		+	[继续前进]
 		-	->->
 
 	=== sleep_here ===
-		You lie down and try to close your eyes.
+		你躺下并试图闭上眼睛。
 		-> monster_attacks ->
-		Then it is time to sleep.
+		然后是睡觉的时间。
 		-> dream ->
 		->->
 
-... and so on.
+... 以此类推。
 
 
-#### Advanced: Tunnels can return elsewhere
+#### Advanced: Tunnels can return elsewhere 隧道可以返回其他地方
 
-Sometimes, in a story, things happen. So sometimes a tunnel can't guarantee that it will always want to go back to where it came from. **ink** supplies a syntax to allow you to "returning from a tunnel but actually go somewhere else" but it should be used with caution as the possibility of getting very confused is very high indeed.
+有时，在故事中发生的事情可能无法确保隧道总是返回它的起点。**ink** 提供了一种语法，使你能够“从隧道返回时实际上前往其他地方”，但应谨慎使用，因为这种操作很容易导致混乱。
 
-Still, there are cases where it's indispensable:
+尽管如此，在某些情况下，这种功能是必不可少的：
+
 
 	=== fall_down_cliff 
 	-> hurt(5) -> 
-	You're still alive! You pick yourself up and walk on.
+	你还活着！你扶着自己站起来，继续前进。
 	
 	=== hurt(x)
 		~ stamina -= x 
@@ -2012,228 +1995,228 @@ Still, there are cases where it's indispensable:
 		}
 	
 	=== youre_dead
-	Suddenly, there is a white light all around you. Fingers lift an eyepiece from your forehead. 'You lost, buddy. Out of the chair.'
+	突然，四周弥漫着白光。有人从你的额头上摘下一个眼镜片。‘你输了，伙计。离开椅子。’
 	 
-And even in less drastic situations, we might want to break up the structure:
+即使在不那么剧烈的情况下，我们也可能希望打破结构：
  
 	-> talk_to_jim ->
  
 	 === talk_to_jim
 	 - (opts) 	
-		*	[ Ask about the warp lacelles ] 
+		*	[ 询问关于 warp lacelles ] 
 			-> warp_lacells ->
-		*	[ Ask about the shield generators ] 
+		*	[ 询问关于 shield generators ] 
 			-> shield_generators ->	
-		* 	[ Stop talking ]
+		* 	[ 停止交谈 ]
 			->->
 	 - -> opts 
 
 	 = warp_lacells
 		{ shield_generators : ->-> argue }
-		"Don't worry about the warp lacelles. They're fine."
+		"别担心 warp lacelles。它们没问题。"
 		->->
 
 	 = shield_generators
 		{ warp_lacells : ->-> argue }
-		"Forget about the shield generators. They're good."
+		"别担心 shield generators。它们没问题。"
 		->->
 	 
 	 = argue 
-	 	"What's with all these questions?" Jim demands, suddenly. 
+	 	"这些问题怎么这么多？" 吉姆突然问道。
 	 	...
 	 	->->
 
-#### Advanced: Tunnels use a call-stack
+#### Advanced: Tunnels use a call-stack 隧道使用调用栈
 
-Tunnels are on a call-stack, so can safely recurse.
+隧道是基于调用栈的，因此它们可以安全地递归。
 
 
-## 2) Threads
+## 2) Threads 线程
 
-So far, everything in ink has been entirely linear, despite all the branching and diverting. But it's actually possible for a writer to 'fork' a story into different sub-sections, to cover more possible player actions.
+到目前为止，尽管有很多分支和转向，**ink** 中的一切仍然是线性的。但实际上，作家可以将故事“分叉”成不同的子部分，以涵盖更多可能的玩家行为。
 
-We call this 'threading', though it's not really threading in the sense that computer scientists mean it: it's more like stitching in new content from various places.
+我们称之为“线程”，尽管这与计算机科学中的“线程”概念有所不同：它更像是从不同地方将新内容拼接到一起。
 
-Note that this is definitely an advanced feature: the engineering stories becomes somewhat more complex once threads are involved!
+请注意，这是一个高级功能：一旦涉及到线程，工程故事会变得更加复杂！
 
-### Threads join multiple sections together
+### Threads join multiple sections together 线程将多个部分连接在一起
 
-Threads allow you to compose sections of content from multiple sources in one go. For example:
+线程允许你将多个来源的内容部分合并成一个整体。例如：
 
     == thread_example ==
-    I had a headache; threading is hard to get your head around.
+    我头痛；线程很难让你理清头绪。
     <- conversation
     <- walking
 
 
     == conversation ==
-    It was a tense moment for Monty and me.
-     * "What did you have for lunch today?"[] I asked.
-        "Spam and eggs," he replied.
-     * "Nice weather, we're having,"[] I said.
-        "I've seen better," he replied.
+    这是蒙提和我之间紧张的时刻。
+     * "今天午饭吃了什么？"[] 我问。
+        "午餐吃的是午餐肉和鸡蛋。" 他回答。
+     * "今天天气不错。"[] 我说。
+        "我见过更好的。" 他回答。
      - -> house
 
     == walking ==
-    We continued to walk down the dusty road.
-     * [Continue walking]
+    我们继续沿着尘土飞扬的路走。
+     * [继续走]
         -> house
 
     == house ==
-    Before long, we arrived at his house.
+    不久后，我们到达了他的家。
     -> END
 
-It allows multiple sections of story to combined together into a single section:
+它允许将多个故事部分合并成一个部分：
 
-    I had a headache; threading is hard to get your head around.
-    It was a tense moment for Monty and me.
-    We continued to walk down the dusty road.
-    1: "What did you have for lunch today?"
-    2: "Nice weather, we're having,"
-    3: Continue walking
+    我头痛；线程很难让你理清头绪。
+    这是蒙提和我之间紧张的时刻。
+    我们继续沿着尘土飞扬的路走。
+    1: "今天午饭吃了什么？"
+    2: "今天天气不错。"
+    3: 继续走
 
-On encountering a thread statement such as `<- conversation`, the compiler will fork the story flow. The first fork considered will run the content at `conversation`, collecting up any options it finds. Once it has run out of flow here it'll then run the other fork.
+当遇到像 `<- conversation` 这样的线程语句时，编译器将会分叉故事流程。第一次分叉会执行 `conversation` 中的内容，收集所有选项。执行完 `conversation` 中的内容后，流程会继续执行下一个分叉。
 
-All the content is collected and shown to the player. But when a choice is chosen, the engine will move to that fork of the story and collapse and discard the others.
+所有内容都会被收集并显示给玩家。但当玩家选择一个选项时，引擎会转到该分叉的故事，并丢弃其他分支。
 
-Note that global variables are *not* forked, including the read counts of knots and stitches.
+注意，全局变量不会被分叉，包括节点和拼接点的读取次数。
 
-### Uses of threads
+### Uses of threads 线程的用途
 
-In a normal story, threads might never be needed.
+在普通故事中，可能永远不需要线程。
 
-But for games with lots of independent moving parts, threads quickly become essential. Imagine a game in which characters move independently around a map: the main story hub for a room might look like the following:
+但是对于有许多独立活动的游戏来说，线程变得非常重要。假设一个游戏中角色在地图上独立移动：房间的主故事中心可能如下所示：
 
-	CONST HALLWAY = 1
-	CONST OFFICE = 2
+  	CONST HALLWAY = 1
+    CONST OFFICE = 2
 
-	VAR player_location = HALLWAY
-	VAR generals_location = HALLWAY
-	VAR doctors_location = OFFICE
+    VAR player_location = HALLWAY
+    VAR generals_location = HALLWAY
+    VAR doctors_location = OFFICE
 
-	== run_player_location
-		{
-			- player_location == HALLWAY: -> hallway
-		}
+    == run_player_location
+        {
+            - player_location == HALLWAY: -> hallway
+        }
 
-	== hallway ==
-		<- characters_present(HALLWAY)
-		*	[Drawers]	-> examine_drawers
-		* 	[Wardrobe] -> examine_wardrobe
-		*  [Go to Office] 	-> go_office
-		-	-> run_player_location
-	= examine_drawers
-		// etc...
+    == hallway ==
+        <- characters_present(HALLWAY)
+        * [抽屉] -> examine_drawers
+        * [衣柜] -> examine_wardrobe
+        * [去办公室] -> go_office
+        - -> run_player_location
+    = examine_drawers
+        // 等等...
 
-	// Here's the thread, which mixes in dialogue for characters you share the room with at the moment.
+    // 这是线程，它将你和在房间里的角色的对话混合在一起。
 
-	== characters_present(room)
-		{ generals_location == room:
-			<- general_conversation
-		}
-		{ doctors_location == room:
-			<- doctor_conversation
-		}
-		-> DONE
+    == characters_present(room)
+        { generals_location == room:
+            <- general_conversation
+        }
+        { doctors_location == room:
+            <- doctor_conversation
+        }
+        -> DONE
 
-	== general_conversation
-		*	[Ask the General about the bloodied knife]
-			"It's a bad business, I can tell you."
-		-	-> run_player_location
+    == general_conversation
+        * [询问将军关于血迹斑斑的刀] 
+            "这是个糟糕的事情，我可以告诉你。"
+        - -> run_player_location
 
-	== doctor_conversation
-		*	[Ask the Doctor about the bloodied knife]
-			"There's nothing strange about blood, is there?"
-		-	-> run_player_location
-
-
-
-Note in particular, that we need an explicit way to return the player who has gone down a side-thread to return to the main flow. In most cases, threads will either need a parameter telling them where to return to, or they'll need to end the current story section.
+    == doctor_conversation
+        * [询问医生关于血迹斑斑的刀] 
+            "血液本身没什么奇怪的，不是吗？"
+        - -> run_player_location
 
 
-### When does a side-thread end?
 
-Side-threads end when they run out of flow to process: and note, they collect up options to display later (unlike tunnels, which collect options, display them and follow them until they hit an explicit return, possibly several moves later).
 
-Sometimes a thread has no content to offer - perhaps there is no conversation to have with a character after all, or perhaps we have simply not written it yet. In that case, we must mark the end of the thread explicitly.
+特别需要注意的是，我们需要一种显式的方式让玩家返回到主流程。通常情况下，线程要么需要一个参数来告知它返回的位置，要么需要结束当前的故事部分。
 
-If we didn't, the end of content might be a story-bug or a hanging story thread, and we want the compiler to tell us about those.
+
+### When does a side-thread end? 侧线程何时结束？
+
+侧线程在没有内容可执行时结束：注意，它们会收集选项并在后续显示（与隧道不同，隧道会收集选项并在显示后继续执行，直到达到显式的返回，可能是几步之后）。
+
+有时，线程可能没有内容可提供——例如，或许没有与角色对话，或者我们还没写好这部分内容。此时，我们必须显式标记线程的结束。
+
+如果不标记结束，内容的结束可能成为故事的 bug 或悬挂的故事线程，编译器会提醒我们。
 
 ### Using `-> DONE`
 
-In cases where we want to mark the end of a thread, we use `-> DONE`: meaning "the flow intentionally ends here". If we don't, we might end up with a warning message - we can still play the game, but it's a reminder that we have unfinished business.
+在我们想标记线程结束的情况下，使用 `-> DONE`：意思是“此处流程有意结束”。如果没有使用 `-> DONE`，可能会生成警告消息；我们仍然可以玩游戏，但这提醒我们还有未完成的部分。
 
-The example at the start of this section will generate a warning; it can be fixed as follows:
+前面示例中的线程将会生成警告；可以通过以下方式修复：
 
     == thread_example ==
-    I had a headache; threading is hard to get your head around.
+    我头痛；线程很难让你理清头绪。
     <- conversation
     <- walking
     -> DONE
 
-The extra DONE tells ink that the flow here has ended and it should rely on the threads for the next part of the story.
+额外的 `DONE` 告诉 **ink** 流程在此结束，它应该依赖线程来进行故事的下一部分。
 
-Note that we don't need a `-> DONE` if the flow ends with options that fail their conditions. The engine treats this as a valid, intentional, end of flow state.
+请注意，如果流程以条件未满足的选项结束，我们不需要使用 `-> DONE`。引擎会将其视为有效的、有意的流程结束状态。
 
-**You do not need a `-> DONE` after an option has been chosen**. Once an option is chosen, a thread is no longer a thread - it is simply the normal story flow once more.
+**选项被选择后不需要 `-> DONE`**。一旦选项被选择，线程不再是线程——它只是普通的故事流程。
 
-Using `-> END` in this case will not end the thread, but the whole story flow. (And this is the real reason for having two different ways to end flow.)
+在这种情况下，使用 `-> END` 不会结束线程，而是结束整个故事流程。（这也是需要两种不同方式结束流程的真正原因。）
+
+#### Example: adding the same choice to several places 示例：将相同选择添加到多个地方
+
+线程可以用于将相同的选择添加到多个地方。当以这种方式使用时，通常会将一个分支作为参数传递，告诉故事在选择完成后该去哪里。
+
+    === outside_the_house
+    前台阶。房子里弥漫着谋杀和薰衣草的气味。
+    - (top)
+        <- review_case_notes(-> top)
+        * [通过前门] 
+            我走进了屋里。
+            -> the_hallway
+        * [闻闻空气]
+            我讨厌薰衣草。它让我想起香皂，而香皂让我想起我的婚姻。
+            -> top
+
+    === the_hallway
+    前厅。前门敞开，通向街道。一个小柜子。
+    - (top)
+        <- review_case_notes(-> top)
+        * [通过前门] 
+            我走到凉爽的阳光下。
+            -> outside_the_house
+        * [打开柜子]
+            键，更多的键。还需要多少锁？
+            -> top
+
+    === review_case_notes(-> go_back_to)
+    + {not done || TURNS_SINCE(-> done) > 10}
+        [查看我的案件笔记]
+        // 条件确保你不会反复查看
+        {I|我} 翻阅了我到目前为止做的笔记。仍然没有明显的嫌疑人。
+    - (done) -> go_back_to
+
+注意这与隧道不同，后者执行相同的内容块，但不提供玩家选择。因此，像下面这样的布局：
+
+    <- childhood_memories(-> next)
+    * [看窗外]
+        我在路上做白日梦……
+    - (next) 然后哨声响起……
+
+可能与以下内容做相同的事：
+
+    * [回忆我的童年]
+        -> think_back ->
+    * [看窗外]
+        我在路上做白日梦……
+    - (next) 然后哨声响起……
+
+但是，一旦被插入的选项包括多个选择，或者选择上有条件逻辑（当然，任何文本内容也是！），线程版本就变得更为实用。
 
 
-#### Example: adding the same choice to several places
+#### Example: organisation of wide choice points 广泛选择点的组织
 
-Threads can be used to add the same choice into lots of different places. When using them this way, it's normal to pass a divert as a parameter, to tell the story where to go after the choice is done.
-
-	=== outside_the_house
-	The front step. The house smells. Of murder. And lavender.
-	- (top)
-		<- review_case_notes(-> top)
-		*	[Go through the front door]
-			I stepped inside the house.
-			-> the_hallway
-		* 	[Sniff the air]
-			I hate lavender. It makes me think of soap, and soap makes me think about my marriage.
-			-> top
-
-	=== the_hallway
-	The hallway. Front door open to the street. Little bureau.
-	- (top)
-		<- review_case_notes(-> top)
-		*	[Go through the front door]
-			I stepped out into the cool sunshine.
-			-> outside_the_house
-		* 	[Open the bureau]
-			Keys. More keys. Even more keys. How many locks do these people need?
-			-> top
-
-	=== review_case_notes(-> go_back_to)
-	+	{not done || TURNS_SINCE(-> done) > 10}
-		[Review my case notes]
-		// the conditional ensures you don't get the option to check repeatedly
-	 	{I|Once again, I} flicked through the notes I'd made so far. Still not obvious suspects.
-	- 	(done) -> go_back_to
-
-Note this is different than a tunnel, which runs the same block of content but doesn't give a player a choice. So a layout like:
-
-	<- childhood_memories(-> next)
-	*	[Look out of the window]
-	 	I daydreamed as we rolled along...
-	 - (next) Then the whistle blew...
-
-might do exactly the same thing as:
-
-	*	[Remember my childhood]
-		-> think_back ->
-	*	[Look out of the window]
-		I daydreamed as we rolled along...
-	- 	(next) Then the whistle blew...
-
-but as soon as the option being threaded in includes multiple choices, or conditional logic on choices (or any text content, of course!), the thread version becomes more practical.
-
-
-#### Example: organisation of wide choice points
-
-A game which uses ink as a script rather than a literal output might often generate very large numbers of parallel choices, intended to be filtered by the player via some other in-game interaction - such as walking around an environment. Threads can be useful in these cases simply to divide up choices.
+一个使用 **ink** 作为脚本的游戏，而非字面输出的游戏，通常会生成大量并行的选择，这些选择通过其他游戏内的交互来过滤，比如在环境中四处走动。线程可以在这些情况下有用，用来划分这些选择。
 
 ```
 === the_kitchen
@@ -2242,91 +2225,88 @@ A game which uses ink as a script rather than a literal output might often gener
 	<- cupboards(-> top)
 	<- room_exits
 = drawers (-> goback)
-	// choices about the drawers...
+	// 关于抽屉的选择...  
 	...
 = cupboards(-> goback)
-	// choices about cupboards
+	// 关于橱柜的选择  
 	...
 = room_exits
-	// exits; doesn't need a "return point" as if you leave, you go elsewhere
+	// 出口；不需要“返回点”，因为如果离开，你就会去别的地方
 	...
 ```
 
-# Part 5: Advanced State Tracking
+# Part 5: Advanced State Tracking 第五部分：高级状态跟踪
 
-Games with lots of interaction can get very complex, very quickly and the writer's job is often as much about maintaining continuity as it is about content.
+具有大量互动的游戏很快就会变得非常复杂，编剧的工作往往与其内容一样重要，甚至更多，是保持连续性。
 
-This becomes particularly important if the game text is intended to model anything - whether it's a game of cards, the player's knowledge of the gameworld so far, or the state of the various light-switches in a house.
+如果游戏文本旨在模拟任何事物——无论是扑克牌游戏、玩家迄今为止对游戏世界的了解，还是房子里各个灯开关的状态——这点就显得尤为重要。
 
-**ink** does not provide a full world-modelling system in the manner of a classic parser IF authoring language - there are no "objects", no concepts of "containment" or being "open" or "locked". However, it does provide a simple yet powerful system for tracking state-changes in a very flexible way, to enable writers to approximate world models where necessary.
+**Ink** 并不像经典的解析器互动小说（IF）创作语言那样提供完整的世界建模系统——没有“对象”、没有“包含”或“开启”或“锁定”的概念。然而，它确实提供了一个简单而强大的系统，以非常灵活的方式跟踪状态变化，使编剧在必要时能够近似地构建世界模型。
 
-#### Note: New feature alert!
+#### Note: New feature alert! 注意：新功能提示！
 
-This feature is very new to the language. That means we haven't begun to discover all the ways it might be used - but we're pretty sure it's going to be useful! So if you think of a clever usage we'd love to know!
+这个功能对于该语言来说非常新。这意味着我们还没有开始发现它可能的所有用法——但我们很确定它会很有用！所以如果您想到一个巧妙的用法，我们很乐意知道！
 
+## 1) Basic Lists 基本列表
 
-## 1) Basic Lists
+状态跟踪的基本单位是状态列表，使用 LIST 关键字定义。请注意，列表与 C# 中的列表（数组）完全不同。
 
-The basic unit of state-tracking is a list of states, defined using the `LIST` keyword. Note that a list is really nothing like a C# list (which is an array).
-
-For instance, we might have:
+例如，我们可能有：
 
 	LIST kettleState = cold, boiling, recently_boiled
 
-This line defines two things: firstly three new values - `cold`, `boiling` and `recently_boiled` - and secondly, a variable, called `kettleState`, to hold these states.
+这一行定义了两件事：首先是三个新值 - cold、boiling 和 recently_boiled - 其次是一个名为 kettleState 的变量，用于保存这些状态。
 
-We can tell the list what value to take:
+我们可以指定列表的值：
 
 	~ kettleState = cold
 
-We can change the value:
+我们可以更改值：
 
-	*	[Turn on kettle]
-		The kettle begins to bubble and boil.
+	*	[打开水壶]
+		水壶开始冒泡并沸腾。
 		~ kettleState = boiling
 
-We can query the value:
+我们可以查询值：
 
-	*	[Touch the kettle]
+	* [触摸水壶]
 		{ kettleState == cold:
-			The kettle is cool to the touch.
+			水壶摸起来很凉。
 		- else:
-		 	The outside of the kettle is very warm!
+			水壶的外部非常温暖！
 		}
 
-For convenience, we can give a list a value when it's defined using a bracket:
+为了方便，我们可以在定义时使用括号给列表赋值：
 
 	LIST kettleState = cold, (boiling), recently_boiled
-	// at the start of the game, this kettle is switched on. Edgy, huh?
+	// 游戏开始时，这个水壶已经被打开了。很酷吧？
 
-...and if the notation for that looks a bit redundant, there's a reason for that coming up in a few subsections time.
+…如果这种表示法看起来有点冗余，后面几个小节会有解释。
 
 
+## 2) Reusing Lists 重用列表
 
-## 2) Reusing Lists
-
-The above example is fine for the kettle, but what if we have a pot on the stove as well? We can then define a list of states, but put them into variables - and as many variables as we want.
+上面的示例适用于水壶，但如果我们还有一个锅在炉子上呢？我们可以定义一个状态列表，但将它们放入变量中，并且可以有任意多个变量。
 
 	LIST daysOfTheWeek = Monday, Tuesday, Wednesday, Thursday, Friday
 	VAR today = Monday
 	VAR tomorrow = Tuesday
 
-### States can be used repeatedly
-
-This allows us to use the same state machine in multiple places.
+### States can be used repeatedly 状态可以重复使用
+这允许我们在多个地方使用相同的状态机。
 
 	LIST heatedWaterStates = cold, boiling, recently_boiled
 	VAR kettleState = cold
 	VAR potState = cold
 
-	*	{kettleState == cold} [Turn on kettle]
-		The kettle begins to boil and bubble.
+	*	{kettleState == cold} [打开水壶]
+		水壶开始沸腾和冒泡。
 		~ kettleState = boiling
-	*	{potState == cold} [Light stove]
-	 	The water in the pot begins to boil and bubble.
+	*	{potState == cold} [点燃炉子]
+	 	锅里的水开始沸腾和冒泡。
 	 	~ potState = boiling
 
-But what if we add a microwave as well? We might want start generalising our functionality a bit:
+但是，如果我们还添加了微波炉呢？我们可能想要开始泛化我们的功能：
 
 	LIST heatedWaterStates = cold, boiling, recently_boiled
 	VAR kettleState = cold
@@ -2334,18 +2314,18 @@ But what if we add a microwave as well? We might want start generalising our fun
 	VAR microwaveState = cold
 
 	=== function boilSomething(ref thingToBoil, nameOfThing)
-		The {nameOfThing} begins to heat up.
+		{nameOfThing} 开始加热。
 		~ thingToBoil = boiling
 
 	=== do_cooking
-	*	{kettleState == cold} [Turn on kettle]
-		{boilSomething(kettleState, "kettle")}
-	*	{potState == cold} [Light stove]
-		{boilSomething(potState, "pot")}
-	*	{microwaveState == cold} [Turn on microwave]
-		{boilSomething(microwaveState, "microwave")}
+	* {kettleState == cold} [打开水壶]
+		{boilSomething(kettleState, "水壶")}
+	* {potState == cold} [点燃炉子]
+		{boilSomething(potState, "锅")}
+	* {microwaveState == cold} [打开微波炉]
+		{boilSomething(microwaveState, "微波炉")}
 
-or even...
+或者甚至…
 
 	LIST heatedWaterStates = cold, boiling, recently_boiled
 	VAR kettleState = cold
@@ -2353,69 +2333,70 @@ or even...
 	VAR microwaveState = cold
 
 	=== cook_with(nameOfThing, ref thingToBoil)
-	+ 	{thingToBoil == cold} [Turn on {nameOfThing}]
-	  	The {nameOfThing} begins to heat up.
+	+ {thingToBoil == cold} [打开 {nameOfThing}]
+		{nameOfThing} 开始加热。
 		~ thingToBoil = boiling
 		-> do_cooking.done
 
 	=== do_cooking
-	<- cook_with("kettle", kettleState)
-	<- cook_with("pot", potState)
-	<- cook_with("microwave", microwaveState)
+	<- cook_with("水壶", kettleState)
+	<- cook_with("锅", potState)
+	<- cook_with("微波炉", microwaveState)
 	- (done)
 
-Note that the "heatedWaterStates" list is still available as well, and can still be tested, and take a value.
+注意，“heatedWaterStates”列表仍然可用，并且仍然可以进行测试和赋值。
 
-#### List values can share names
 
-Reusing lists brings with it ambiguity. If we have:
+#### List values can share names 列表值可以共享名称
+
+重用列表会带来歧义。如果我们有：
 
 	LIST colours = red, green, blue, purple
 	LIST moods = mad, happy, blue
 
 	VAR status = blue
 
-... how can the compiler know which blue you meant?
+…编译器如何知道您指的是哪个 blue 呢？
 
-We resolve these using a `.` syntax similar to that used for knots and stitches.
+我们使用类似于结点和缝合所用的 . 语法来解决这些问题。
 
 	VAR status = colours.blue
 
-...and the compiler will issue an error until you specify.
+…并且编译器将在您指定之前发出错误。
 
-Note the "family name" of the state, and the variable containing a state, are totally separate. So
+请注意，状态的“族名称”和包含状态的变量是完全分开的。所以
 
 	{ statesOfGrace == statesOfGrace.fallen:
 		// is the current state "fallen"
 	}
 
-... is correct.
+…是正确的。
 
 
-#### Advanced: a LIST is actually a variable
+#### Advanced: a LIST is actually a variable 高级：一个 LIST 实际上是一个变量
 
-One surprising feature is the statement
-
-	LIST statesOfGrace = ambiguous, saintly, fallen
-
-actually does two things simultaneously: it creates three values, `ambiguous`, `saintly` and `fallen`, and gives them the name-parent `statesOfGrace` if needed; and it creates a variable called `statesOfGrace`.
-
-And that variable can be used like a normal variable. So the following is valid, if horribly confusing and a bad idea:
+一个令人惊讶的特性是语句
 
 	LIST statesOfGrace = ambiguous, saintly, fallen
 
-	~ statesOfGrace = 3.1415 // set the variable to a number not a list value
+实际上同时做了两件事：它创建了三个值，ambiguous、saintly 和 fallen，并在需要时赋予它们名称父级 statesOfGrace；同时它创建了一个名为 statesOfGrace 的变量。
 
-...and it wouldn't preclude the following from being fine:
+这个变量可以像普通变量一样使用。因此，以下是有效的，尽管极其混乱且不建议这样做：
+
+	LIST statesOfGrace = ambiguous, saintly, fallen
+
+	~ statesOfGrace = 3.1415 // 将变量设置为一个不是列表值的数字
+
+…并且这不会阻止以下内容的正常运行：
 
 	~ temp anotherStateOfGrace = statesOfGrace.saintly
 
 
 
 
-## 3) List Values
+## 3) List Values 列表值
 
-When a list is defined, the values are listed in an order, and that order is considered to be significant. In fact, we can treat these values as if they *were* numbers. (That is to say, they are enums.)
+当定义一个列表时，值按顺序列出，这个顺序被认为是有意义的。事实上，我们可以将这些值当作数字来对待。（也就是说，它们是枚举。）
 
 	LIST volumeLevel = off, quiet, medium, loud, deafening
 	VAR lecturersVolume = quiet
@@ -2426,176 +2407,176 @@ When a list is defined, the values are listed in an order, and that order is con
 
 		{ lecturersVolume > murmurersVolume:
 			~ murmurersVolume++
-			The murmuring gets louder.
+			低语声变得更大声。
 		}
 	}
 
-The values themselves can be printed using the usual `{...}` syntax, but this will print their name.
+这些值本身可以使用通常的 {...} 语法打印，但这将打印它们的名称。
 
-	The lecturer's voice becomes {lecturersVolume}.
+	讲师的声音变得 {lecturersVolume}。
 
-### Converting values to numbers
+### Converting values to numbers 将值转换为数字
 
-The numerical value, if needed, can be got explicitly using the LIST_VALUE function. Note the first value in a list has the value 1, and not the value 0.
+如果需要，可以使用 LIST_VALUE 函数显式获取数值。请注意，列表中的第一个值的值为 1，而不是 0。
 
-	The lecturer has {LIST_VALUE(deafening) - LIST_VALUE(lecturersVolume)} notches still available to him.
+	讲师还有 {LIST_VALUE(deafening) - LIST_VALUE(lecturersVolume)} 个刻度可用。
 
-### Converting numbers to values
+### Converting numbers to values 将数字转换为值
 
-You can go the other way by using the list's name as a function:
+你可以通过使用列表的名称作为函数来进行反向转换：
 
 	LIST Numbers = one, two, three
 	VAR score = one
-	~ score = Numbers(2) // score will be "two"
+	~ score = Numbers(2) // score 将是 "two"
 
-### Advanced: defining your own numerical values
+### Advanced: defining your own numerical values 定义你自己的数值
 
-By default, the values in a list start at 1 and go up by one each time, but you can specify your own values if you need to.
+默认情况下，列表中的值从 1 开始，每次增加 1，但如果需要，你可以指定自己的值。
 
 	LIST primeNumbers = two = 2, three = 3, five = 5
 
-If you specify a value, but not the next value, ink will assume an increment of 1. So the following is the same:
+如果你指定了一个值，但没有指定下一个值，ink 将假定下一个值递增 1。因此，以下内容是相同的：
 
 	LIST primeNumbers = two = 2, three, five = 5
 
 
-## 4) Multivalued Lists
+## 4) Multivalued Lists 多值列表
 
-The following examples have all included one deliberate untruth, which we'll now remove. Lists - and variables containing list values - do not have to contain only one value.
+以下示例中都包含了一个故意的不真实内容，现在我们将其移除。列表——以及包含列表值的变量——不必仅包含一个值。
 
-### Lists are boolean sets
+### Lists are boolean sets 列表是布尔集合
 
-A list variable is not a variable containing a number. Rather, a list is like the in/out nameboard in an accommodation block. It contains a list of names, each of which has a room-number associated with it, and a slider to say "in" or "out".
 
-Maybe no one is in:
+列表变量不是包含数字的变量。相反，列表就像住宿楼中的进出标牌。它包含一系列名称，每个名称都关联有一个房间号码，并有一个滑块来表示“在”或“出”。
+
+也许没人进去：
 
 	LIST DoctorsInSurgery = Adams, Bernard, Cartwright, Denver, Eamonn
 
-Maybe everyone is:
+也许每个人都在：
 
 	LIST DoctorsInSurgery = (Adams), (Bernard), (Cartwright), (Denver), (Eamonn)
 
-Or maybe some are and some aren't:
+或者可能有些人在，有些人不在：
 
 	LIST DoctorsInSurgery = (Adams), Bernard, (Cartwright), Denver, Eamonn
 
-Names in brackets are included in the initial state of the list.
+括号中的名称在列表的初始状态中被包含。
 
-Note that if you're defining your own values, you can place the brackets around the whole term or just the name:
+请注意，如果您定义自己的值，可以将括号放在整个术语周围或仅放在名称周围：
 
 	LIST primeNumbers = (two = 2), (three) = 3, (five = 5)
 
-#### Assiging multiple values
+#### Assiging multiple values 分配多个值
 
-We can assign all the values of the list at once as follows:
+我们可以一次性分配列表的所有值，如下所示：
 
 	~ DoctorsInSurgery = (Adams, Bernard)
 	~ DoctorsInSurgery = (Adams, Bernard, Eamonn)
 
-We can assign the empty list to clear a list out:
+我们可以将空列表赋值以清空列表：
 
 	~ DoctorsInSurgery = ()
 
 
-#### Adding and removing entries
+#### Adding and removing entries 添加和移除条目
 
-List entries can be added and removed, singly or collectively.
+列表条目可以单独或集体添加和移除。
 
 	~ DoctorsInSurgery = DoctorsInSurgery + Adams
- 	~ DoctorsInSurgery += Adams  // this is the same as the above
+ 	~ DoctorsInSurgery += Adams   // 这与上面的一样
 	~ DoctorsInSurgery -= Eamonn
 	~ DoctorsInSurgery += (Eamonn, Denver)
 	~ DoctorsInSurgery -= (Adams, Eamonn, Denver)
 
-Trying to add an entry that's already in the list does nothing. Trying to remove an entry that's not there also does nothing. Neither produces an error, and a list can never contain duplicate entries.
+尝试添加已存在于列表中的条目不会有任何效果。尝试移除不存在的条目也不会有任何效果。两者都不会产生错误，并且列表永远不会包含重复的条目。
 
+### Basic Queries 基本查询
 
-### Basic Queries
-
-We have a few basic ways of getting information about what's in a list:
+我们有几种基本方法来获取列表中的信息：
 
 	LIST DoctorsInSurgery = (Adams), Bernard, (Cartwright), Denver, Eamonn
 
 	{LIST_COUNT(DoctorsInSurgery)} 	//  "2"
 	{LIST_MIN(DoctorsInSurgery)} 		//  "Adams"
 	{LIST_MAX(DoctorsInSurgery)} 		//  "Cartwright"
-	{LIST_RANDOM(DoctorsInSurgery)} 	//  "Adams" or "Cartwright"
+	{LIST_RANDOM(DoctorsInSurgery)} 	//  "Adams" 或者 "Cartwright"
 
-#### Testing for emptiness
+#### Testing for emptiness 测试是否为空
 
-Like most values in ink, a list can be tested "as it is", and will return true, unless it's empty.
+像 Ink 中的大多数值一样，可以直接测试一个列表，如果它不为空则返回真。
 
-	{ DoctorsInSurgery: The surgery is open today. | Everyone has gone home. }
+	{ DoctorsInSurgery: 手术室今天开着。 | 每个人都回家了。 }
 
-#### Testing for exact equality
+#### Testing for exact equality 测试是否完全相等
 
-Testing multi-valued lists is slightly more complex than single-valued ones. Equality (`==`) now means 'set equality' - that is, all entries are identical.
+测试多值列表比单值列表稍微复杂一些。相等（==）现在意味着“集合相等”——也就是说，所有条目都相同。
 
-So one might say:
+例如，可以这样说：
 
 	{ DoctorsInSurgery == (Adams, Bernard):
-		Dr Adams and Dr Bernard are having a loud argument in one corner.
+		Dr Adams 和 Dr Bernard 在一个角落激烈争吵。
 	}
 
-If Dr Eamonn is in as well, the two won't argue, as the lists being compared won't be equal - DoctorsInSurgery will have an Eamonn that the list (Adams, Bernard) doesn't have.
+如果 Dr Eamonn 也在，双方将不会争吵，因为被比较的列表不相等——DoctorsInSurgery 会包含一个列表 (Adams, Bernard) 没有的 Eamonn。
 
-Not equals works as expected:
+不等于按预期工作：
 
 	{ DoctorsInSurgery != (Adams, Bernard):
-		At least Adams and Bernard aren't arguing.
+		至少 Adams 和 Bernard 没有在争吵。
 	}
 
-#### Testing for containment
+#### Testing for containment 测试是否包含
 
-What if we just want to simply ask if Adams and Bernard are present? For that we use a new operator, `has`, otherwise known as `?`.
+如果我们只是想简单地询问 Adams 和 Bernard 是否在场，可以使用新的运算符 has，也就是 ?。
 
 	{ DoctorsInSurgery ? (Adams, Bernard):
-		Dr Adams and Dr Bernard are having a hushed argument in one corner.
+		Dr Adams 和 Dr Bernard 在一个角落低声争吵。
 	}
 
-And `?` can apply to single values too:
+? 也可以应用于单个值：
 
 	{ DoctorsInSurgery has Eamonn:
-		Dr Eamonn is polishing his glasses.
+		Dr Eamonn 正在擦拭他的眼镜。
 	}
 
-We can also negate it, with `hasnt` or `!?` (not `?`). Note this starts to get a little complicated as
+我们也可以使用 hasnt 或 !?（不是 ?）来取反。请注意，这开始有点复杂，因为
 
 	DoctorsInSurgery !? (Adams, Bernard)
 
-does not mean neither Adams nor Bernard is present, only that they are not *both* present (and arguing).
+并不意味着 Adams 和 Bernard 都不在，只是他们不同时在场（并且不在争吵）。
 
-#### Warning: no lists contain the empty list
+#### Warning: no lists contain the empty list 警告：没有列表包含空列表
 
-Note that the test 
+请注意测试
 
 	SomeList ? ()
 
-will always return false, regardless of whether `SomeList` itself is empty. In practice this is the most useful default, as you'll often want to do tests like:
+将始终返回假，无论 SomeList 本身是否为空。在实践中，这是最有用的默认设置，因为您通常会想进行类似以下的测试：
 
 	SilverWeapons ? best_weapon_to_use 
 	
-to fail if the player is empty-handed.
+以在玩家空手时失败。
 
-#### Example: basic knowledge tracking
+#### Example: basic knowledge tracking 基本知识跟踪
 
-The simplest use of a multi-valued list is for tracking "game flags" tidily.
+多值列表最简单的用法是整齐地跟踪“游戏标志”。
 
 	LIST Facts = (Fogg_is_fairly_odd), 	first_name_phileas, (Fogg_is_English)
 
 	{Facts ? Fogg_is_fairly_odd:I smiled politely.|I frowned. Was he a lunatic?}
 	'{Facts ? first_name_phileas:Phileas|Monsieur}, really!' I cried.
 
-In particular, it allows us to test for multiple game flags in a single line.
+特别是，它允许我们在一行中测试多个游戏标志
 
 	{ Facts ? (Fogg_is_English, Fogg_is_fairly_odd):
-		<> 'I know Englishmen are strange, but this is *incredible*!'
+		<> '我知道英国人很奇怪，但这太*不可思议*了！'
 	}
 
 
-#### Example: a doctor's surgery
+#### Example: a doctor's surgery 示例：医生的诊所
 
-We're overdue a fuller example, so here's one.
+我们需要一个更完整的示例，所以这里有一个。
 
 	LIST DoctorsInSurgery = (Adams), Bernard, Cartwright, (Denver), Eamonn
 
@@ -2618,23 +2599,23 @@ We're overdue a fuller example, so here's one.
 
 	=== waiting_room
 		{whos_in_today()}
-		*	[Time passes...]
+		* 	[时间过去了...]
 			{doctorLeaves(Adams)} {doctorEnters(Cartwright)} {doctorEnters(Eamonn)}
 			{whos_in_today()}
 
-This produces:
+这将产生：
 
 	In the surgery today are Adams, Denver.
 
-	> Time passes...
+	> 时间过去了...
 
 	Dr Adams leaves for lunch. Dr Cartwright arrives in a fluster. Dr Eamonn arrives in a fluster.
 
 	In the surgery today are Cartwright, Denver, Eamonn.
 
-#### Advanced: nicer list printing
+#### Advanced: nicer list printing 高级：更美观的列表打印
 
-The basic list print is not especially attractive for use in-game. The following is better:
+基本的列表打印在游戏中不是特别吸引人。以下方法更好：
 
 	=== function listWithCommas(list, if_empty)
 	    {LIST_COUNT(list):
@@ -2652,29 +2633,30 @@ The basic list print is not especially attractive for use in-game. The following
 
 	My favourite dinosaurs are {listWithCommas(favouriteDinosaurs, "all extinct")}.
 
-It's probably also useful to have an is/are function to hand:
+拥有一个 is/are 函数也是很有用的：
 
 	=== function isAre(list)
 		{LIST_COUNT(list) == 1:is|are}
 
 	My favourite dinosaurs {isAre(favouriteDinosaurs)} {listWithCommas(favouriteDinosaurs, "all extinct")}.
 
-And to be pendantic:
+并且为了严谨：
 
 	My favourite dinosaur{LIST_COUNT(favouriteDinosaurs) != 1:s} {isAre(favouriteDinosaurs)} {listWithCommas(favouriteDinosaurs, "all extinct")}.
 
 
-#### Lists don't need to have multiple entries
+#### Lists don't need to have multiple entries 列表不需要包含多个条目
 
-Lists don't *have* to contain multiple values. If you want to use a list as a state-machine, the examples above will all work - set values using `=`, `++` and `--`; test them using `==`, `<`, `<=`, `>` and `>=`. These will all work as expected.
+列表不必须包含多个值。如果您想将列表用作状态机，上述所有示例都将正常工作——使用 =, ++ 和 -- 设置值；使用 ==, <, <=, > 和 >= 测试它们。这些都将按预期工作。
 
-### The "full" list
 
-Note that `LIST_COUNT`, `LIST_MIN` and `LIST_MAX` are refering to who's in/out of the list, not the full set of *possible* doctors. We can access that using
+### The "full" list “完整”列表
+
+请注意，LIST_COUNT、LIST_MIN 和 LIST_MAX 是指列表中谁在/不在，而不是所有可能的医生。我们可以使用以下方法访问：
 
 	LIST_ALL(element of list)
 
-or
+或
 
 	LIST_ALL(list containing elements of a list)
 
@@ -2682,44 +2664,44 @@ or
 	{LIST_COUNT(LIST_ALL(DoctorsInSurgery))} // "5"
 	{LIST_MIN(LIST_ALL(Eamonn))} 				// "Adams"
 
-Note that printing a list using `{...}` produces a bare-bones representation of the list; the values as words, delimited by commas.
+请注意，使用 {...} 打印列表会生成一个简洁的表示；值作为单词，用逗号分隔。
 
-#### Advanced: "refreshing" a list's type
+#### Advanced: "refreshing" a list's type 高级：“刷新”列表的类型
 
-If you really need to, you can make an empty list that knows what type of list it is.
+如果确实需要，您可以创建一个知道其类型的空列表。
 
 	LIST ValueList = first_value, second_value, third_value
 	VAR myList = ()
 
 	~ myList = ValueList()
 
-You'll then be able to do:
+然后您将能够执行：
 
 	{ LIST_ALL(myList) }
 
-#### Advanced: a portion of the "full" list
+#### Advanced: a portion of the "full" list 完整列表的一部分
 
-You can also retrieve just a "slice" of the full list, using the `LIST_RANGE` function. There are two formulations, both valid:
+您还可以使用 LIST_RANGE 函数仅检索完整列表的“切片”。有两种格式，两者都是有效的：
 
 	LIST_RANGE(list_name, min_integer_value, max_integer_value)
 
-and
+和
 
 	LIST_RANGE(list_name, min_value, max_value)
 	
-Min and max values here are inclusive. If the game can’t find the values, it’ll get as close as it can, but never go outside the range. So for example:
+这里的最小值和最大值是包含在内的。如果游戏找不到这些值，它将尽可能接近，但永远不会超出范围。例如：
 
 	{LIST_RANGE(LIST_ALL(primeNumbers), 10, 20)} 
 
-will produce 
+将产生
 	
 	11, 13, 17, 19
 
 
 
-### Example: Tower of Hanoi
+### Example: Tower of Hanoi 河内塔
 
-To demonstrate a few of these ideas, here's a functional Tower of Hanoi example, written so no one else has to write it.
+为了展示其中的一些概念，这里有一个功能性的河内塔示例，编写得让别人不必再写它。
 
 
 	LIST Discs = one, two, three, four, five, six, seven
@@ -2812,35 +2794,36 @@ To demonstrate a few of these ideas, here's a functional Tower of Hanoi example,
 
 
 
-## 5) Advanced List Operations
+## 5) Advanced List Operations 高级列表操作
 
-The above section covers basic comparisons. There are a few more powerful features as well, but - as anyone familiar with mathematical   sets will know - things begin to get a bit fiddly. So this section comes with an 'advanced' warning.
+上述部分涵盖了基本的比较。还有一些更强大的功能，但——正如任何熟悉数学集合的人所知——事情开始变得有点棘手。因此，本节附有“高级”警告。
 
-A lot of the features in this section won't be necessary for most games.
+本节中的许多功能对于大多数游戏来说并不必要。
 
-### Comparing lists
+### Comparing lists 比较列表
 
-We can compare lists less than exactly using `>`, `<`, `>=` and `<=`. Be warned! The definitions we use are not exactly standard fare. They are based on comparing the numerical value of the elements in the lists being tested.
+我们可以使用 `>`, `<`, `>=` 和 `<=` 来精确地比较列表。请注意！我们使用的定义并不完全是标准的。这些定义基于比较被测试列表中元素的数值。
 
-#### "Distinctly bigger than"
+#### "Distinctly bigger than" “明显大于”
 
-`LIST_A > LIST_B` means "the smallest value in A is bigger than the largest values in B": in other words, if put on a number line, the entirety of A is to the right of the entirety of B. `<` does the same in reverse.
+`LIST_A > LIST_B` 意味着“A 中的最小值大于 B 中的最大值”：换句话说，如果将它们放在数轴上，A 的全部都在 B 的全部右侧。`<` 则相反。
 
-#### "Definitely never smaller than"
 
-`LIST_A >= LIST_B` means - take a deep breath now - "the smallest value in A is at least the smallest value in B, and the largest value in A is at least the largest value in B". That is, if drawn on a number line, the entirety of A is either above B or overlaps with it, but B does not extend higher than A.
+#### "Definitely never smaller than" “绝对不小于”
 
-Note that `LIST_A > LIST_B` implies `LIST_A != LIST_B`, and `LIST_A >= LIST_B` allows `LIST_A == LIST_B` but precludes `LIST_A < LIST_B`, as you might hope.
+`LIST_A >= LIST_B` 意味着——现在深呼吸——“A 中的最小值至少与 B 中的最小值相等，且 A 中的最大值至少与 B 中的最大值相等”。也就是说，如果在数轴上绘制，A 的全部要么在 B 之上，要么与其重叠，但 B 不会延伸到比 A 更高的位置。
 
-#### Health warning!
+请注意，`LIST_A > LIST_B` 意味着 `LIST_A != LIST_B`，而 `LIST_A >= LIST_B` 允许 `LIST_A == LIST_B`，但排除了 `LIST_A < LIST_B`，如您所愿。
 
-`LIST_A >= LIST_B` is *not* the same as `LIST_A > LIST_B or LIST_A == LIST_B`.
+#### Health warning! 健康警告！
 
-The moral is, don't use these unless you have a clear picture in your mind.
+`LIST_A >= LIST_B` *不*等同于 `LIST_A > LIST_B or LIST_A == LIST_B`.
 
-### Inverting lists
+道德是，除非您心中有清晰的画面，否则不要使用这些操作。
 
-A list can be "inverted", which is the equivalent of going through the accommodation in/out name-board and flipping every switch to the opposite of what it was before.
+### Inverting lists 反转列表
+
+可以“反转”一个列表，这相当于通过住宿楼的进出标牌并将每个开关切换到其相反状态。
 
 	LIST GuardsOnDuty = (Smith), (Jones), Carter, Braithwaite
 
@@ -2848,7 +2831,7 @@ A list can be "inverted", which is the equivalent of going through the accommoda
 		~ GuardsOnDuty = LIST_INVERT(GuardsOnDuty)
 
 
-Note that `LIST_INVERT` on an empty list will return a null value, if the game doesn't have enough context to know what invert. If you need to handle that case, it's safest to do it by hand:
+请注意，LIST_INVERT 在空列表上将返回一个空值，如果游戏没有足够的上下文来知道如何反转。如果需要处理这种情况，最安全的方法是手动处理：
 
 	=== function changingOfTheGuard
 		{!GuardsOnDuty: // "is GuardsOnDuty empty right now?"
@@ -2857,19 +2840,20 @@ Note that `LIST_INVERT` on an empty list will return a null value, if the game d
 			~ GuardsOnDuty = LIST_INVERT(GuardsOnDuty)
 		}
 
-#### Footnote
+#### Footnote 注脚
 
-The syntax for inversion was originally `~ list` but we changed it because otherwise the line
+反转的语法最初是 ~ list，但我们更改了它，因为否则以下行
 
 	~ list = ~ list
 
-was not only functional, but actually caused list to invert itself, which seemed excessively perverse.
+不仅是功能性的，而且实际上会导致列表自身反转，这看起来过于反常。
 
-### Intersecting lists
 
-The `has` or `?` operator is, somewhat more formally, the "are you a subset of me" operator, ⊇, which includes the sets being equal, but which doesn't include if the larger set doesn't entirely contain the smaller set.
+### Intersecting lists 相交列表
 
-To test for "some overlap" between lists, we use the overlap operator, `^`, to get the *intersection*.
+has 或 ? 运算符在更正式的术语中是“你是我的子集吗”运算符，⊇，它包括集合相等的情况，但不包括较大的集合不完全包含较小的集合的情况。
+
+要测试列表之间的“部分重叠”，我们使用重叠运算符 ^ 来获取 交集。
 
 	LIST CoreValues = strength, courage, compassion, greed, nepotism, self_belief, delusions_of_godhood
 	VAR desiredValues = (strength, courage, compassion, self_belief )
@@ -2877,7 +2861,7 @@ To test for "some overlap" between lists, we use the overlap operator, `^`, to g
 
 	{desiredValues ^ actualValues} // prints "self_belief"
 
-The result is a new list, so you can test it:
+结果是一个新列表，因此您可以对其进行测试：
 
 	{desiredValues ^ actualValues: The new president has at least one desirable quality.}
 
@@ -2886,18 +2870,19 @@ The result is a new list, so you can test it:
 
 
 
-## 6) Multi-list Lists
+## 6) Multi-list Lists 多列表列表
 
 
-So far, all of our examples have included one large simplification, again - that the values in a list variable have to all be from the same list family. But they don't.
+到目前为止，我们所有的示例都包含了一个大的简化——即列表变量中的所有值必须来自同一个列表族。但事实并非如此。
 
-This allows us to use lists - which have so far played the role of state-machines and flag-trackers - to also act as general properties, which is useful for world modelling.
+这允许我们使用列表——迄今为止它们充当状态机和标志跟踪器的角色——来充当一般属性，这对于世界建模非常有用。
 
-This is our inception moment. The results are powerful, but also more like "real code" than anything that's come before.
+这是我们的起始时刻。结果非常强大，但也更像“真实代码”而不是之前的任何内容。
 
-### Lists to track objects
 
-For instance, we might define:
+### Lists to track objects 用于跟踪对象的列表
+
+例如，我们可能定义：
 
 	LIST Characters = Alfred, Batman, Robin
 	LIST Props = champagne_glass, newspaper
@@ -2905,45 +2890,46 @@ For instance, we might define:
 	VAR BallroomContents = (Alfred, Batman, newspaper)
 	VAR HallwayContents = (Robin, champagne_glass)
 
-We could then describe the contents of any room by testing its state:
+然后，我们可以通过测试其状态来描述任何房间的内容：
 
 	=== function describe_room(roomState)
 		{ roomState ? Alfred: Alfred is here, standing quietly in a corner. } { roomState ? Batman: Batman's presence dominates all. } { roomState ? Robin: Robin is all but forgotten. }
 		<> { roomState ? champagne_glass: A champagne glass lies discarded on the floor. } { roomState ? newspaper: On one table, a headline blares out WHO IS THE BATMAN? AND *WHO* IS HIS BARELY-REMEMBERED ASSISTANT? }
 
-So then:
+所以：
 
 	{ describe_room(BallroomContents) }
 
-produces:
+会生成：
 
 	Alfred is here, standing quietly in a corner. Batman's presence dominates all.
 
 	On one table, a headline blares out WHO IS THE BATMAN? AND *WHO* IS HIS BARELY-REMEMBERED ASSISTANT?
 
-While:
+而：
 
 	{ describe_room(HallwayContents) }
 
-gives:
+则会显示：
 
 	Robin is all but forgotten.
 
 	A champagne glass lies discarded on the floor.
 
-And we could have options based on combinations of things:
+我们还可以基于事物的组合创建选项：
 
 	*	{ currentRoomState ? (Batman, Alfred) } [Talk to Alfred and Batman]
 		'Say, do you two know each other?'
 
-### Lists to track multiple states
+### Lists to track multiple states 用于跟踪多重状态的列表
 
-We can model devices with multiple states. Back to the kettle again...
+我们可以为具有多个状态的设备建模。回到水壶的例子……
 
 	LIST OnOff = on, off
 	LIST HotCold = cold, warm, hot
 
-	VAR kettleState = (off, cold) // we need brackets because it's a proper, multi-valued list now
+	VAR kettleState = (off, cold) // 我们需要括号，因为它现在是一个真正的多值列表
+
 
 	=== function turnOnKettle() ===
 	{ kettleState ? hot:
@@ -2952,29 +2938,29 @@ We can model devices with multiple states. Back to the kettle again...
 		The water in the kettle begins to heat up.
 		~ kettleState -= off
 		~ kettleState += on
-		// note we avoid "=" as it'll remove all existing states
+		// 注意我们避免使用 "="，因为它会移除所有现有状态
 	}
 
 	=== function can_make_tea() ===
 		~ return kettleState ? (hot, off)
 
-These mixed states can make changing state a bit trickier, as the off/on above demonstrates, so the following helper function can be useful.
+这些混合状态可能会使状态变化变得更棘手，如上面的关闭/开启示例所示，因此以下辅助函数可能会很有用。
 
  	=== function changeStateTo(ref stateVariable, stateToReach)
- 		// remove all states of this type
+ 		// 移除所有此类型的状态
  		~ stateVariable -= LIST_ALL(stateToReach)
- 		// put back the state we want
+ 		// 放回我们想要的状态
  		~ stateVariable += stateToReach
 
- which enables code like:
+这使得代码如下成为可能：
 
  	~ changeState(kettleState, on)
  	~ changeState(kettleState, warm)
 
 
-#### How does this affect queries?
+#### How does this affect queries? 这如何影响查询？
 
-The queries given above mostly generalise nicely to multi-valued lists
+上述的查询大多很好地泛化到多值列表
 
     LIST Letters = a,b,c
     LIST Numbers = one, two, three
@@ -2995,9 +2981,9 @@ The queries given above mostly generalise nicely to multi-valued lists
 	{ LIST_INVERT(mixedList) }            // one, b, two
 
 
-## 7) Long example: crime scene
+## 7) Long example: crime scene 长示例：犯罪现场
 
-Finally, here's a long example, demonstrating a lot of ideas from this section in action. You might want to try playing it before reading through to better understand the various moving parts.
+最后，这是一个长示例，展示了本节中许多概念的实际应用。您可能想在阅读之前先尝试运行它，以更好地理解各种动态部分。
 
 	-> murder_scene
 
@@ -3345,14 +3331,14 @@ Finally, here's a long example, demonstrating a lot of ideas from this section i
 
 
 
-## 8) Summary
+## 8) Summary 总结
 
-To summarise a difficult section, **ink**'s list construction provides:
+总结一个复杂的部分，**ink** 的列表构造提供了：
 
-### Flags
-* 	Each list entry is an event
-* 	Use `+=` to mark an event as having occurred
-*  	Test using `?` and `!?`
+### Flags 标志
+* 每个列表条目是一个事件
+* 使用 `+=` 标记一个事件已发生
+* 使用 `?` 和 `!?` 进行测试
 
 Example:
 
@@ -3361,10 +3347,11 @@ Example:
 	{ GameEvents ? (foundSword, metGorgon) }
 	~ GameEvents += metGorgon
 
-### State machines
-* 	Each list entry is a state
-*  Use `=` to set the state; `++` and `--` to step forward or backward
-*  Test using `==`, `>` etc
+### State machines 状态机
+* 每个列表条目是一个状态
+* 使用 = 设置状态；使用 ++ 和 -- 向前或向后移动
+* 使用 ==, > 等进行测试
+
 
 Example:
 
@@ -3373,10 +3360,11 @@ Example:
 	{ PancakeState < ready_to_eat }
 	~ PancakeState++
 
-### Properties
-*	Each list is a different property, with values for the states that property can take (on or off, lit or unlit, etc)
-* 	Change state by removing the old state, then adding in the new
-*  Test using `?` and `!?`
+### Properties 属性
+* 每个列表是不同的属性，具有该属性可以采取的状态值（开或关，亮或暗，等等）
+* 通过移除旧状态然后添加新状态来改变状态
+* 使用 ? 和 !? 进行测试
+
 
 Example:
 
@@ -3394,60 +3382,60 @@ Example:
 
 
 
-# Part 6: International character support in identifiers
+# Part 6: International character support in identifiers 第六部分：标识符中的国际字符支持
 
-By default, ink has no limitations on the use of non-ASCII characters inside the story content. However, a limitation currently exsits
-on the characters that can be used for names of constants, variables, stictches, diverts and other named flow elements (a.k.a. *identifiers*).
+默认情况下，**ink** 对故事内容中使用非 ASCII 字符没有任何限制。然而，目前在常量、变量、缝合、分流和其他命名流程元素（即 *标识符*）的名称中可使用的字符存在限制。
 
-Sometimes it is inconvenient for a writer using a non-ASCII language to write a story because they have to constantly switch to naming identifiers in ASCII and then switching back to whatever language they are using for the story. In addition, naming identifiers in the author's own language could improve the overal readibility of the raw story format.
+有时，对于使用非 ASCII 语言的编剧来说，编写故事会很不方便，因为他们必须不断切换到使用 ASCII 命名标识符，然后再切换回用于故事的语言。此外，使用作者自己语言命名标识符可以提高原始故事格式的整体可读性。
 
-In an effort to assist in the above scenario, ink *automatically* supports a list of pre-defined non-ASCII character ranges that can be used as identifiers. In general, those ranges have been selected to include the alpha-numeric subset of the official unicode character range, which would suffice for naming identifiers. The below section gives more detailed information on the non-ASCII characters that ink automatically supports.
+为了协助上述场景，**ink** *自动*支持一系列预定义的非 ASCII 字符范围，这些字符范围可用作标识符。通常，这些范围的选择包括官方 Unicode 字符范围的字母数字子集，足以用于命名标识符。以下部分提供了 **ink** 自动支持的非 ASCII 字符的更详细信息。
 
-### Supported Identifier Characters
+### Supported Identifier Characters 支持的标识符字符
 
-The support for the additional character ranges in ink is currently limited to a predefined set of character ranges.
+**ink** 对标识符中使用非 ASCII 字符的支持目前限于一组预定义的字符范围。
 
-Below is a listing of the currently supported identifier ranges.
+以下是当前支持的标识符范围列表。
 
- - **Arabic**
+ - **阿拉伯语**
+  
+   启用阿拉伯语家族语言的字符，是官方 *阿拉伯语* Unicode 范围 `\u0600`-`\u06FF` 的子集。
+  
+  
+ - **亚美尼亚语**
+  
+   启用亚美尼亚语的字符，是官方 *亚美尼亚语* Unicode 范围 `\u0530`-`\u058F` 的子集。
+  
+  
+ - **西里尔字母**
+  
+   启用使用西里尔字母的语言的字符，是官方 *西里尔字母* Unicode 范围 `\u0400`-`\u04FF` 的子集。
+  
+  
+ - **希腊语**
+  
+   启用使用希腊字母的语言的字符，是官方 *希腊语和科普特语* Unicode 范围 `\u0370`-`\u03FF` 的子集。
+  
+  
+ - **希伯来语**
+  
+   启用使用希伯来字母的希伯来语字符，是官方 *希伯来语* Unicode 范围 `\u0590`-`\u05FF` 的子集。
+  
+  
+ - **拉丁扩展 A**
+  
+   启用拉丁字母的扩展字符范围子集——完全由官方 *拉丁扩展-A* Unicode 范围 `\u0100`-`\u017F` 表示。
+  
+  
+ - **拉丁扩展 B**
+  
+   启用拉丁字母的扩展字符范围子集——完全由官方 *拉丁扩展-B* Unicode 范围 `\u0180`-`\u024F` 表示。
+  
+ - **拉丁语补充**
+  
+   启用拉丁字母的扩展字符范围子集——完全由官方 *拉丁语补充* Unicode 范围 `\u0080` - `\u00FF` 表示。
 
-   Enables characters for languages of the Arabic family and is a subset of the official *Arabic* unicode range `\u0600`-`\u06FF`.
 
+**注意！** ink 文件应以 UTF-8 格式保存，以确保支持上述字符范围。
 
- - **Armenian**
+如果您希望在标识符中使用的特定字符范围尚未被支持，请随时在主要 ink 仓库上提交 [问题](/inkle/ink/issues/new) 或 [拉取请求](/inkle/ink/pulls)。
 
-   Enables characters for the Armenian language and is a subset of the official *Armenian* unicode range `\u0530`-`\u058F`.
-
-
- - **Cyrillic**
-
-   Enables characters for languages using the Cyrillic alphabet and is a subset of the official *Cyrillic* unicode range `\u0400`-`\u04FF`.
-
-
- - **Greek**
-
-   Enables characters for languages using the Greek alphabet and is a subset of the official *Greek and Coptic* unicode range `\u0370`-`\u03FF`.
-
-
- - **Hebrew**
-
-   Enables characters in Hebrew using the Hebrew alphabet and is a subset of the official *Hebrew* unicode range `\u0590`-`\u05FF`.
-
-
- - **Latin Extended A**
-
-   Enables an extended character range subset of the Latin alphabet - completely represented by the official *Latin Extended-A* unicode range `\u0100`-`\u017F`.
-
-
- - **Latin Extended B**
-
-   Enables an extended character range subset of the Latin alphabet - completely represented by the official *Latin Extended-B* unicode range `\u0180`-`\u024F`.
-
-- **Latin 1 Supplement**
-
-   Enables an extended character range subset of the Latin alphabet - completely represented by the official *Latin 1 Supplement* unicode range `\u0080` - `\u00FF`.
-
-
-**NOTE!** ink files should be saved in UTF-8 format, which ensures that the above character ranges are supported.
-
-If a particular character range that you would like to use within identifiers isn't supported, feel free to open an [issue](/inkle/ink/issues/new) or [pull request](/inkle/ink/pulls) on the main ink repo.
