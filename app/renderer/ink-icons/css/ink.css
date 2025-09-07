@@ -25,6 +25,11 @@
   }
   #toolbar .button .icon.ink-icon{
   font-size: 12pt;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
   }
   .icon.icon.ink-icon::before{
       font-family: 'icomoon';

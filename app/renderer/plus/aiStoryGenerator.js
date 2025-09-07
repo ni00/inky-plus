@@ -165,7 +165,7 @@ class AIStoryGenerator {
                             <div class="form-field half">
                                 <label for="swal-max-tokens">最大Token数</label>
                                 <input type="number" id="swal-max-tokens" class="swal2-input"
-                                       value="${config.maxTokens || 4000}" min="100" max="8000" step="100">
+                                       value="${config.maxTokens || 6000}" min="100" max="1000000" step="100">
                             </div>
                         </div>
                     </div>
@@ -233,7 +233,7 @@ class AIStoryGenerator {
             baseURL: null,
             model: 'gpt-4',
             temperature: 0.7,
-            maxTokens: 4000
+            maxTokens: 6000
         };
 
         try {

@@ -48,6 +48,7 @@ div {
   z-index: 50;
   cursor: default;
   -webkit-user-select: none;
+  overflow: visible;
 }
 
 #toolbar div {
@@ -80,6 +81,23 @@ h1.title {
 
 .win32 h1.title, .linux h1.title {
   display: none;
+}
+
+/* Fix icon alignment on Linux */
+.linux #toolbar .button .icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.linux #toolbar .button .icon.ink-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
 }
 
 #toolbar p.issuesMessage {
@@ -151,6 +169,13 @@ img.issue-icon.warning {
   height: 30px;
   background: none;
   bottom: 0;
+  overflow: visible;
+}
+
+/* Better button positioning on Linux */
+.linux #toolbar .buttons {
+  bottom: 2px;
+  height: 32px;
 }
 #toolbar .buttons.left {
   left: 5px;
@@ -171,11 +196,17 @@ img.issue-icon.warning {
   height: 30px;
   background: none;
   -webkit-app-region: no-drag;
+  overflow: visible;
 }
 
 #toolbar .button .icon {
   font-size: 16pt;
   color: gray;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
 }
 #toolbar .button:hover .icon {
   color: dimgray;

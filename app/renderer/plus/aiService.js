@@ -4,7 +4,7 @@ const { generateText } = require('ai');
 
 const AIService = {
     // 生成故事的提示词模板
-    createStoryPrompt(config) {
+    createStoryPrompt(config, aiConfig) {
         return `# 角色
 你是一位专业的互动小说作家，并且是 Inkle's Ink 脚本语言的专家。你擅长构建引人入胜的故事情节、设计富有意义的玩家选择，并使用 Ink 的高级功能来创造动态的、有状态的叙事体验。
 
@@ -24,7 +24,7 @@ const AIService = {
 4. 故事应该有至少5-8个重要的选择节点
 5. 包含角色成长和状态变化
 6. 确保语法正确，可以被Ink引擎编译
-7. 故事长度适中，大约1500-2000字
+7. 故事长度适中，大约${Math.floor(aiConfig.maxTokens)}字
 8. 变量 (Variables): 在文件开头使用 VAR 声明至少 2-3 个用于跟踪故事状态的全局变量。例如：VAR reputation = 0，VAR has_security_pass = false，VAR energy = 100。
 9. 结构 (Structure): 使用 === knot_name === 来定义主要的故事节点（场景）。故事必须从 === main === 或 === start === 开始。在 Knot 内部，可以使用 = stitch_name 来组织更小的片段。当出现 "= stitch_name" 时，必须提前显式写出 "-> stitch_name" 后再继续内容，不要依赖引擎自动进入该 stitch，以避免无输出或提前结束。=== knot_name === 之后不要直接使用 =stitch_name ，除非你十分确定需要一个 =stitch_name。
 10. 选择 (Choices):
@@ -47,6 +47,40 @@ const AIService = {
 你的输出必须是纯文本格式的完整 .ink 代码。
 不要在代码块前后添加任何额外的解释、介绍或总结。所有说明都应以 Ink 注释 // 的形式包含在代码内部。
 确保代码格式清晰，缩进正确，以便于阅读和调试。
+
+
+示例格式(你的输出不需要包含\`\`\`ink和\`\`\`)：
+\`\`\`ink
+// 变量声明
+VAR has_key = false
+VAR sanity = 10
+
+->start
+=== start ===
+你在一间昏暗的房间醒来，头痛欲裂。
+一扇锁着的门挡住了你的去路。
+* [检查桌子]
+    你发现了一把生锈的钥匙。
+    ~ has_key = true
+    -> start
+* {has_key} [用钥匙开门]
+    -> escape
+* [大声呼救]
+    回声在空荡的房间里回响，但无人应答。你的理智下降了。
+    ~ sanity = sanity - 1
+    -> start
+
+=== escape ===
+-> escape_room
+= escape_room
+你成功逃出了房间。
+{sanity > 5:
+    你感到一阵轻松，重获自由。
+}
+{sanity <= 5:
+    你虽然逃了出来，但无尽的恐惧攫住了你。
+}
+-> END
 
 现在请开始创作：`;
     },
@@ -74,7 +108,7 @@ const AIService = {
 
     // 真实的AI生成
     async generateStory(config, onProgress, aiConfig) {
-        const prompt = this.createStoryPrompt(config);
+        const prompt = this.createStoryPrompt(config, aiConfig);
 
         try {
             // 创建AI模型实例
